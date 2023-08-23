@@ -18,10 +18,14 @@ export function generateV2Speech(
   voice: string,
   options?: v2ApiOptions,
 ): Promise<v2SpeechResult> {
+  //   const apiUrl = new URL('https://play.ht/api/v2/tts');
+  const apiUrl = new URL('https://staging.play.ht/api/v2/tts');
+
   const requestOptions: https.RequestOptions = {
     method: 'POST',
-    hostname: 'play.ht',
-    path: 'api/v2/tts',
+    hostname: apiUrl.hostname,
+    path: apiUrl.pathname,
+    port: apiUrl.port,
     headers: {
       AUTHORIZATION: `Bearer ${apiKey}`,
       'X-USER-ID': userId,
@@ -44,19 +48,9 @@ export function generateV2Speech(
 
   return new Promise<v2SpeechResult>((resolve, reject) => {
     let headersSent = false;
-    let buffer = '';
     let isResolved = false;
-    const onEvent = (incomingData: string) => {
-      const incomingText = incomingData.toString();
-
-      const [eventTypeRaw, dataRaw] = incomingText.split(/\r?\n/);
-      if (!eventTypeRaw?.includes('event: ') || !dataRaw?.includes('data: ')) {
-        throw new Error(`Unexpected text format. Expected event/data but received: "${incomingText}".`);
-      }
-
-      const eventName = eventTypeRaw?.replace(/^event: /, '');
+    const onEvent = (eventName: string, eventData: any) => {
       if (eventName === 'completed') {
-        const eventData = dataRaw && JSON.parse(dataRaw.replace(/^data: /, ''));
         isResolved = true;
         resolve({
           id: eventData.id,
@@ -68,26 +62,27 @@ export function generateV2Speech(
     };
 
     const request = https.request(requestOptions, (res) => {
-      res.on('data', (data) => {
+      res.on('data', (rawData) => {
         try {
+          const data = rawData.toString();
+          console.log('incoming>>', data, '<<', res.statusCode);
           if (!headersSent && res.statusCode !== 200) {
-            reject(new Error('Error communicating with the server.'));
+            if (data.includes('error_message')) {
+              const result = JSON.parse(data);
+              reject(new Error(result.error_message || 'Error communicating with the server.'));
+            } else {
+              reject(new Error('Error communicating with the server.'));
+            }
             headersSent = true;
           } else {
-            const { ready, remaining } = splitOnDoubleNewline(buffer + data.toString());
-            buffer = remaining;
-            if (ready !== null) {
-              onEvent(ready);
-            }
+            const { eventName, eventData } = getLastEvent(data);
+            onEvent(eventName, eventData);
           }
         } catch (e) {
           reject(e);
         }
       });
       res.on('end', () => {
-        if (buffer !== '') {
-          onEvent(buffer);
-        }
         if (!isResolved) {
           reject(new Error("Finished with no 'completed' event."));
         }
@@ -122,11 +117,24 @@ export function generateV2Speech(
   });
 }
 
-// If theres \w+\r\n\r\n in the data string, assign everything up to it to `ready``, and everything after it to `remaining`
-function splitOnDoubleNewline(data: string): { ready: string | null; remaining: string } {
-  const match = data.match(/[\s\S]*?\r\n\r\n/);
-  if (match === null) return { ready: null, remaining: data };
-  const matchIndexEnd = match[0].length;
-  const [ready, remaining] = [data.slice(0, matchIndexEnd), data.slice(matchIndexEnd)];
-  return { ready, remaining };
+function getLastEvent(data: string): { eventName: string; eventData: any } {
+  const EVENT_PREFIX = 'event: ';
+  const DATA_PREFIX = 'data: ';
+  const lines = data
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .reverse();
+
+  const eventLine = lines.find((line) => line.startsWith(EVENT_PREFIX));
+  const dataLine = lines.find((line) => line.startsWith(DATA_PREFIX));
+
+  if (!eventLine || !dataLine) {
+    throw new Error(`Unexpected text format. Expected event/data but received: "${data}".`);
+  }
+
+  const eventName = eventLine?.slice(EVENT_PREFIX.length);
+  const eventData = JSON.parse(dataLine?.slice(DATA_PREFIX.length));
+
+  return { eventName, eventData };
 }
