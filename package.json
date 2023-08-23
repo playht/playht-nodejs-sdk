@@ -1,9 +1,14 @@
 {
   "name": "@playht/playht-nodejs-sdk",
   "version": "0.0.1",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "access": "restricted"
+  },
   "description": "NodeJS SDK to use PlayHT generative AI text-to-speech APIs",
   "files": [
-    "dist"
+    "dist",
+    "package.json"
   ],
   "main": "dist/index.js",
   "module": "./dist/index.js",
@@ -15,7 +20,8 @@
     "test": "jest",
     "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit",
     "verify": "yarn check && yarn test",
-    "check": "tsc --noEmit && prettier --check . && eslint --ext .ts ./src"
+    "check": "tsc --noEmit && prettier --check . && eslint --ext .ts ./src",
+    "release": "yarn && yarn build && npm publish"
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",
