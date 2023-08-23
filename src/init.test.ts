@@ -1,5 +1,5 @@
-import { init } from './index';
+import PlayHTAPI from './index';
 
 test('exists', () => {
-  expect(init('a', 'b')).toBeUndefined();
+  expect(new PlayHTAPI('a', 'b')).toBeUndefined();
 });

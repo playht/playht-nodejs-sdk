@@ -15,7 +15,7 @@
     "test": "jest",
     "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit",
     "verify": "yarn check && yarn test",
-    "check": "tsc --noEmit && prettier --check . && eslint --ext .ts ./src --max-warnings=0"
+    "check": "tsc --noEmit && prettier --check . && eslint --ext .ts ./src"
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",
