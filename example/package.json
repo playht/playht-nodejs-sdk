@@ -1,0 +1,23 @@
+{
+  "name": "play-api-example",
+  "version": "1.0.0",
+  "description": "Example usage of PlayHT APIs",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon src/server.js"
+  },
+  "keywords": [],
+  "author": "PlayHT team",
+  "license": "ISC",
+  "dependencies": {
+    "@playht/playht-nodejs-sdk": "^0.0.1",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "node-fetch": "^2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

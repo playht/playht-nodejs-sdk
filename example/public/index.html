@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PlayHT API Examples</title>
+  </head>
+  <body>
+    <h1>PlayHT API Examples</h1>
+    <h2>Ultra-Realistic Voices API (v2)</h2>
+
+    <label>Enter text to generate:</label>
+    <textarea id="textToGenerate">I can speak now</textarea>
+    <button onclick="generateClick()">Generate Audio</button>
+
+    <script>
+      function generateClick(event) {
+        // const apiURL = "/ttsEventStream";
+        const apiURL = "/ttsV2";
+
+        const options = {
+          header: { "content-type": "application/json" },
+          body: JSON.stringify({
+            text:
+              document.getElementById("textToGenerate").value ||
+              "Generating random text",
+          }),
+          method: "POST",
+        };
+
+        fetch(apiURL, options)
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error(
+                "Could not reach the API: " + response.statusText
+              );
+            }
+          })
+          .then((json) => {
+            console.log("response json");
+            console.dir(json);
+          })
+          .catch((error) => {
+            console.dir(error);
+          });
+        return true;
+      }
+    </script>
+    <!-- <hr />
+    <script>
+      function loadAudio(url, keepPlaying) {
+        console.log("creating");
+        const sound = new Howl({
+          // src: url === 'radio' ? 'http://s29.myradiostream.com:12352/listen.mp3' : '/'+url,
+          // format: ['webm'],
+          src:
+            url === "radio"
+              ? "http://peridot.streamguys.com:7150/Mirchi"
+              : "/" + url,
+          format: url === "radio" ? ["aac"] : ["mp3"],
+          html5: true,
+        });
+        sound.once("play", () => {
+          console.log("played");
+          if (!keepPlaying) sound.stop();
+        });
+        window.sounds = window.sounds ?? {};
+        window.sounds[url] = sound;
+      }
+
+      function playAudio(url) {
+        window.sounds[url].play();
+        console.log(window.sounds[url].duration());
+      }
+    </script>
+    <hr />
+    <button onclick="loadAudio('audio')">LOAD</button>
+    <button onclick="playAudio('audio')">Play</button>
+    <hr />
+    <button onclick="loadAudio('audio-concat')">LOAD-concat</button>
+    <button onclick="playAudio('audio-concat')">Play-concat</button>
+    <button onclick="loadAudio('audio-concat', true)">
+      LOAD N PLAY-concat
+    </button>
+    <hr />
+    <button onclick="loadAudio('radio')">LOAD-radio</button>
+    <button onclick="playAudio('radio')">Play-radio</button>
+
+    <hr />
+
+    <script>
+      // const ws = new window.WebSocket(url);
+      // ws.onmessage = _ => {
+      //   console.log("Media source not ready yet... discard this package");
+      // };
+      //
+      // const mediaSource1 = new window.MediaSource();
+      // const audio1 = document.createElement("audio");
+      // audio1.src = window.URL.createObjectURL(mediaSource1);
+      // audio1.controls = true;
+      // document.body.appendChild(audio1);
+      //
+      // mediaSource1.onsourceopen = _ => {
+      //   const sourceBuffer = mediaSource1.addSourceBuffer("audio/mpeg"); // mpeg appears to not work in Firefox, unfortunately :(
+      //   ws.onmessage = e => {
+      //     const soundDataBase64 = JSON.parse(e.data);
+      //     const bytes = window.atob(soundDataBase64);
+      //     const arrayBuffer = new window.ArrayBuffer(bytes.length);
+      //     const bufferView = new window.Uint8Array(arrayBuffer);
+      //     for (let i = 0; i < bytes.length; i++) {
+      //       bufferView[i] = bytes.charCodeAt(i);
+      //     }
+      //     sourceBuffer.appendBuffer(arrayBuffer);
+      //   };
+      // };
+    </script>
+
+    <hr />
+    <button id="startStreaming">Start Streaming</button>
+    <audio controls id="audioElement"></audio>
+    <script>
+      const events = [
+        "loadstart",
+        "durationchange",
+        "loadedmetadata",
+        "loadeddata",
+        "progress",
+        "canplay",
+        "canplaythrough",
+        "play",
+        "pause",
+        "ended",
+        "error",
+      ];
+      audioEvents.forEach((event) => {
+        audioElement.addEventListener(event, () => {
+          console.log(event);
+        });
+      });
+    </script>
+
+    <script>
+      /**
+       * @type {HTMLAudioElement}
+       */
+      const audioElement = document.getElementById("audioElement");
+      const startStreamingBtn = document.getElementById("startStreaming");
+
+      const mediaSource = new MediaSource();
+      audioElement.src = URL.createObjectURL(mediaSource);
+
+      mediaSource.addEventListener("error", function (e) {
+        console.error("MediaSource error:", e);
+      });
+
+      audioElement.addEventListener("error", function () {
+        console.error("Audio element error:", audioElement.error);
+        console.error(
+          "Audio element error was MEDIA_ERR_SRC_NOT_SUPPORTED? ",
+          audioElement.error.code ===
+            audioElement.error.MEDIA_ERR_SRC_NOT_SUPPORTED
+        );
+      });
+
+      let sourceBuffer;
+      mediaSource.addEventListener("sourceopen", function () {
+        console.log("MEDIA SOURCE IS OPEN");
+        sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
+        // sourceBuffer = mediaSource.addSourceBuffer('audio/mp4');
+        // sourceBuffer = mediaSource.addSourceBuffer('audio/mp4; codecs="mp4a.40.2"');
+        sourceBuffer.addEventListener("*", function (e) {
+          console.error("SourceBuffer error:", e);
+        });
+      });
+
+      startStreamingBtn.addEventListener("click", function () {
+        // Disable the button to prevent multiple streams
+        startStreamingBtn.disabled = true;
+
+        console.log("click");
+
+        fetch("/audio-concat.mp3").then((response) => {
+          console.log("response");
+          const reader = response.body.getReader();
+          const readChunk = ({ done, value }) => {
+            if (done) {
+              console.log("CLOSING MEDIA SOURCE");
+              mediaSource.endOfStream();
+              return;
+            }
+            if (!sourceBuffer.updating) {
+              console.log("mode is", sourceBuffer.mode);
+              try {
+                sourceBuffer.appendBuffer(value);
+              } catch (e) {
+                console.log("error on appendbuffer", e);
+              }
+            }
+            reader.read().then(readChunk);
+          };
+          reader.read().then(readChunk);
+        });
+      });
+    </script> -->
+  </body>
+</html>
