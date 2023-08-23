@@ -123,7 +123,7 @@ export function generateV2Speech(
 }
 
 // If theres \w+\r\n\r\n in the data string, assign everything up to it to `ready``, and everything after it to `remaining`
-export function splitOnDoubleNewline(data: string): { ready: string | null; remaining: string } {
+function splitOnDoubleNewline(data: string): { ready: string | null; remaining: string } {
   const match = data.match(/[\s\S]*?\r\n\r\n/);
   if (match === null) return { ready: null, remaining: data };
   const matchIndexEnd = match[0].length;
