@@ -1,15 +1,16 @@
-import PlayHTAPI from "@playht/playht-nodejs-sdk";
+// @ts-ignore - Module is linked locally
+import PlayHTAPI from '@playht/playht-nodejs-sdk';
 
-async function ttsV2(req, res) {
+async function ttsV2(req: any, res: any) {
   const apiKey = process.env.PLAYHT_API_KEY;
   const userId = process.env.PLAYHT_USER_ID;
 
-  const text = req.body?.text || "The server could not find the text";
+  const text = req.body?.text || 'The server could not find the text';
 
   const api = new PlayHTAPI(apiKey, userId);
 
   try {
-    const generated = await api.genereateUltraRealisticSpeech(text, "larry");
+    const generated = await api.genereateUltraRealisticSpeech(text, 'larry');
     res.status(200).json(generated);
   } catch (error) {
     console.error(error);
