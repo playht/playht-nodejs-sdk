@@ -1,7 +1,14 @@
 import type { v1ApiOptions } from '../index';
 import axios from 'axios';
 
-export type v1SpeechResult = {};
+export type v1SpeechResult = {
+  preset: string;
+  transcriptionId: string;
+  audioUrl: Array<string>;
+  voice: string;
+  transcriped: boolean;
+  message: string;
+};
 
 interface GenerationJobResponse {
   status: string;
@@ -10,6 +17,9 @@ interface GenerationJobResponse {
   wordCount: number;
 }
 
+const WAIT_BETWEEN_STATUS_CHECKS_MS = 150;
+const MAX_STATUS_CHECKS_RETRIES = 10;
+
 export async function generateV1Speech(
   apiKey: string,
   userId: string,
@@ -17,7 +27,7 @@ export async function generateV1Speech(
   voice: string,
   options?: v1ApiOptions,
 ): Promise<v1SpeechResult> {
-  const requestOptions = {
+  const convertOptions = {
     method: 'POST',
     url: 'https://play.ht/api/v1/convert',
     headers: {
@@ -39,15 +49,45 @@ export async function generateV1Speech(
   };
 
   const generationJobData = await axios
-    .request(requestOptions)
+    .request(convertOptions)
     .then(({ data }: { data: GenerationJobResponse }) => {
-      console.log(data);
       return data;
     })
     .catch((error: any) => {
       console.error(error);
+      throw new Error(error);
     });
 
-  console.dir(generationJobData);
-  return {};
+  const transcriptionId = generationJobData.transcriptionId;
+
+  const statusOptions = {
+    method: 'GET',
+    url: `https://play.ht/api/v1/articleStatus?transcriptionId=${transcriptionId}`,
+    headers: {
+      accept: 'application/json',
+      AUTHORIZATION: apiKey,
+      'X-USER-ID': userId,
+    },
+  };
+
+  let retries = 0;
+  return await (async function retryUntilGenerated() {
+    do {
+      const generationStatus = await axios
+        .request(statusOptions)
+        .then(({ data }: { data: v1SpeechResult }) => {
+          console.log(retries, data);
+          return data;
+        })
+        .catch(function (error) {
+          throw new Error(error);
+        });
+      if (generationStatus.transcriped) {
+        return generationStatus;
+      }
+      retries++;
+      await new Promise((resolve) => setTimeout(resolve, WAIT_BETWEEN_STATUS_CHECKS_MS));
+    } while (retries < MAX_STATUS_CHECKS_RETRIES);
+    throw new Error('Audio generation error. Max status check retries reached.');
+  })();
 }

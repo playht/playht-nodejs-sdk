@@ -11,19 +11,24 @@
     <h2>Ultra-Realistic Voices API (v2)</h2>
     <div><label>Enter text to generate:</label></div>
     <div><textarea id="v2TextToGenerate">I can speak now</textarea></div>
-    <button onclick="generateV2Click()">Generate Audio</button>
+    <div><button onclick="generateV2Click()">Generate Audio</button></div>
     <audio id="v2AudioPlayer" controls>Your browser does not support the audio element.</audio>
     <hr />
     <h2>Standard and Premium voices API (v1)</h2>
     <div><label>Enter text to generate:</label></div>
-    <div><textarea id="v1TextToGenerate">I can speak now</textarea></div>
-    <button onclick="generateV1Click()">Generate Audio</button>
+    <div><textarea id="v1TextToGenerate">Tell me what to say</textarea></div>
+    <div><button onclick="generateV1Click()">Generate Audio</button></div>
     <audio id="v1AudioPlayer" controls>Your browser does not support the audio element.</audio>
 
     <script>
       function generateV2Click(event) {
         const text = document.getElementById('v2TextToGenerate').value;
         requestGeneration('/ttsV2', text, 'v2AudioPlayer');
+      }
+
+      function generateV1Click(event) {
+        const text = document.getElementById('v1TextToGenerate').value;
+        requestGeneration('/ttsV1', text, 'v1AudioPlayer');
       }
 
       function requestGeneration(apiURL, text, audioPlayerId) {
@@ -44,7 +49,7 @@
             }
           })
           .then((json) => {
-            playUrl(json.url, audioPlayerId);
+            playUrl(json?.url || json?.audioUrl?.[0], audioPlayerId);
           })
           .catch((error) => {
             if (error.message) {
