@@ -1,5 +1,6 @@
-import { generateV2Speech, v2SpeechResult } from './api/v2tts';
-import { generateV1Speech, v1SpeechResult } from './api/v1tts';
+import { generateV2Speech, V2SpeechResult } from './api/generateV2Speech';
+import { generateV1Speech, V1SpeechResult } from './api/generateV1Speech';
+import { availableV1Voices, VoiceInfo } from './api/availableV1Voices';
 
 export type v1ApiOptions = {
   title?: string;
@@ -36,19 +37,15 @@ export default class PlayHTAPI {
     content: Array<string>,
     voice: string,
     options?: v1ApiOptions,
-  ): Promise<v1SpeechResult> {
+  ): Promise<V1SpeechResult> {
     return await generateV1Speech(this.apiKey, this.userId, content, voice, options);
   }
 
-  async genereateUltraRealisticSpeech(text: string, voice: string, options?: v2ApiOptions): Promise<v2SpeechResult> {
+  async genereateUltraRealisticSpeech(text: string, voice: string, options?: v2ApiOptions): Promise<V2SpeechResult> {
     return await generateV2Speech(this.apiKey, this.userId, text, voice, options);
   }
 
-  async genereateSpeech() {
-    // Choose API based on voice.
-  }
-
-  async getAvailableVoices() {
-    // TODO api/v1/getVoices
+  async getAvailableStandardOrPremiumVoices(): Promise<Array<VoiceInfo>> {
+    return await availableV1Voices(this.apiKey, this.userId);
   }
 }
