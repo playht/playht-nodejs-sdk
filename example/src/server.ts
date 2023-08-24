@@ -1,6 +1,7 @@
 import express from 'express';
-import ttsV2 from './ttsV2';
 import ttsV1 from './ttsV1';
+import ttsV2 from './ttsV2';
+import streamV2 from './streamV2';
 import voicesV1 from './voicesV1';
 import voicesV2 from './voicesV2';
 import clonedVoices from './clonedVoices';
@@ -17,6 +18,7 @@ app.post('/ttsV1', ttsV1);
 app.get('/voicesV1', voicesV1);
 app.get('/voicesV2', voicesV2);
 app.get('/clonedVoices', clonedVoices);
+app.get('/streamV2', streamV2);
 app.use('/', express.static('public'));
 
 app.listen(3000, () => {

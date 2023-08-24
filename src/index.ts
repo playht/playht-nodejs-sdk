@@ -1,4 +1,5 @@
 import { generateV2Speech, V2SpeechResult } from './api/generateV2Speech';
+import { generateV2Stream } from './api/generateV2Stream';
 import { generateV1Speech, V1SpeechResult } from './api/generateV1Speech';
 import { availableV1Voices, V1VoiceInfo } from './api/availableV1Voices';
 import { availableV2Voices, V2VoiceInfo } from './api/availableV2Voices';
@@ -47,8 +48,13 @@ export default class PlayHTAPI {
     return await generateV2Speech(this.apiKey, this.userId, text, voice, options);
   }
 
-  async streamUltraRealisticSpeech(text: string, voice: string, options?: v2ApiOptions): Promise<V2SpeechResult> {
-    throw new Error('Not implemented yet');
+  async streamUltraRealisticSpeech(
+    text: string,
+    voice: string,
+    outputStream: NodeJS.WritableStream,
+    options?: v2ApiOptions,
+  ): Promise<void> {
+    return await generateV2Stream(this.apiKey, this.userId, text, voice, outputStream, options);
   }
 
   async getAvailableStandardOrPremiumVoices(): Promise<Array<V1VoiceInfo>> {
