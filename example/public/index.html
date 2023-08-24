@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PlayHT API Examples</title>
+  </head>
+  <body>
+    <h1>PlayHT API Examples</h1>
+    <h2>Ultra-Realistic Voices API (v2)</h2>
+
+    <div><label>Enter text to generate:</label></div>
+    <div><textarea id="textToGenerate">I can speak now</textarea></div>
+    <button onclick="generateClick()">Generate Audio</button>
+    <hr />
+
+    <audio id="audioPlayer" controls>Your browser does not support the audio element.</audio>
+
+    <script>
+      function generateClick(event) {
+        const apiURL = '/ttsV2';
+
+        const options = {
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: document.getElementById('textToGenerate').value || 'Generating random text',
+          }),
+          method: 'POST',
+        };
+
+        fetch(apiURL, options)
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error(response.statusText);
+            }
+          })
+          .then((json) => {
+            playUrl(json.url);
+          })
+          .catch((error) => {
+            if (error.message) {
+              alert(error.message);
+            } else {
+              alert('Error while contacting the API: ' + error);
+            }
+          });
+        return true;
+      }
+
+      function playUrl(audioSourceUrl) {
+        const audio = document.getElementById('audioPlayer');
+
+        audio.pause();
+        audio.currentTime = 0;
+
+        const existingSource = audio.querySelector('source');
+        if (existingSource) {
+          audio.removeChild(existingSource);
+        }
+
+        const source = document.createElement('source');
+        source.src = audioSourceUrl;
+        source.type = 'audio/mpeg';
+
+        audio.appendChild(source);
+        audio.load();
+
+        // Listen for the 'canplaythrough' event to know when the audio is ready to play
+        audio.addEventListener('canplaythrough', () => {
+          audio.play();
+        });
+      }
+    </script>
+  </body>
+</html>
