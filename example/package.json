@@ -2,9 +2,8 @@
   "name": "play-api-example",
   "version": "1.0.0",
   "description": "Example usage of PlayHT SDK",
-  "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf ./dist && tsc",
     "start": "yarn build && nodemon dist/server.js"
   },
   "dependencies": {

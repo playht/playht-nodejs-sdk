@@ -10,14 +10,13 @@
     "dist",
     "package.json"
   ],
-  "type": "module",
   "main": "dist/index.js",
   "module": "./dist/index.js",
   "repository": "https://github.com/playht/playht-nodejs-sdk",
   "author": "nobody@play.ht",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --emitDeclarationOnly && esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js",
+    "build": "rm -rf ./dist && tsc --emitDeclarationOnly && esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js",
     "test": "jest",
     "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit",
     "verify": "yarn check && yarn test",
@@ -39,5 +38,8 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
   },
-  "packageManager": "yarn@3.6.2"
+  "packageManager": "yarn@3.6.2",
+  "dependencies": {
+    "axios": "^1.4.0"
+  }
 }

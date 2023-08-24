@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import PlayHTAPI from '../../dist/index.js';
+import PlayHTAPI from '../../dist';
 
 async function ttsV2(req: Request, res: Response, next: NextFunction) {
   const apiKey = process.env.PLAYHT_API_KEY;
@@ -19,8 +19,10 @@ async function ttsV2(req: Request, res: Response, next: NextFunction) {
 
   res.set('Content-Type', 'application/json');
   try {
+    // Call the aPI
     const api = new PlayHTAPI(apiKey, userId);
     const generated = await api.genereateUltraRealisticSpeech(text, 'arthur');
+
     res.status(200).json(generated);
   } catch (error: any) {
     res.statusMessage = error?.message;

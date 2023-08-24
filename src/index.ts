@@ -1,8 +1,18 @@
-import { generateV2Speech, v2SpeechResult } from './v2Api/v2tts';
+import { generateV2Speech, v2SpeechResult } from './api/v2tts';
+import { generateV1Speech, v1SpeechResult } from './api/v1tts';
+
+export type v1ApiOptions = {
+  title?: string;
+  narrationStyle?: string;
+  globalSpeed?: string;
+  pronunciations?: Array<{ key: string; value: string }>;
+  trimSilence?: boolean;
+  transcriptionId?: string;
+};
 
 export type v2ApiOptions = {
   quality?: string;
-  outputFormat?: string; // TODO type
+  outputFormat?: 'mp3' | 'ogg' | 'wav' | 'flac' | 'mulaw';
   speed?: number;
   sampleRate?: number;
   seed?: number | null;
@@ -22,8 +32,12 @@ export default class PlayHTAPI {
     this.userId = userId;
   }
 
-  async genereateStandardOrPremiumUltraRealisticSpeech() {
-    // TODO use api/v1/convert endpoint
+  async genereateStandardOrPremiumSpeech(
+    content: Array<string>,
+    voice: string,
+    options?: v1ApiOptions,
+  ): Promise<v1SpeechResult> {
+    return await generateV1Speech(this.apiKey, this.userId, content, voice, options);
   }
 
   async genereateUltraRealisticSpeech(text: string, voice: string, options?: v2ApiOptions): Promise<v2SpeechResult> {

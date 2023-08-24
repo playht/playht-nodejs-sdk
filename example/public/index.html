@@ -7,23 +7,30 @@
   </head>
   <body>
     <h1>PlayHT API Examples</h1>
+
     <h2>Ultra-Realistic Voices API (v2)</h2>
-
     <div><label>Enter text to generate:</label></div>
-    <div><textarea id="textToGenerate">I can speak now</textarea></div>
-    <button onclick="generateClick()">Generate Audio</button>
+    <div><textarea id="v2TextToGenerate">I can speak now</textarea></div>
+    <button onclick="generateV2Click()">Generate Audio</button>
+    <audio id="v2AudioPlayer" controls>Your browser does not support the audio element.</audio>
     <hr />
-
-    <audio id="audioPlayer" controls>Your browser does not support the audio element.</audio>
+    <h2>Standard and Premium voices API (v1)</h2>
+    <div><label>Enter text to generate:</label></div>
+    <div><textarea id="v1TextToGenerate">I can speak now</textarea></div>
+    <button onclick="generateV1Click()">Generate Audio</button>
+    <audio id="v1AudioPlayer" controls>Your browser does not support the audio element.</audio>
 
     <script>
-      function generateClick(event) {
-        const apiURL = '/ttsV2';
+      function generateV2Click(event) {
+        const text = document.getElementById('v2TextToGenerate').value;
+        requestGeneration('/ttsV2', text, 'v2AudioPlayer');
+      }
 
+      function requestGeneration(apiURL, text, audioPlayerId) {
         const options = {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            text: document.getElementById('textToGenerate').value || 'Generating random text',
+            text,
           }),
           method: 'POST',
         };
@@ -37,7 +44,7 @@
             }
           })
           .then((json) => {
-            playUrl(json.url);
+            playUrl(json.url, audioPlayerId);
           })
           .catch((error) => {
             if (error.message) {
@@ -49,8 +56,8 @@
         return true;
       }
 
-      function playUrl(audioSourceUrl) {
-        const audio = document.getElementById('audioPlayer');
+      function playUrl(audioSourceUrl, audioElementId) {
+        const audio = document.getElementById(audioElementId);
 
         audio.pause();
         audio.currentTime = 0;
@@ -67,7 +74,6 @@
         audio.appendChild(source);
         audio.load();
 
-        // Listen for the 'canplaythrough' event to know when the audio is ready to play
         audio.addEventListener('canplaythrough', () => {
           audio.play();
         });
