@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import PlayHTAPI from '../../dist/index';
 
-async function voicesV1(req: Request, res: Response, next: NextFunction) {
+async function allVoices(req: Request, res: Response, next: NextFunction) {
   const apiKey = process.env.PLAYHT_API_KEY;
   const userId = process.env.PLAYHT_USER_ID;
 
@@ -14,7 +14,7 @@ async function voicesV1(req: Request, res: Response, next: NextFunction) {
   try {
     // Call the API
     const api = new PlayHTAPI(apiKey, userId);
-    const voices = await api.getAvailableStandardOrPremiumVoices();
+    const voices = await api.getAllAvailableVoices();
 
     res.status(200).json(voices);
   } catch (error: any) {
@@ -24,4 +24,4 @@ async function voicesV1(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-export default voicesV1;
+export default allVoices;

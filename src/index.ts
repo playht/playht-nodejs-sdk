@@ -1,9 +1,22 @@
 import { generateV2Speech, V2SpeechResult } from './api/generateV2Speech';
 import { generateV2Stream } from './api/generateV2Stream';
 import { generateV1Speech, V1SpeechResult } from './api/generateV1Speech';
-import { availableV1Voices, V1VoiceInfo } from './api/availableV1Voices';
-import { availableV2Voices, V2VoiceInfo } from './api/availableV2Voices';
-import { availableClonedVoices, ClonedVoiceInfo } from './api/availableClonedVoices';
+import { V1VoiceInfo } from './api/availableV1Voices';
+import { V2VoiceInfo } from './api/availableV2Voices';
+import voicesPrivate from './private/voicesPrivate';
+
+export type EngineType = 'Standard' | 'PlayHT1.0' | 'PlayHT2.0';
+
+export type VoiceInfo =
+  | ({
+      engineType: 'Standard';
+    } & V1VoiceInfo)
+  | ({
+      engineType: 'PlayHT1.0';
+    } & V2VoiceInfo)
+  | ({
+      engineType: 'PlayHT2.0';
+    } & V2VoiceInfo);
 
 export type v1ApiOptions = {
   title?: string;
@@ -26,6 +39,10 @@ export type v2ApiOptions = {
 export default class PlayHTAPI {
   apiKey: string;
   userId: string;
+
+  _allVoicesCache: Array<VoiceInfo> | null = null;
+  #getAllVoices: () => Promise<Array<VoiceInfo>>;
+
   constructor(apiKey: string, userId: string) {
     if (!apiKey || !userId) {
       throw new Error(
@@ -34,6 +51,8 @@ export default class PlayHTAPI {
     }
     this.apiKey = apiKey;
     this.userId = userId;
+
+    this.#getAllVoices = voicesPrivate._getAllVoices;
   }
 
   async genereateStandardOrPremiumSpeech(
@@ -57,15 +76,7 @@ export default class PlayHTAPI {
     return await generateV2Stream(this.apiKey, this.userId, text, voice, outputStream, options);
   }
 
-  async getAvailableStandardOrPremiumVoices(): Promise<Array<V1VoiceInfo>> {
-    return await availableV1Voices(this.apiKey, this.userId);
-  }
-
-  async getAvailableUltraRealisticVoices(): Promise<Array<V2VoiceInfo>> {
-    return await availableV2Voices(this.apiKey, this.userId);
-  }
-
-  async getAvailableClonedVoices(): Promise<Array<ClonedVoiceInfo>> {
-    return await availableClonedVoices(this.apiKey, this.userId);
+  async getAllAvailableVoices(): Promise<Array<VoiceInfo>> {
+    return await this.#getAllVoices();
   }
 }

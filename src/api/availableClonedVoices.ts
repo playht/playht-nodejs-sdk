@@ -1,13 +1,7 @@
 import axios from 'axios';
+import { V2VoiceInfo } from './availableV2Voices';
 
-export type ClonedVoiceInfo = {
-  id: string;
-  name: string;
-  type: string;
-  gender: string | null;
-};
-
-export async function availableClonedVoices(apiKey: string, userId: string): Promise<Array<ClonedVoiceInfo>> {
+export async function availableClonedVoices(apiKey: string, userId: string): Promise<Array<V2VoiceInfo>> {
   const options = {
     method: 'GET',
     url: 'https://play.ht/api/v2/cloned-voices',
@@ -20,7 +14,7 @@ export async function availableClonedVoices(apiKey: string, userId: string): Pro
 
   return await axios
     .request(options)
-    .then(({ data }: { data: Array<ClonedVoiceInfo> }) => data)
+    .then(({ data }: { data: Array<V2VoiceInfo> }) => data.map((v) => ({ is_cloned: true, ...v })))
     .catch(function (error) {
       throw new Error(error);
     });

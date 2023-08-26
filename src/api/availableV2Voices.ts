@@ -3,17 +3,19 @@ import axios from 'axios';
 export type V2VoiceInfo = {
   id: string;
   name: string;
-  sample: string | null;
-  accent: string;
-  age: number | null;
-  gender: string;
-  language: string;
-  language_code: string;
-  loudness: number | null;
-  style: string | null;
-  tempo: number | null;
-  texture: string | null;
-  is_cloned: boolean;
+  sample?: string | null;
+  accent?: string;
+  age?: number | null;
+  gender?: string;
+  language?: string;
+  language_code?: string;
+  loudness?: number | null;
+  style?: string | null;
+  tempo?: number | null;
+  texture?: string | null;
+  is_cloned?: boolean;
+  engine?: 'parrot' | 'peregrine';
+  type?: string;
 };
 
 export async function availableV2Voices(apiKey: string, userId: string): Promise<Array<V2VoiceInfo>> {
