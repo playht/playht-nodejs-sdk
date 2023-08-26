@@ -25,6 +25,16 @@
     <div><textarea id="v1TextToGenerate">Tell me what to say</textarea></div>
     <div><button onclick="generateV1Click()">Generate Audio</button></div>
     <audio id="v1AudioPlayer" controls>Your browser does not support the audio element.</audio>
+    <hr />
+    <h2>Stream Standard and Premium voices API (v1)</h2>
+    <div><label>Enter text to generate:</label></div>
+    <div>
+      <textarea id="v1StreamTextToGenerate">
+The clear, babbling stream meandered through the lush, sunlit meadow.</textarea
+      >
+    </div>
+    <div><button onclick="generateV1StreamClick()">Generate Audio</button></div>
+    <audio id="v1StreamAudioPlayer" controls>Your browser does not support the audio element.</audio>
 
     <script>
       function generateV2Click(event) {
@@ -42,6 +52,13 @@
       function generateV1Click(event) {
         const text = document.getElementById('v1TextToGenerate').value;
         requestGeneration('/ttsV1', text, 'v1AudioPlayer');
+      }
+
+      function generateV1StreamClick(event) {
+        const text = document.getElementById('v1StreamTextToGenerate').value;
+        const searchParams = new URLSearchParams();
+        searchParams.set('text', text);
+        playUrl(`/streamV1?${searchParams.toString()}`, 'v1StreamAudioPlayer');
       }
 
       function requestGeneration(apiURL, text, audioPlayerId) {
