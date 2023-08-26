@@ -4,9 +4,10 @@ import axios from 'axios';
 export type V1SpeechResult = {
   preset: string;
   transcriptionId: string;
-  audioUrl: Array<string>;
+  audioUrl: Array<string> | string;
   voice: string;
-  transcriped: boolean;
+  transcriped?: boolean;
+  converted?: boolean;
   message: string;
 };
 
@@ -20,7 +21,7 @@ interface GenerationJobResponse {
 const WAIT_BETWEEN_STATUS_CHECKS_MS = 150;
 const MAX_STATUS_CHECKS_RETRIES = 10;
 
-export async function generateV1Speech(
+export default async function generateV1Speech(
   apiKey: string,
   userId: string,
   content: Array<string>,
@@ -78,7 +79,7 @@ export async function generateV1Speech(
         .catch(function (error) {
           throw new Error(error);
         });
-      if (generationStatus.transcriped) {
+      if (generationStatus.transcriped || generationStatus.converted) {
         return generationStatus;
       }
       retries++;

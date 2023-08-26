@@ -18,7 +18,7 @@ export type V2VoiceInfo = {
   type?: string;
 };
 
-export async function availableV2Voices(apiKey: string, userId: string): Promise<Array<V2VoiceInfo>> {
+export default async function availableV2Voices(apiKey: string, userId: string): Promise<Array<V2VoiceInfo>> {
   const options = {
     method: 'GET',
     url: 'https://play.ht/api/v2/voices',

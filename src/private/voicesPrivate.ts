@@ -1,8 +1,8 @@
 import { VoiceInfo } from '..';
 import PlayHTAPI from '..';
-import { availableV1Voices, V1VoiceInfo } from '../api/availableV1Voices';
-import { availableV2Voices, V2VoiceInfo } from '../api/availableV2Voices';
-import { availableClonedVoices } from '../api/availableClonedVoices';
+import availableV1Voices from '../api/availableV1Voices';
+import availableV2Voices from '../api/availableV2Voices';
+import availableClonedVoices from '../api/availableClonedVoices';
 
 async function _getAllVoices(this: PlayHTAPI): Promise<Array<VoiceInfo>> {
   const [v1Voices, v2Voices, clonedVoices] = await Promise.all([

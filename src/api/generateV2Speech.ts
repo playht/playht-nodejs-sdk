@@ -11,7 +11,7 @@ export type V2SpeechResult = {
   size: number;
 };
 
-export function generateV2Speech(
+export default function generateV2Speech(
   apiKey: string,
   userId: string,
   text: string,

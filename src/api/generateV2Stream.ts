@@ -12,7 +12,7 @@ export type V2SpeechResult = {
   size: number;
 };
 
-export async function generateV2Stream(
+export default async function generateV2Stream(
   apiKey: string,
   userId: string,
   text: string,
@@ -43,7 +43,6 @@ export async function generateV2Stream(
   };
 
   const response = await axios(streamOptions).catch((error: any) => {
-    console.error("there's an error:", error);
     throw new Error(error);
   });
 

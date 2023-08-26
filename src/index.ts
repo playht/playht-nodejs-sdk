@@ -1,6 +1,7 @@
-import { generateV2Speech, V2SpeechResult } from './api/generateV2Speech';
-import { generateV2Stream } from './api/generateV2Stream';
-import { generateV1Speech, V1SpeechResult } from './api/generateV1Speech';
+import generateV2Speech, { V2SpeechResult } from './api/generateV2Speech';
+import generateV2Stream from './api/generateV2Stream';
+import generateV1Speech, { V1SpeechResult } from './api/generateV1Speech';
+import generateV1Stream from './api/generateV1Stream';
 import { V1VoiceInfo } from './api/availableV1Voices';
 import { V2VoiceInfo } from './api/availableV2Voices';
 import voicesPrivate from './private/voicesPrivate';
@@ -74,6 +75,15 @@ export default class PlayHTAPI {
     options?: v2ApiOptions,
   ): Promise<void> {
     return await generateV2Stream(this.apiKey, this.userId, text, voice, outputStream, options);
+  }
+
+  async streamStandardOrPremiumSpeech(
+    content: Array<string>,
+    voice: string,
+    outputStream: NodeJS.WritableStream,
+    options?: v1ApiOptions,
+  ): Promise<void> {
+    return await generateV1Stream(this.apiKey, this.userId, content, voice, outputStream, options);
   }
 
   async getAllAvailableVoices(): Promise<Array<VoiceInfo>> {

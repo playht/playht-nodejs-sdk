@@ -1,29 +1,27 @@
 import { NextFunction, Request, Response } from 'express';
-import PlayHTAPI from '../../dist/index';
+import PlayHTAPI from '../../dist';
 
-async function ttsV1(req: Request, res: Response, next: NextFunction) {
+async function streamV1(req: Request, res: Response, next: NextFunction) {
   const apiKey = process.env.PLAYHT_API_KEY;
   const userId = process.env.PLAYHT_USER_ID;
 
-  if (!req.body?.text) {
-    res.status(400).send('Text to generate not provided');
+  const { text } = req.query;
+
+  if (!text || typeof text !== 'string') {
+    res.status(400).send('Text to generate not provided in the request');
     return next();
   }
-
-  const text = req.body.text;
 
   if (!apiKey || !userId) {
     res.status(400).send('API key and User ID need to be set.');
     return next();
   }
 
-  res.set('Content-Type', 'application/json');
+  res.setHeader('Content-Type', 'audio/mpeg');
   try {
     // Call the API
     const api = new PlayHTAPI(apiKey, userId);
-    const generated = await api.genereateStandardOrPremiumSpeech([text], 'en-US-NancyNeural');
-
-    res.status(200).json(generated);
+    await api.streamStandardOrPremiumSpeech([text], 'en-US-NancyNeural', res);
   } catch (error: any) {
     res.statusMessage = error?.message;
     res.status(error?.status || 500).send();
@@ -31,4 +29,4 @@ async function ttsV1(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-export default ttsV1;
+export default streamV1;

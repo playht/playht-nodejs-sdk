@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { V2VoiceInfo } from './availableV2Voices';
 
-export async function availableClonedVoices(apiKey: string, userId: string): Promise<Array<V2VoiceInfo>> {
+export default async function availableClonedVoices(apiKey: string, userId: string): Promise<Array<V2VoiceInfo>> {
   const options = {
     method: 'GET',
     url: 'https://play.ht/api/v2/cloned-voices',
