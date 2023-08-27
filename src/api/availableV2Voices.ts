@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { APISettings } from '..';
 
 export type V2VoiceInfo = {
   id: string;
@@ -18,7 +19,8 @@ export type V2VoiceInfo = {
   type?: string;
 };
 
-export default async function availableV2Voices(apiKey: string, userId: string): Promise<Array<V2VoiceInfo>> {
+export default async function availableV2Voices(settings: APISettings): Promise<Array<V2VoiceInfo>> {
+  const { apiKey, userId } = settings;
   const options = {
     method: 'GET',
     url: 'https://play.ht/api/v2/voices',

@@ -1,4 +1,4 @@
-import type { v2ApiOptions } from '../index';
+import type { APISettings, v2ApiOptions } from '../index';
 import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
 
@@ -13,13 +13,13 @@ export type V2SpeechResult = {
 };
 
 export default async function generateV2Stream(
-  apiKey: string,
-  userId: string,
+  settings: APISettings,
   text: string,
   voice: string,
   outputStream: NodeJS.WritableStream,
   options?: v2ApiOptions,
 ): Promise<void> {
+  const { apiKey, userId } = settings;
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
     url: 'https://play.ht/api/v2/tts/stream',

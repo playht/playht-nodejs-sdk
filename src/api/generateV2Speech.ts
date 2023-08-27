@@ -1,4 +1,4 @@
-import type { v2ApiOptions } from '../index';
+import type { APISettings, v2ApiOptions } from '../index';
 import https from 'https';
 
 const CONNECTION_TIMEOUT = 30 * 1000; // 30s
@@ -12,13 +12,13 @@ export type V2SpeechResult = {
 };
 
 export default function generateV2Speech(
-  apiKey: string,
-  userId: string,
+  settings: APISettings,
   text: string,
   voice: string,
   options?: v2ApiOptions,
 ): Promise<V2SpeechResult> {
   const apiUrl = new URL('https://play.ht/api/v2/tts');
+  const { apiKey, userId } = settings;
 
   const requestOptions: https.RequestOptions = {
     method: 'POST',

@@ -1,4 +1,4 @@
-import type { v1ApiOptions } from '../index';
+import type { APISettings, v1ApiOptions } from '../index';
 import axios from 'axios';
 
 export type V1SpeechResult = {
@@ -22,12 +22,12 @@ const WAIT_BETWEEN_STATUS_CHECKS_MS = 150;
 const MAX_STATUS_CHECKS_RETRIES = 10;
 
 export default async function generateV1Speech(
-  apiKey: string,
-  userId: string,
+  settings: APISettings,
   content: Array<string>,
   voice: string,
   options?: v1ApiOptions,
 ): Promise<V1SpeechResult> {
+  const { apiKey, userId } = settings;
   const convertOptions = {
     method: 'POST',
     url: 'https://play.ht/api/v1/convert',

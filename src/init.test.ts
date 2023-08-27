@@ -1,7 +1,6 @@
-import PlayHTAPI from './index';
+import * as PlayHTAPI from './index';
 
 test('exists', () => {
-  const api = new PlayHTAPI('a', 'b');
-  expect(api).toBeDefined();
-  expect(typeof api.genereateUltraRealisticSpeech).toBe('function');
+  expect(PlayHTAPI.init).toBeDefined();
+  expect(typeof PlayHTAPI.genereateUltraRealisticSpeech).toBe('function');
 });
