@@ -79,7 +79,8 @@ The clear, babbling stream meandered through the lush, sunlit meadow.</textarea
             }
           })
           .then((json) => {
-            playUrl(json?.url || json?.audioUrl?.[0], audioPlayerId);
+            const url = json?.url || Array.isArray(json?.audioUrl) ? json?.audioUrl?.[0] : json?.audioUrl;
+            playUrl(url, audioPlayerId);
           })
           .catch((error) => {
             if (error.message) {

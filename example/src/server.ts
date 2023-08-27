@@ -5,8 +5,21 @@ import streamV2 from './streamV2';
 import streamV1 from './streamV1';
 import allVoices from './allVoices';
 import dotenv from 'dotenv';
+import * as PlayHTAPI from '../../dist/index';
 
 dotenv.config();
+PlayHTAPI.init({
+  apiKey:
+    process.env.PLAYHT_API_KEY ||
+    (function () {
+      throw new Error('PLAYHT_API_KEY not found in .env file. Please read .env.example to see how to create it.');
+    })(),
+  userId:
+    process.env.PLAYHT_USER_ID ||
+    (function () {
+      throw new Error('PLAYHT_USER_ID not found in .env file. Please read .env.example to see how to create it.');
+    })(),
+});
 
 const app = express();
 
