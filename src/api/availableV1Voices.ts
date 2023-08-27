@@ -1,11 +1,17 @@
 import axios from 'axios';
 import { APISettings } from '..';
 
-type v1VoicesData = {
-  voices: Array<V1VoiceInfo>;
+// Type for the SDK
+export type V1VoiceInfo = {
+  engineType: 'Standard';
+} & V1APIVoiceInfo;
+
+// What the server returns
+type V1APIVoicesData = {
+  voices: Array<V1APIVoiceInfo>;
 };
 
-export type V1VoiceInfo = {
+type V1APIVoiceInfo = {
   value: string;
   name: string;
   language: string;
@@ -19,6 +25,8 @@ export type V1VoiceInfo = {
   styles?: Array<string>;
 };
 
+let _v1VoicesCache: Array<V1VoiceInfo>;
+
 export default async function availableV1Voices(settings: APISettings): Promise<Array<V1VoiceInfo>> {
   const { apiKey, userId } = settings;
   const options = {
@@ -31,10 +39,21 @@ export default async function availableV1Voices(settings: APISettings): Promise<
     },
   };
 
-  return await axios
+  if (_v1VoicesCache) {
+    return _v1VoicesCache;
+  }
+
+  _v1VoicesCache = await axios
     .request(options)
-    .then(({ data }: { data: v1VoicesData }) => data.voices)
+    .then(({ data }: { data: V1APIVoicesData }) =>
+      data.voices.map((v1) => ({
+        engineType: 'Standard' as const,
+        ...v1,
+      })),
+    )
     .catch(function (error) {
       throw new Error(error);
     });
+
+  return _v1VoicesCache;
 }

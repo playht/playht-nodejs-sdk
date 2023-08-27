@@ -2,19 +2,13 @@ import generateV2Speech, { V2SpeechResult } from './api/generateV2Speech';
 import generateV2Stream from './api/generateV2Stream';
 import generateV1Speech, { V1SpeechResult } from './api/generateV1Speech';
 import generateV1Stream from './api/generateV1Stream';
-import getAllVoices from './api/getAllVoices';
-import { V1VoiceInfo } from './api/availableV1Voices';
-import { V2VoiceInfo } from './api/availableV2Voices';
+import availableV1Voices, { V1VoiceInfo } from './api/availableV1Voices';
+import availableV2Voices, { V2VoiceInfo } from './api/availableV2Voices';
+import availableClonedVoices from './api/availableClonedVoices';
 
 export type EngineType = 'Standard' | 'PlayHT1.0';
 
-export type VoiceInfo =
-  | ({
-      engineType: 'Standard';
-    } & V1VoiceInfo)
-  | ({
-      engineType: 'PlayHT1.0';
-    } & V2VoiceInfo);
+export type VoiceInfo = V1VoiceInfo | V2VoiceInfo;
 
 export type v1ApiOptions = {
   title?: string;
@@ -72,8 +66,25 @@ export async function streamStandardOrPremiumSpeech(
   return await generateV1Stream(APISettingsStore.getSettings(), content, voice, outputStream, options);
 }
 
-export async function getAllAvailableVoices(): Promise<Array<VoiceInfo>> {
-  return await getAllVoices(APISettingsStore.getSettings());
+export async function getUltraRealisticVoices(): Promise<Array<VoiceInfo>> {
+  return await availableV2Voices(APISettingsStore.getSettings());
+}
+
+export async function getStandardOrPremiumVoices(): Promise<Array<VoiceInfo>> {
+  return await availableV1Voices(APISettingsStore.getSettings());
+}
+
+export async function getClonedVoices(): Promise<Array<VoiceInfo>> {
+  return await availableClonedVoices(APISettingsStore.getSettings());
+}
+
+export async function getAllVoices(): Promise<Array<VoiceInfo>> {
+  const [v1Voices, v2Voices, clonedVoices] = await Promise.all([
+    availableV1Voices(APISettingsStore.getSettings()),
+    availableV2Voices(APISettingsStore.getSettings()),
+    availableClonedVoices(APISettingsStore.getSettings()),
+  ]);
+  return [...v1Voices, ...v2Voices, ...clonedVoices];
 }
 
 export type APISettings = {
@@ -99,7 +110,9 @@ export class APISettingsStore {
 
   static getSettings(): APISettings {
     if (!APISettingsStore._instance) {
-      throw new Error('You need to initialise the API first by calling init() with your API key and user ID.');
+      throw new Error(
+        'Initialise the API first by calling init() with your API key and user ID. Please refer to https://docs.play.ht/reference/api-authentication for more info.',
+      );
     }
     return {
       apiKey: APISettingsStore._instance.apiKey,
