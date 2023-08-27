@@ -6,7 +6,7 @@ import getAllVoices from './api/getAllVoices';
 import { V1VoiceInfo } from './api/availableV1Voices';
 import { V2VoiceInfo } from './api/availableV2Voices';
 
-export type EngineType = 'Standard' | 'PlayHT1.0' | 'PlayHT2.0';
+export type EngineType = 'Standard' | 'PlayHT1.0';
 
 export type VoiceInfo =
   | ({
@@ -14,9 +14,6 @@ export type VoiceInfo =
     } & V1VoiceInfo)
   | ({
       engineType: 'PlayHT1.0';
-    } & V2VoiceInfo)
-  | ({
-      engineType: 'PlayHT2.0';
     } & V2VoiceInfo);
 
 export type v1ApiOptions = {

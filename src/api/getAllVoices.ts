@@ -22,11 +22,11 @@ export default async function getAllVoices(settings: APISettings): Promise<Array
       ...v1,
     })),
     ...v2Voices.map((v2) => ({
-      engineType: v2.engine === 'parrot' ? ('PlayHT2.0' as const) : ('PlayHT1.0' as const),
+      engineType: 'PlayHT1.0' as const,
       ...v2,
     })),
     ...clonedVoices.map((c) => ({
-      engineType: c.type === 'instant' ? ('PlayHT2.0' as const) : ('PlayHT1.0' as const),
+      engineType: 'PlayHT1.0' as const,
       ...c,
     })),
   ];
