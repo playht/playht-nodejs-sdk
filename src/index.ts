@@ -5,6 +5,7 @@ import generateV1Stream from './api/generateV1Stream';
 import availableV1Voices, { V1VoiceInfo } from './api/availableV1Voices';
 import availableV2Voices, { V2VoiceInfo } from './api/availableV2Voices';
 import availableClonedVoices from './api/availableClonedVoices';
+import APISettingsStore from './api/APISettingsStore';
 
 export type EngineType = 'Standard' | 'PlayHT1.0';
 
@@ -91,41 +92,3 @@ export type APISettings = {
   apiKey: string;
   userId: string;
 };
-
-export class APISettingsStore {
-  apiKey: string;
-  userId: string;
-
-  private static _instance: APISettingsStore;
-
-  private constructor(settings: APISettings) {
-    this.apiKey = settings.apiKey;
-    this.userId = settings.userId;
-
-    if (APISettingsStore._instance) {
-      return APISettingsStore._instance;
-    }
-    APISettingsStore._instance = this;
-  }
-
-  static getSettings(): APISettings {
-    if (!APISettingsStore._instance) {
-      throw new Error(
-        'Initialise the API first by calling init() with your API key and user ID. Please refer to https://docs.play.ht/reference/api-authentication for more info.',
-      );
-    }
-    return {
-      apiKey: APISettingsStore._instance.apiKey,
-      userId: APISettingsStore._instance.userId,
-    };
-  }
-
-  public static setSettings(settings: APISettings) {
-    if (!settings.apiKey || !settings.userId) {
-      throw new Error(
-        'Please enter a valid api key and valid user ID. Please refer to https://docs.play.ht/reference/api-authentication for more info.',
-      );
-    }
-    new APISettingsStore(settings);
-  }
-}
