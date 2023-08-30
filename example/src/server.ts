@@ -17,8 +17,6 @@ PlayHTAPI.init({
     (function () {
       throw new Error('PLAYHT_USER_ID not found in .env file. Please read .env.example to see how to create it.');
     })(),
-  defaultVoiceEngine: 'Standard',
-  defaultVoiceId: 'en-US-NancyNeural',
 });
 
 const app = express();
