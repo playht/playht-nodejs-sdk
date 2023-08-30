@@ -1,13 +1,26 @@
 import axios from 'axios';
 import APISettingsStore from './APISettingsStore';
-import { V1ApiOptions, V1SpeechResult } from './v1Common';
+import { V1ApiOptions } from './apiCommon';
 
-interface GenerationJobResponse {
+export type V1SpeechResult = {
+  transcriptionId: string;
+  audioUrl: string;
+  message?: string;
+};
+
+type GenerationStatusResponse = {
+  audioUrl: [string] | string;
+  transcriped?: boolean;
+  converted?: boolean;
+  message?: string;
+};
+
+type GenerationJobResponse = {
   status: string;
   transcriptionId: string;
   contentLength: number;
   wordCount: number;
-}
+};
 
 const WAIT_BETWEEN_STATUS_CHECKS_MS = 150;
 const MAX_STATUS_CHECKS_RETRIES = 10;
@@ -61,17 +74,18 @@ export default async function generateV1Speech(
     do {
       const generationStatus = await axios
         .request(statusOptions)
-        .then(({ data }: { data: V1SpeechResult }) => {
+        .then(({ data }: { data: GenerationStatusResponse }) => {
           return data;
         })
         .catch(function (error) {
           throw new Error(error);
         });
-      const { audioUrl, transcriped, converted } = generationStatus;
+      const { audioUrl, message, transcriped, converted } = generationStatus;
       if (transcriped || converted) {
         const url = Array.isArray(audioUrl) ? audioUrl[0] : audioUrl;
         return {
-          ...generationStatus,
+          message,
+          transcriptionId,
           audioUrl: url,
         };
       }

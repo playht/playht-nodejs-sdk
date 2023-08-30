@@ -1,18 +1,10 @@
 import type { OutputFormat } from '../index';
 import https from 'https';
 import APISettingsStore from './APISettingsStore';
+import { V2ApiOptions } from './apiCommon';
 
 const CONNECTION_TIMEOUT = 30 * 1000; // 30s
 const INNACTIVITY_TIMEOUT = 20 * 1000; // 20s
-
-export type V2ApiOptions = {
-  quality?: string;
-  outputFormat?: OutputFormat;
-  speed?: number;
-  sampleRate?: number;
-  seed?: number;
-  temperature?: number;
-};
 
 export type V2SpeechResult = {
   id: string;

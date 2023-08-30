@@ -2,7 +2,7 @@ import availableV1Voices, { V1VoiceInfo } from './api/availableV1Voices';
 import availableV2Voices, { V2VoiceInfo } from './api/availableV2Voices';
 import availableClonedVoices from './api/availableClonedVoices';
 import APISettingsStore from './api/APISettingsStore';
-import commonGenerateSpeech from './api/commonGenerateSpeech';
+import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 
 export type VoiceEngine = 'Standard' | 'PlayHT1.0';
 export type InputType = 'ssml' | 'plain';
@@ -42,6 +42,7 @@ export type SpeechOptions =
 export type SpeechOutput = {
   audioUrl: string;
   generationId: string;
+  message?: string;
 };
 
 export type APISettingsInput = {
@@ -56,13 +57,7 @@ export function init(settings: APISettingsInput) {
 }
 
 export async function generateSpeech(input: string, options?: SpeechOptions): Promise<SpeechOutput> {
-  const { defaultVoiceEngine, defaultVoiceId } = APISettingsStore.getSettings();
-  const optionsWithDefaults = {
-    voiceEngine: defaultVoiceEngine,
-    voiceId: defaultVoiceId,
-    ...options,
-  };
-  return await commonGenerateSpeech(input, optionsWithDefaults);
+  return await commonGenerateSpeech(input, options);
 }
 
 export async function streamSpeech(
@@ -70,7 +65,7 @@ export async function streamSpeech(
   outputStream: NodeJS.WritableStream,
   options?: SpeechOptions,
 ): Promise<void> {
-  throw new Error('not implemented yet');
+  return await commonGenerateStream(input, outputStream, options);
 }
 
 export type VoicesFilter = {
