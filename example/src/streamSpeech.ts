@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import * as PlayHTAPI from '../../dist/index';
 
-async function streamV1(req: Request, res: Response, next: NextFunction) {
+async function streamSpeech(req: Request, res: Response, next: NextFunction) {
   const { text } = req.query;
 
   if (!text || typeof text !== 'string') {
@@ -12,7 +12,7 @@ async function streamV1(req: Request, res: Response, next: NextFunction) {
   res.setHeader('Content-Type', 'audio/mpeg');
   try {
     // Call the API
-    await PlayHTAPI.streamStandardOrPremiumSpeech([text], 'en-US-NancyNeural', res);
+    await PlayHTAPI.streamSpeech(text, res);
   } catch (error: any) {
     res.statusMessage = error?.message;
     res.status(error?.status || 500).send();
@@ -20,4 +20,4 @@ async function streamV1(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-export default streamV1;
+export default streamSpeech;

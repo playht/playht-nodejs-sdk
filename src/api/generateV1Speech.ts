@@ -1,15 +1,6 @@
-import type { APISettings, v1ApiOptions } from '../index';
 import axios from 'axios';
-
-export type V1SpeechResult = {
-  preset: string;
-  transcriptionId: string;
-  audioUrl: Array<string> | string;
-  voice: string;
-  transcriped?: boolean;
-  converted?: boolean;
-  message: string;
-};
+import APISettingsStore from './APISettingsStore';
+import { V1ApiOptions, V1SpeechResult } from './v1Common';
 
 interface GenerationJobResponse {
   status: string;
@@ -22,12 +13,11 @@ const WAIT_BETWEEN_STATUS_CHECKS_MS = 150;
 const MAX_STATUS_CHECKS_RETRIES = 10;
 
 export default async function generateV1Speech(
-  settings: APISettings,
-  content: Array<string>,
+  content: string,
   voice: string,
-  options?: v1ApiOptions,
+  options?: V1ApiOptions,
 ): Promise<V1SpeechResult> {
-  const { apiKey, userId } = settings;
+  const { apiKey, userId } = APISettingsStore.getSettings();
   const convertOptions = {
     method: 'POST',
     url: 'https://play.ht/api/v1/convert',
@@ -38,14 +28,12 @@ export default async function generateV1Speech(
       'X-USER-ID': userId,
     },
     data: {
-      content,
+      content: [content],
       voice,
-      title: options?.title,
       narrationStyle: options?.narrationStyle,
       globalSpeed: options?.globalSpeed,
       trimSilence: options?.trimSilence,
       pronunciations: options?.pronunciations,
-      transcriptionId: options?.transcriptionId,
     },
   };
 
@@ -79,8 +67,13 @@ export default async function generateV1Speech(
         .catch(function (error) {
           throw new Error(error);
         });
-      if (generationStatus.transcriped || generationStatus.converted) {
-        return generationStatus;
+      const { audioUrl, transcriped, converted } = generationStatus;
+      if (transcriped || converted) {
+        const url = Array.isArray(audioUrl) ? audioUrl[0] : audioUrl;
+        return {
+          ...generationStatus,
+          audioUrl: url,
+        };
       }
       retries++;
       await new Promise((resolve) => setTimeout(resolve, WAIT_BETWEEN_STATUS_CHECKS_MS));

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import * as PlayHTAPI from '../../dist/index';
 
-async function allVoices(req: Request, res: Response, next: NextFunction) {
+async function listVoices(req: Request, res: Response, next: NextFunction) {
   res.set('Content-Type', 'application/json');
   try {
     // Call the API
@@ -15,4 +15,4 @@ async function allVoices(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-export default allVoices;
+export default listVoices;

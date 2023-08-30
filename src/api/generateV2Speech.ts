@@ -1,8 +1,18 @@
-import type { APISettings, v2ApiOptions } from '../index';
+import type { OutputFormat } from '../index';
 import https from 'https';
+import APISettingsStore from './APISettingsStore';
 
 const CONNECTION_TIMEOUT = 30 * 1000; // 30s
 const INNACTIVITY_TIMEOUT = 20 * 1000; // 20s
+
+export type V2ApiOptions = {
+  quality?: string;
+  outputFormat?: OutputFormat;
+  speed?: number;
+  sampleRate?: number;
+  seed?: number;
+  temperature?: number;
+};
 
 export type V2SpeechResult = {
   id: string;
@@ -11,14 +21,9 @@ export type V2SpeechResult = {
   size: number;
 };
 
-export default function generateV2Speech(
-  settings: APISettings,
-  text: string,
-  voice: string,
-  options?: v2ApiOptions,
-): Promise<V2SpeechResult> {
+export default function generateV2Speech(text: string, voice: string, options?: V2ApiOptions): Promise<V2SpeechResult> {
   const apiUrl = new URL('https://play.ht/api/v2/tts');
-  const { apiKey, userId } = settings;
+  const { apiKey, userId } = APISettingsStore.getSettings();
 
   const requestOptions: https.RequestOptions = {
     method: 'POST',

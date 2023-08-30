@@ -1,85 +1,84 @@
-import generateV2Speech, { V2SpeechResult } from './api/generateV2Speech';
-import generateV2Stream from './api/generateV2Stream';
-import generateV1Speech, { V1SpeechResult } from './api/generateV1Speech';
-import generateV1Stream from './api/generateV1Stream';
 import availableV1Voices, { V1VoiceInfo } from './api/availableV1Voices';
 import availableV2Voices, { V2VoiceInfo } from './api/availableV2Voices';
 import availableClonedVoices from './api/availableClonedVoices';
 import APISettingsStore from './api/APISettingsStore';
+import commonGenerateSpeech from './api/commonGenerateSpeech';
 
-export type EngineType = 'Standard' | 'PlayHT1.0';
+export type VoiceEngine = 'Standard' | 'PlayHT1.0';
+export type InputType = 'ssml' | 'plain';
+export type OutputQuality = 'draft' | 'low' | 'medium' | 'high' | 'premium';
+export type OutputFormat = 'mp3' | 'ogg' | 'wav' | 'flac' | 'mulaw';
 
 export type VoiceInfo = V1VoiceInfo | V2VoiceInfo;
 
-export type v1ApiOptions = {
-  title?: string;
+export type SharedSpeechOptions = {
+  voiceEngine?: VoiceEngine;
+  voiceId?: string;
+  inputType?: InputType;
+  speed?: number;
+  quality?: OutputQuality;
+};
+
+export type StandardEngineOptions = {
+  voiceEngine: 'Standard';
   narrationStyle?: string;
-  globalSpeed?: string;
   pronunciations?: Array<{ key: string; value: string }>;
   trimSilence?: boolean;
-  transcriptionId?: string;
 };
 
-export type v2ApiOptions = {
-  quality?: string;
-  outputFormat?: 'mp3' | 'ogg' | 'wav' | 'flac' | 'mulaw';
-  speed?: number;
+export type PlayHT10EngineOptions = {
+  voiceEngine: 'PlayHT1.0';
+  inputType?: 'plain';
+  outputFormat?: OutputFormat;
   sampleRate?: number;
-  seed?: number | null;
-  temperature?: number | null;
+  seed?: number;
+  temperature?: number;
 };
 
-export function init(settings: { apiKey: string; userId: string }) {
+export type SpeechOptions =
+  | (SharedSpeechOptions & PlayHT10EngineOptions)
+  | (SharedSpeechOptions & StandardEngineOptions);
+
+export type SpeechOutput = {
+  audioUrl: string;
+  generationId: string;
+};
+
+export type APISettingsInput = {
+  apiKey: string;
+  userId: string;
+  defaultVoiceId?: string;
+  defaultVoiceEngine?: VoiceEngine;
+};
+
+export function init(settings: APISettingsInput) {
   APISettingsStore.setSettings(settings);
 }
 
-export async function genereateStandardOrPremiumSpeech(
-  content: Array<string>,
-  voice: string,
-  options?: v1ApiOptions,
-): Promise<V1SpeechResult> {
-  return await generateV1Speech(APISettingsStore.getSettings(), content, voice, options);
+export async function generateSpeech(input: string, options?: SpeechOptions): Promise<SpeechOutput> {
+  const { defaultVoiceEngine, defaultVoiceId } = APISettingsStore.getSettings();
+  const optionsWithDefaults = {
+    voiceEngine: defaultVoiceEngine,
+    voiceId: defaultVoiceId,
+    ...options,
+  };
+  return await commonGenerateSpeech(input, optionsWithDefaults);
 }
 
-export async function genereateUltraRealisticSpeech(
-  text: string,
-  voice: string,
-  options?: v2ApiOptions,
-): Promise<V2SpeechResult> {
-  return await generateV2Speech(APISettingsStore.getSettings(), text, voice, options);
-}
-
-export async function streamUltraRealisticSpeech(
-  text: string,
-  voice: string,
+export async function streamSpeech(
+  input: string,
   outputStream: NodeJS.WritableStream,
-  options?: v2ApiOptions,
+  options?: SpeechOptions,
 ): Promise<void> {
-  return await generateV2Stream(APISettingsStore.getSettings(), text, voice, outputStream, options);
+  throw new Error('not implemented yet');
 }
 
-export async function streamStandardOrPremiumSpeech(
-  content: Array<string>,
-  voice: string,
-  outputStream: NodeJS.WritableStream,
-  options?: v1ApiOptions,
-): Promise<void> {
-  return await generateV1Stream(APISettingsStore.getSettings(), content, voice, outputStream, options);
-}
+export type VoicesFilter = {
+  voiceEngine?: Array<VoiceEngine>;
+  isCloned?: boolean;
+};
 
-export async function getUltraRealisticVoices(): Promise<Array<VoiceInfo>> {
-  return await availableV2Voices(APISettingsStore.getSettings());
-}
-
-export async function getStandardOrPremiumVoices(): Promise<Array<VoiceInfo>> {
-  return await availableV1Voices(APISettingsStore.getSettings());
-}
-
-export async function getClonedVoices(): Promise<Array<VoiceInfo>> {
-  return await availableClonedVoices(APISettingsStore.getSettings());
-}
-
-export async function getAllVoices(): Promise<Array<VoiceInfo>> {
+export async function getAllVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
   const [v1Voices, v2Voices, clonedVoices] = await Promise.all([
     availableV1Voices(APISettingsStore.getSettings()),
     availableV2Voices(APISettingsStore.getSettings()),
@@ -87,8 +86,3 @@ export async function getAllVoices(): Promise<Array<VoiceInfo>> {
   ]);
   return [...v1Voices, ...v2Voices, ...clonedVoices];
 }
-
-export type APISettings = {
-  apiKey: string;
-  userId: string;
-};

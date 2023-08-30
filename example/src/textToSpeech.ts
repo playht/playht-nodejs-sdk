@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import * as PlayHTAPI from '../../dist/index';
 
-async function ttsV2(req: Request, res: Response, next: NextFunction) {
+async function textToSpeech(req: Request, res: Response, next: NextFunction) {
   if (!req.body?.text) {
     res.status(400).send('Text to generate not provided');
     return next();
@@ -12,7 +12,7 @@ async function ttsV2(req: Request, res: Response, next: NextFunction) {
   res.set('Content-Type', 'application/json');
   try {
     // Call the API
-    const generated = await PlayHTAPI.genereateUltraRealisticSpeech(text, 'arthur');
+    const generated = await PlayHTAPI.generateSpeech(text);
 
     res.status(200).json(generated);
   } catch (error: any) {
@@ -22,4 +22,4 @@ async function ttsV2(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-export default ttsV2;
+export default textToSpeech;

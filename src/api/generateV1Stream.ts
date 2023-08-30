@@ -1,20 +1,17 @@
-import { APISettings, v1ApiOptions } from '..';
 import generateV1Speech from './generateV1Speech';
 import axios from 'axios';
+import { V1ApiOptions } from './v1Common';
 
 export default async function generateV1Stream(
-  settings: APISettings,
-  content: Array<string>,
+  content: string,
   voice: string,
   outputStream: NodeJS.WritableStream,
-  options?: v1ApiOptions,
+  options?: V1ApiOptions,
 ): Promise<void> {
-  const generated = await generateV1Speech(settings, content, voice, options);
-
-  const url = Array.isArray(generated.audioUrl) ? generated.audioUrl[0] : generated.audioUrl;
+  const generated = await generateV1Speech(content, voice, options);
 
   const response = await axios({
-    url,
+    url: generated.audioUrl,
     method: 'GET',
     responseType: 'stream',
   }).catch((error: any) => {

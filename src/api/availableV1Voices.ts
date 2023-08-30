@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { APISettings } from '..';
+import { APISettingsInput } from '..';
 
 // Type for the SDK
 export type V1VoiceInfo = {
@@ -27,7 +27,7 @@ type V1APIVoiceInfo = {
 
 let _v1VoicesCache: Array<V1VoiceInfo>;
 
-export default async function availableV1Voices(settings: APISettings): Promise<Array<V1VoiceInfo>> {
+export default async function availableV1Voices(settings: APISettingsInput): Promise<Array<V1VoiceInfo>> {
   const { apiKey, userId } = settings;
   const options = {
     method: 'GET',

@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { V2APIVoiceInfo, V2VoiceInfo } from './availableV2Voices';
-import { APISettings } from '..';
+import { APISettingsInput } from '..';
 
 let _clonedVoicesCache: Array<V2VoiceInfo>;
 
-export default async function availableClonedVoices(settings: APISettings): Promise<Array<V2VoiceInfo>> {
+export default async function availableClonedVoices(settings: APISettingsInput): Promise<Array<V2VoiceInfo>> {
   const { apiKey, userId } = settings;
   const options = {
     method: 'GET',

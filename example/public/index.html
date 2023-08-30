@@ -8,57 +8,37 @@
   <body>
     <h1>PlayHT API Examples</h1>
 
-    <h2>Ultra-Realistic Voices API (v2)</h2>
-    <div><label>Enter text to generate:</label></div>
-    <div><textarea id="v2TextToGenerate">I can speak now</textarea></div>
-    <div><button onclick="generateV2Click()">Generate Audio</button></div>
-    <audio id="v2AudioPlayer" controls>Your browser does not support the audio element.</audio>
-    <hr />
-    <h2>Stream Ultra-Realistic Voices API (v2)</h2>
-    <div><label>Enter text to stream:</label></div>
-    <div><textarea id="v2StreamTextToGenerate">Stream this now please</textarea></div>
-    <div><button onclick="generateV2StreamClick()">Generate Audio</button></div>
-    <audio id="v2StreamAudioPlayer" controls>Your browser does not support the audio element.</audio>
-    <hr />
-    <h2>Standard and Premium voices API (v1)</h2>
-    <div><label>Enter text to generate:</label></div>
-    <div><textarea id="v1TextToGenerate">Tell me what to say</textarea></div>
-    <div><button onclick="generateV1Click()">Generate Audio</button></div>
-    <audio id="v1AudioPlayer" controls>Your browser does not support the audio element.</audio>
-    <hr />
-    <h2>Stream Standard and Premium voices API (v1)</h2>
+    <h2>Generate speech from text</h2>
     <div><label>Enter text to generate:</label></div>
     <div>
-      <textarea id="v1StreamTextToGenerate">
-The clear, babbling stream meandered through the lush, sunlit meadow.</textarea
+      <textarea id="textToGenerate">
+Immersed in the text's pages, I journeyed through a world woven with words and imagination.</textarea
       >
     </div>
-    <div><button onclick="generateV1StreamClick()">Generate Audio</button></div>
-    <audio id="v1StreamAudioPlayer" controls>Your browser does not support the audio element.</audio>
+    <div><button onclick="generateClick()">Generate Audio</button></div>
+    <audio id="audioPlayer" controls>Your browser does not support the audio element.</audio>
+    <hr />
+    <h2>Stream speech from text</h2>
+    <div><label>Enter text to stream:</label></div>
+    <div>
+      <textarea id="streamTextToGenerate">
+The clear, babbling stream meandered through the lush, sunlit meadow, creating a soothing and tranquil atmosphere.</textarea
+      >
+    </div>
+    <div><button onclick="generateStreamClick()">Generate Audio</button></div>
+    <audio id="streamAudioPlayer" controls>Your browser does not support the audio element.</audio>
 
     <script>
-      function generateV2Click(event) {
-        const text = document.getElementById('v2TextToGenerate').value;
-        requestGeneration('/ttsV2', text, 'v2AudioPlayer');
+      function generateClick(event) {
+        const text = document.getElementById('textToGenerate').value;
+        requestGeneration('/textToSpeech', text, 'audioPlayer');
       }
 
-      function generateV2StreamClick(event) {
-        const text = document.getElementById('v2StreamTextToGenerate').value;
+      function generateStreamClick(event) {
+        const text = document.getElementById('streamTextToGenerate').value;
         const searchParams = new URLSearchParams();
         searchParams.set('text', text);
-        playUrl(`/streamV2?${searchParams.toString()}`, 'v2StreamAudioPlayer');
-      }
-
-      function generateV1Click(event) {
-        const text = document.getElementById('v1TextToGenerate').value;
-        requestGeneration('/ttsV1', text, 'v1AudioPlayer');
-      }
-
-      function generateV1StreamClick(event) {
-        const text = document.getElementById('v1StreamTextToGenerate').value;
-        const searchParams = new URLSearchParams();
-        searchParams.set('text', text);
-        playUrl(`/streamV1?${searchParams.toString()}`, 'v1StreamAudioPlayer');
+        playUrl(`/streamSpeech?${searchParams.toString()}`, 'streamAudioPlayer');
       }
 
       function requestGeneration(apiURL, text, audioPlayerId) {

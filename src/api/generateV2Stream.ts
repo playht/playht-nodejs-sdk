@@ -1,23 +1,17 @@
-import type { APISettings, v2ApiOptions } from '../index';
+import type { APISettingsInput } from '../index';
 import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
+import { V2ApiOptions } from './generateV2Speech';
 
 const CONNECTION_TIMEOUT = 30 * 1000; // 30s
 const INNACTIVITY_TIMEOUT = 20 * 1000; // 20s
 
-export type V2SpeechResult = {
-  id: string;
-  url: string;
-  duration: number;
-  size: number;
-};
-
 export default async function generateV2Stream(
-  settings: APISettings,
+  settings: APISettingsInput,
   text: string,
   voice: string,
   outputStream: NodeJS.WritableStream,
-  options?: v2ApiOptions,
+  options?: V2ApiOptions,
 ): Promise<void> {
   const { apiKey, userId } = settings;
   const streamOptions: AxiosRequestConfig = {
