@@ -7,6 +7,7 @@
     "start": "yarn build && nodemon dist/server.js"
   },
   "dependencies": {
+    "@playht/playht-nodejs-sdk": "file:../",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "node-fetch": "^2"

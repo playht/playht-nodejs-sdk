@@ -3,7 +3,7 @@ import textToSpeech from './textToSpeech';
 import streamSpeech from './streamSpeech';
 import listVoices from './listVoices';
 import dotenv from 'dotenv';
-import * as PlayHTAPI from '../../dist/index';
+import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
 
 dotenv.config();
 PlayHTAPI.init({
