@@ -1,18 +1,14 @@
 import axios from 'axios';
-import { APISettingsInput } from '..';
-
-// Type for the SDK
-export type V2VoiceInfo = {
-  engineType: 'PlayHT1.0';
-} & V2APIVoiceInfo;
+import APISettingsStore from './APISettingsStore';
+import { VoiceInfo } from '..';
 
 export type V2APIVoiceInfo = {
   id: string;
   name: string;
   sample?: string | null;
   accent?: string;
-  age?: number | null;
-  gender?: string;
+  age?: 'old' | 'adult' | 'youth' | null;
+  gender?: 'male' | 'female';
   language?: string;
   language_code?: string;
   loudness?: number | null;
@@ -23,10 +19,10 @@ export type V2APIVoiceInfo = {
   type?: string;
 };
 
-let _v2VoicesCache: Array<V2VoiceInfo>;
+let _v2VoicesCache: Array<VoiceInfo>;
 
-export default async function availableV2Voices(settings: APISettingsInput): Promise<Array<V2VoiceInfo>> {
-  const { apiKey, userId } = settings;
+export default async function availableV2Voices(): Promise<Array<VoiceInfo>> {
+  const { apiKey, userId } = APISettingsStore.getSettings();
   const options = {
     method: 'GET',
     url: 'https://play.ht/api/v2/voices',
@@ -44,9 +40,17 @@ export default async function availableV2Voices(settings: APISettingsInput): Pro
   _v2VoicesCache = await axios
     .request(options)
     .then(({ data }: { data: Array<V2APIVoiceInfo> }) =>
-      data.map((v2) => ({
-        engineType: 'PlayHT1.0' as const,
-        ...v2,
+      data.map((v2Voice) => ({
+        voiceEngine: 'PlayHT1.0' as const,
+        id: v2Voice.id,
+        name: v2Voice.name,
+        sampleUrl: v2Voice.sample ? v2Voice.sample : undefined,
+        language: v2Voice.language,
+        languageCode: v2Voice.language_code,
+        gender: v2Voice.gender,
+        ageGroup: toAgeGroup(v2Voice.age),
+        styles: v2Voice.style ? [v2Voice.style] : undefined,
+        isCloned: false,
       })),
     )
     .catch(function (error) {
@@ -54,4 +58,15 @@ export default async function availableV2Voices(settings: APISettingsInput): Pro
     });
 
   return _v2VoicesCache;
+}
+function toAgeGroup(age?: 'old' | 'adult' | 'youth' | null): 'youth' | 'adult' | 'senior' | undefined {
+  switch (age) {
+    case 'old':
+      return 'senior';
+    case 'adult':
+      return 'adult';
+    case 'youth':
+      return 'youth';
+  }
+  return undefined;
 }

@@ -1,15 +1,6 @@
 import axios from 'axios';
-import { APISettingsInput } from '..';
-
-// Type for the SDK
-export type V1VoiceInfo = {
-  engineType: 'Standard';
-} & V1APIVoiceInfo;
-
-// What the server returns
-type V1APIVoicesData = {
-  voices: Array<V1APIVoiceInfo>;
-};
+import APISettingsStore from './APISettingsStore';
+import { VoiceInfo } from '..';
 
 type V1APIVoiceInfo = {
   value: string;
@@ -17,7 +8,7 @@ type V1APIVoiceInfo = {
   language: string;
   voiceType: string;
   languageCode: string;
-  gender: string;
+  gender: 'Male' | 'Female';
   service: string;
   sample: string;
   isNew?: boolean;
@@ -25,10 +16,10 @@ type V1APIVoiceInfo = {
   styles?: Array<string>;
 };
 
-let _v1VoicesCache: Array<V1VoiceInfo>;
+let _v1VoicesCache: Array<VoiceInfo>;
 
-export default async function availableV1Voices(settings: APISettingsInput): Promise<Array<V1VoiceInfo>> {
-  const { apiKey, userId } = settings;
+export default async function availableV1Voices(): Promise<Array<VoiceInfo>> {
+  const { apiKey, userId } = APISettingsStore.getSettings();
   const options = {
     method: 'GET',
     url: 'https://play.ht/api/v1/getVoices',
@@ -45,11 +36,32 @@ export default async function availableV1Voices(settings: APISettingsInput): Pro
 
   _v1VoicesCache = await axios
     .request(options)
-    .then(({ data }: { data: V1APIVoicesData }) =>
-      data.voices.map((v1) => ({
-        engineType: 'Standard' as const,
-        ...v1,
-      })),
+    .then(
+      ({
+        data,
+      }: {
+        data: {
+          voices: Array<V1APIVoiceInfo>;
+        };
+      }): Array<VoiceInfo> =>
+        data.voices.map((v1Voice) => ({
+          voiceEngine: 'Standard' as const,
+          id: v1Voice.value,
+          name: v1Voice.name,
+          sampleUrl: v1Voice.sample ? v1Voice.sample : undefined,
+          language: v1Voice.language,
+          languageCode: v1Voice.languageCode,
+          // Use ternary operator to get correct type.
+          gender:
+            v1Voice.gender.toLocaleLowerCase() === 'male'
+              ? 'male'
+              : v1Voice.gender.toLocaleLowerCase() === 'female'
+              ? 'female'
+              : undefined,
+          ageGroup: v1Voice.isKid === true ? 'youth' : 'adult',
+          styles: v1Voice.styles,
+          isCloned: false,
+        })),
     )
     .catch(function (error) {
       throw new Error(error);

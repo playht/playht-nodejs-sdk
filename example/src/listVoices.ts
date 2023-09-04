@@ -5,7 +5,7 @@ async function listVoices(req: Request, res: Response, next: NextFunction) {
   res.set('Content-Type', 'application/json');
   try {
     // Call the API
-    const voices = await PlayHTAPI.getAllVoices();
+    const voices = await PlayHTAPI.listVoices();
 
     res.status(200).json(voices);
   } catch (error: any) {

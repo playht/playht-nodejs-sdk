@@ -1,18 +1,28 @@
-import availableV1Voices, { V1VoiceInfo } from './api/availableV1Voices';
-import availableV2Voices, { V2VoiceInfo } from './api/availableV2Voices';
-import availableClonedVoices from './api/availableClonedVoices';
 import APISettingsStore from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
+import { commonGetAllVoices } from './api/commonGetAllVoices';
 
 export type VoiceEngine = 'Standard' | 'PlayHT1.0';
 export type InputType = 'ssml' | 'plain';
 export type OutputQuality = 'draft' | 'low' | 'medium' | 'high' | 'premium';
 export type OutputFormat = 'mp3' | 'ogg' | 'wav' | 'flac' | 'mulaw';
 
-export type VoiceInfo = V1VoiceInfo | V2VoiceInfo;
+export type VoiceInfo = {
+  id: string;
+  name: string;
+  voiceEngine: VoiceEngine;
+  sampleUrl?: string;
+  language?: string;
+  languageCode?: string;
+  gender?: 'male' | 'female';
+  accent?: string;
+  ageGroup?: 'youth' | 'adult' | 'senior';
+  styles?: Array<string>;
+  isCloned: boolean;
+};
 
 export type SharedSpeechOptions = {
-  voiceEngine?: VoiceEngine;
+  voiceEngine: VoiceEngine;
   voiceId?: string;
   inputType?: InputType;
   speed?: number;
@@ -73,11 +83,6 @@ export type VoicesFilter = {
   isCloned?: boolean;
 };
 
-export async function getAllVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
-  const [v1Voices, v2Voices, clonedVoices] = await Promise.all([
-    availableV1Voices(APISettingsStore.getSettings()),
-    availableV2Voices(APISettingsStore.getSettings()),
-    availableClonedVoices(APISettingsStore.getSettings()),
-  ]);
-  return [...v1Voices, ...v2Voices, ...clonedVoices];
+export async function getVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
+  return await commonGetAllVoices(filters);
 }

@@ -1,11 +1,17 @@
 import axios from 'axios';
-import { V2APIVoiceInfo, V2VoiceInfo } from './availableV2Voices';
-import { APISettingsInput } from '..';
+import APISettingsStore from './APISettingsStore';
+import { VoiceInfo } from '..';
 
-let _clonedVoicesCache: Array<V2VoiceInfo>;
+type ClonedAPIVoiceInfo = {
+  id: string;
+  name: string;
+  gender?: 'male' | 'female';
+};
 
-export default async function availableClonedVoices(settings: APISettingsInput): Promise<Array<V2VoiceInfo>> {
-  const { apiKey, userId } = settings;
+let _clonedVoicesCache: Array<VoiceInfo>;
+
+export default async function availableClonedVoices(): Promise<Array<VoiceInfo>> {
+  const { apiKey, userId } = APISettingsStore.getSettings();
   const options = {
     method: 'GET',
     url: 'https://play.ht/api/v2/cloned-voices',
@@ -22,12 +28,15 @@ export default async function availableClonedVoices(settings: APISettingsInput):
 
   _clonedVoicesCache = await axios
     .request(options)
-    .then(({ data }: { data: Array<V2APIVoiceInfo> }) =>
-      data.map((v) => ({
-        engineType: 'PlayHT1.0' as const,
-        is_cloned: true,
-        ...v,
-      })),
+    .then(
+      ({ data }: { data: Array<ClonedAPIVoiceInfo> }): Array<VoiceInfo> =>
+        data.map((voice) => ({
+          voiceEngine: 'PlayHT1.0' as const,
+          isCloned: true,
+          id: voice.id,
+          name: voice.name,
+          gender: voice.gender,
+        })),
     )
     .catch(function (error) {
       throw new Error(error);
