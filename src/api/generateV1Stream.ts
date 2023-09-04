@@ -1,6 +1,6 @@
+import axios from 'axios';
 import { V1ApiOptions } from './apiCommon';
 import generateV1Speech from './generateV1Speech';
-import axios from 'axios';
 
 export default async function generateV1Stream(
   content: string,

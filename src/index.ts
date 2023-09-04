@@ -83,6 +83,6 @@ export type VoicesFilter = {
   isCloned?: boolean;
 };
 
-export async function getVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
+export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
   return await commonGetAllVoices(filters);
 }

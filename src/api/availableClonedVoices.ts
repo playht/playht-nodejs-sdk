@@ -1,6 +1,6 @@
 import axios from 'axios';
-import APISettingsStore from './APISettingsStore';
 import { VoiceInfo } from '..';
+import APISettingsStore from './APISettingsStore';
 
 type ClonedAPIVoiceInfo = {
   id: string;

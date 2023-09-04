@@ -1,6 +1,6 @@
 import type { APISettingsInput } from '../index';
-import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 import { V2ApiOptions } from './apiCommon';
 import APISettingsStore from './APISettingsStore';
 

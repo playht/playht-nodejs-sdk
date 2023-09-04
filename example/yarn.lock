@@ -37,10 +37,10 @@ __metadata:
 
 "@playht/playht-nodejs-sdk@file:../::locator=play-api-example%40workspace%3A.":
   version: 0.0.4
-  resolution: "@playht/playht-nodejs-sdk@file:../#../::hash=a384ce&locator=play-api-example%40workspace%3A."
+  resolution: "@playht/playht-nodejs-sdk@file:../#../::hash=513e0c&locator=play-api-example%40workspace%3A."
   dependencies:
     axios: ^1.4.0
-  checksum: ee2acda249972aac3e3acbbb227362b8d430042389f7de370fdb621430bc511d298c8c7493ec48fcb81b35a2bf4dccda327eaa2fe7f6cee23d6a2cac9f7155db
+  checksum: 44ab3fc2332dbb69e38b7a5e2e36276f7f8f4128d0715d74a16f9710d9a7e21e98ec436716c9de7d373e7b5f084b7fbba2afda7bf3766ba14862526e38b752c6
   languageName: node
   linkType: hard
 

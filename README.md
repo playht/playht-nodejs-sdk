@@ -42,8 +42,8 @@ Import the `PlayHT` class and create an instance with your credentials:
 import PlayHTAPI from '@playht/playht-nodejs-sdk';
 
 // ...When you need to access the API
-const apiKey = "<YOUR API KEY>";
-const userId = "<YOUR USER ID>";
+const apiKey = '<YOUR API KEY>';
+const userId = '<YOUR USER ID>';
 
 const api = new PlayHTAPI(apiKey, userId);
 ```
