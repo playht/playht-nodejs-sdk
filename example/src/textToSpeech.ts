@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
 
-async function textToSpeech(req: Request, res: Response, next: NextFunction) {
+export async function textToSpeech(req: Request, res: Response, next: NextFunction) {
   if (!req.body?.text) {
     res.status(400).send('Text to generate not provided');
     return next();
@@ -21,5 +21,3 @@ async function textToSpeech(req: Request, res: Response, next: NextFunction) {
   }
   next();
 }
-
-export default textToSpeech;

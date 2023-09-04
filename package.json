@@ -12,6 +12,9 @@
   ],
   "main": "dist/index.js",
   "module": "./dist/index.js",
+  "workspaces": [
+    "example/"
+  ],
   "repository": "https://github.com/playht/playht-nodejs-sdk",
   "author": "nobody@play.ht",
   "license": "MIT",

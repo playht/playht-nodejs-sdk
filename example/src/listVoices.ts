@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
 
-async function listVoices(req: Request, res: Response, next: NextFunction) {
+export async function listVoices(req: Request, res: Response, next: NextFunction) {
   res.set('Content-Type', 'application/json');
   try {
     // Call the API
@@ -14,5 +14,3 @@ async function listVoices(req: Request, res: Response, next: NextFunction) {
   }
   next();
 }
-
-export default listVoices;

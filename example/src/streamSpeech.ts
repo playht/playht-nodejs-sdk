@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
 
-async function streamSpeech(req: Request, res: Response, next: NextFunction) {
+export async function streamSpeech(req: Request, res: Response, next: NextFunction) {
   const { text } = req.query;
 
   if (!text || typeof text !== 'string') {
@@ -19,5 +19,3 @@ async function streamSpeech(req: Request, res: Response, next: NextFunction) {
   }
   next();
 }
-
-export default streamSpeech;

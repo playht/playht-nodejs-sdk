@@ -1,9 +1,10 @@
+/* eslint-disable no-process-env */
 import express from 'express';
-import textToSpeech from './textToSpeech';
-import streamSpeech from './streamSpeech';
-import listVoices from './listVoices';
 import dotenv from 'dotenv';
 import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import { textToSpeech } from './textToSpeech';
+import { streamSpeech } from './streamSpeech';
+import { listVoices } from './listVoices';
 
 dotenv.config();
 PlayHTAPI.init({
