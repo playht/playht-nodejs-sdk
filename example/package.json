@@ -5,7 +5,7 @@
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "start": "yarn build && nodemon dist/server.js",
-    "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit"
+    "lint": "prettier --write . && cd .. && eslint --ext .ts ./example/src --fix && cd example && tsc --noEmit"
   },
   "dependencies": {
     "@playht/playht-nodejs-sdk": "workspace:^",
