@@ -13,7 +13,7 @@
   "main": "dist/index.js",
   "module": "./dist/index.js",
   "workspaces": [
-    "example/"
+    "example"
   ],
   "repository": "https://github.com/playht/playht-nodejs-sdk",
   "author": "nobody@play.ht",
