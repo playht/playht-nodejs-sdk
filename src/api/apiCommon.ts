@@ -1,10 +1,9 @@
-import { OutputFormat, SpeechOptions, SpeechOutput , OutputQuality } from '..';
-import APISettingsStore from './APISettingsStore';
-import generateV1Speech from './generateV1Speech';
-import generateV1Stream from './generateV1Stream';
-import generateV2Speech from './generateV2Speech';
-import generateV2Stream from './generateV2Stream';
-
+import type { OutputFormat, SpeechOptions, SpeechOutput, OutputQuality } from '..';
+import { APISettingsStore } from './APISettingsStore';
+import { generateV1Speech } from './generateV1Speech';
+import { generateV1Stream } from './generateV1Stream';
+import { generateV2Speech } from './generateV2Speech';
+import { generateV2Stream } from './generateV2Stream';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -123,6 +122,6 @@ function toV1Options(options: SpeechOptionsWithVoiceID): V1ApiOptions {
     pronunciations: options.pronunciations,
     trimSilence: options.trimSilence,
     preset: qualityToPreset(options.quality),
-    globalSpeed: `${Math.trunc((options.speed || 1) * 100)  }%`,
+    globalSpeed: `${Math.trunc((options.speed || 1) * 100)}%`,
   };
 }

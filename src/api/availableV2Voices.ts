@@ -1,6 +1,6 @@
+import type { VoiceInfo } from '..';
 import axios from 'axios';
-import { VoiceInfo } from '..';
-import APISettingsStore from './APISettingsStore';
+import { APISettingsStore } from './APISettingsStore';
 
 export type V2APIVoiceInfo = {
   id: string;
@@ -21,7 +21,7 @@ export type V2APIVoiceInfo = {
 
 let _v2VoicesCache: Array<VoiceInfo>;
 
-export default async function availableV2Voices(): Promise<Array<VoiceInfo>> {
+export async function availableV2Voices(): Promise<Array<VoiceInfo>> {
   const { apiKey, userId } = APISettingsStore.getSettings();
   const options = {
     method: 'GET',
@@ -60,6 +60,10 @@ export default async function availableV2Voices(): Promise<Array<VoiceInfo>> {
   return _v2VoicesCache;
 }
 function toAgeGroup(age?: 'old' | 'adult' | 'youth' | null): 'youth' | 'adult' | 'senior' | undefined {
+  if (!age) {
+    return undefined;
+  }
+
   switch (age) {
     case 'old':
       return 'senior';
@@ -67,6 +71,7 @@ function toAgeGroup(age?: 'old' | 'adult' | 'youth' | null): 'youth' | 'adult' |
       return 'adult';
     case 'youth':
       return 'youth';
+    default:
+      return undefined;
   }
-  return undefined;
 }

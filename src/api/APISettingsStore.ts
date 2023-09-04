@@ -1,4 +1,4 @@
-import { APISettingsInput, VoiceEngine } from '..';
+import type { APISettingsInput, VoiceEngine } from '..';
 
 const DEFAULT_VOICE_ID =
   's3://mockingbird-prod/larry_vo_narrative_4bd5c1bd-f662-4a38-b5b9-76563f7b92ec/voices/speaker/manifest.json';
@@ -8,7 +8,7 @@ const DEFAULT_VOICE_ENGINE: VoiceEngine = 'PlayHT1.0';
 
 type APISettings = APISettingsInput & { defaultVoiceId: string; defaultVoiceEngine: VoiceEngine };
 
-export default class APISettingsStore {
+export class APISettingsStore {
   settings: APISettings;
 
   private static _instance: APISettingsStore;

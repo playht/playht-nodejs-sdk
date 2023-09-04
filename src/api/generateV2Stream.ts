@@ -1,10 +1,9 @@
-import type { APISettingsInput } from '../index';
 import type { AxiosRequestConfig } from 'axios';
+import type { V2ApiOptions } from './apiCommon';
 import axios from 'axios';
-import { V2ApiOptions } from './apiCommon';
-import APISettingsStore from './APISettingsStore';
+import { APISettingsStore } from './APISettingsStore';
 
-export default async function generateV2Stream(
+export async function generateV2Stream(
   text: string,
   voice: string,
   outputStream: NodeJS.WritableStream,

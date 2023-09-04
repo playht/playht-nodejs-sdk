@@ -1,6 +1,6 @@
+import type { VoiceInfo } from '..';
 import axios from 'axios';
-import { VoiceInfo } from '..';
-import APISettingsStore from './APISettingsStore';
+import { APISettingsStore } from './APISettingsStore';
 
 type ClonedAPIVoiceInfo = {
   id: string;
@@ -10,7 +10,7 @@ type ClonedAPIVoiceInfo = {
 
 let _clonedVoicesCache: Array<VoiceInfo>;
 
-export default async function availableClonedVoices(): Promise<Array<VoiceInfo>> {
+export async function availableClonedVoices(): Promise<Array<VoiceInfo>> {
   const { apiKey, userId } = APISettingsStore.getSettings();
   const options = {
     method: 'GET',

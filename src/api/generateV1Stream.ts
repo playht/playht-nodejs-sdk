@@ -1,8 +1,8 @@
+import type { V1ApiOptions } from './apiCommon';
 import axios from 'axios';
-import { V1ApiOptions } from './apiCommon';
-import generateV1Speech from './generateV1Speech';
+import { generateV1Speech } from './generateV1Speech';
 
-export default async function generateV1Stream(
+export async function generateV1Stream(
   content: string,
   voice: string,
   outputStream: NodeJS.WritableStream,

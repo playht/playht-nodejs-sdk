@@ -1,4 +1,4 @@
-import APISettingsStore from './api/APISettingsStore';
+import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 
@@ -83,6 +83,6 @@ export type VoicesFilter = {
   isCloned?: boolean;
 };
 
-export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
-  return await commonGetAllVoices(filters);
+export async function listVoices(/* filters?: VoicesFilter */): Promise<Array<VoiceInfo>> {
+  return await commonGetAllVoices(/*filters*/);
 }

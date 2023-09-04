@@ -1,6 +1,6 @@
+import type { V1ApiOptions } from './apiCommon';
 import axios from 'axios';
-import APISettingsStore from './APISettingsStore';
-import { V1ApiOptions } from './apiCommon';
+import { APISettingsStore } from './APISettingsStore';
 
 export type V1SpeechResult = {
   transcriptionId: string;
@@ -25,7 +25,7 @@ type GenerationJobResponse = {
 const WAIT_BETWEEN_STATUS_CHECKS_MS = 150;
 const MAX_STATUS_CHECKS_RETRIES = 10;
 
-export default async function generateV1Speech(
+export async function generateV1Speech(
   content: string,
   voice: string,
   options?: V1ApiOptions,
