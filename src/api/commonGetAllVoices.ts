@@ -4,8 +4,10 @@ import { availableV1Voices } from './availableV1Voices';
 import { availableV2Voices } from './availableV2Voices';
 
 export async function commonGetAllVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
-  const needV1Voices = !filters || !filters.voiceEngine || filters.voiceEngine.includes('Standard');
-  const needV2Voices = !filters || !filters.voiceEngine || filters.voiceEngine.includes('PlayHT1.0');
+  const needV1Voices =
+    filters?.isCloned !== true && (!filters || !filters.voiceEngine || filters.voiceEngine.includes('Standard'));
+  const needV2Voices =
+    filters?.isCloned !== true && (!filters || !filters.voiceEngine || filters.voiceEngine.includes('PlayHT1.0'));
   const needClonedVoices = !filters || filters.isCloned === undefined || filters.isCloned;
 
   const [v1Voices, v2Voices, clonedVoices] = await Promise.all([
@@ -20,16 +22,16 @@ export async function commonGetAllVoices(filters?: VoicesFilter): Promise<Array<
     if (filters?.name && filters.name !== voice.name) {
       return false;
     }
-    if (filters?.ageGroup && voice.ageGroup && !filters.ageGroup.includes(voice.ageGroup)) {
+    if (filters?.ageGroup && (!voice.ageGroup || !filters.ageGroup.includes(voice.ageGroup))) {
       return false;
     }
-    if (filters?.gender && voice.gender && filters.gender !== voice.gender) {
+    if (filters?.gender && filters.gender !== voice.gender) {
       return false;
     }
-    if (filters?.language && voice.language && !filters.language.includes(voice.language)) {
+    if (filters?.language && (!voice.language || !filters.language.includes(voice.language))) {
       return false;
     }
-    if (filters?.languageCode && voice.languageCode && !filters.languageCode.includes(voice.languageCode)) {
+    if (filters?.languageCode && (!voice.languageCode || !filters.languageCode.includes(voice.languageCode))) {
       return false;
     }
     if (filters?.isCloned !== undefined && voice.isCloned !== filters.isCloned) {
