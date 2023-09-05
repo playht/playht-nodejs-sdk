@@ -1004,7 +1004,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playht/playht-nodejs-sdk@workspace:., @playht/playht-nodejs-sdk@workspace:^":
+"@playht/playht-nodejs-sdk@file:../::locator=play-api-example%40workspace%3Aexample":
+  version: 0.0.4
+  resolution: "@playht/playht-nodejs-sdk@file:../#../::hash=d666a3&locator=play-api-example%40workspace%3Aexample"
+  dependencies:
+    axios: ^1.4.0
+  checksum: e50027341971b94f70c02c8c76accde56096d33e1e5a7c40a8b5f722136639e203da0a04157a2deccc0a35263030362737b46b62c25071967653f0bc69ad1bbf
+  languageName: node
+  linkType: hard
+
+"@playht/playht-nodejs-sdk@workspace:.":
   version: 0.0.0-use.local
   resolution: "@playht/playht-nodejs-sdk@workspace:."
   dependencies:
@@ -5150,7 +5159,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "play-api-example@workspace:example"
   dependencies:
-    "@playht/playht-nodejs-sdk": "workspace:^"
+    "@playht/playht-nodejs-sdk": "file:../"
     "@types/express": ^4.17.17
     "@types/node": ^20.5.9
     "@typescript-eslint/eslint-plugin": ^6.4.1

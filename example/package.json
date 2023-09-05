@@ -8,7 +8,7 @@
     "lint": "prettier --write . && cd .. && eslint --ext .ts ./example/src --fix && cd example && tsc --noEmit"
   },
   "dependencies": {
-    "@playht/playht-nodejs-sdk": "workspace:^",
+    "@playht/playht-nodejs-sdk": "file:../",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "node-fetch": "^2"
@@ -18,7 +18,6 @@
     "@types/node": "^20.5.9",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "@typescript-eslint/parser": "^6.4.1",
-    "esbuild": "^0.19.2",
     "eslint": "^8.47.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.1",
