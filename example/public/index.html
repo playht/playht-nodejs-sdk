@@ -109,12 +109,11 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
     <input type="text" id="voiceName" placeholder="Enter voice name" />
     <br /><br />
 
-    <label for="audioFile">Audio File:</label>
+    <label for="audioFile">MP3 audio File:</label>
     <input type="file" id="audioFile" />
     <br /><br />
 
     <button onclick="uploadFile()">Upload</button>
-    <button id="useClonedButton" onclick="useClonedVoice()" disabled>Use Cloned Voice</button>
 
     <script>
       let clonedVoiceId = null;
@@ -153,23 +152,14 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
             if (!clonedVoiceId) {
               throw new Error('No voice ID returned.');
             }
-            const useClonedButton = document.getElementById('useClonedButton');
-            useClonedButton.disabled = false;
-            alert(`Cloned voice ${voiceName} created successfully! Click "Use Cloned Voice" to use it in the examples above.`);
+            voiceId = clonedVoiceId;
+            voiceEngine = clonedVoiceEngine;
+            alert(`Cloned voice ${voiceName} created successfully!\nThe generate buttons above will use it.`);
           })
           .catch((error) => {
             console.error('Error uploading file:', error);
             alert('Error uploading file.');
           });
-      }
-      function useClonedVoice() {
-        if (!clonedVoiceId || !clonedVoiceEngine) {
-          alert('Please upload a file first.');
-          return;
-        }
-        voiceId = clonedVoiceId;
-        voiceEngine = clonedVoiceEngine;
-        alert('Cloned voice selected. Use it in the examples above.');
       }
     </script>
   </body>
