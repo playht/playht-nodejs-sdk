@@ -29,6 +29,8 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
     <audio id="streamAudioPlayer" controls>Your browser does not support the audio element.</audio>
 
     <script>
+      let voiceId = 'florencio';
+      let voiceEngine = 'PlayHT1.0'
       function generateClick(event) {
         const text = document.getElementById('textToGenerate').value;
         requestGeneration('/textToSpeech', text, 'audioPlayer');
@@ -46,6 +48,8 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             text,
+            voiceId,
+            voiceEngine,
           }),
           method: 'POST',
         };
