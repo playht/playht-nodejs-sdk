@@ -1,4 +1,4 @@
-import type { VoiceInfo } from '..';
+import type { VoiceAgeGroup, VoiceInfo } from '..';
 import axios from 'axios';
 import { APISettingsStore } from './APISettingsStore';
 
@@ -59,7 +59,7 @@ export async function availableV2Voices(): Promise<Array<VoiceInfo>> {
 
   return _v2VoicesCache;
 }
-function toAgeGroup(age?: 'old' | 'adult' | 'youth' | null): 'youth' | 'adult' | 'senior' | undefined {
+function toAgeGroup(age?: 'old' | 'adult' | 'youth' | null): VoiceAgeGroup | undefined {
   if (!age) {
     return undefined;
   }
