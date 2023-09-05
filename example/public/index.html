@@ -31,6 +31,7 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
     <script>
       let voiceId = 'florencio';
       let voiceEngine = 'PlayHT1.0'
+
       function generateClick(event) {
         const text = document.getElementById('textToGenerate').value;
         requestGeneration('/textToSpeech', text, 'audioPlayer');
@@ -40,6 +41,8 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
         const text = document.getElementById('streamTextToGenerate').value;
         const searchParams = new URLSearchParams();
         searchParams.set('text', text);
+        searchParams.set('voiceId', voiceId);
+        searchParams.set('voiceEngine', voiceEngine);
         playUrl(`/streamSpeech?${searchParams.toString()}`, 'streamAudioPlayer');
       }
 
@@ -111,8 +114,12 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
     <br /><br />
 
     <button onclick="uploadFile()">Upload</button>
+    <button id="useClonedButton" onclick="useClonedVoice()" disabled>Use Cloned Voice</button>
 
     <script>
+      let clonedVoiceId = null;
+      let clonedVoiceEngine = null;
+
       function uploadFile() {
         const fileInput = document.getElementById('audioFile');
         const file = fileInput.files[0];
@@ -141,12 +148,28 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
           .then((response) => response.json())
           .then((data) => {
             console.log('API Response:', data);
-            alert('File uploaded successfully!');
+            clonedVoiceEngine = data.voiceEngine;
+            clonedVoiceId = data.id;
+            if (!clonedVoiceId) {
+              throw new Error('No voice ID returned.');
+            }
+            const useClonedButton = document.getElementById('useClonedButton');
+            useClonedButton.disabled = false;
+            alert(`Cloned voice ${voiceName} created successfully! Click "Use Cloned Voice" to use it in the examples above.`);
           })
           .catch((error) => {
             console.error('Error uploading file:', error);
             alert('Error uploading file.');
           });
+      }
+      function useClonedVoice() {
+        if (!clonedVoiceId || !clonedVoiceEngine) {
+          alert('Please upload a file first.');
+          return;
+        }
+        voiceId = clonedVoiceId;
+        voiceEngine = clonedVoiceEngine;
+        alert('Cloned voice selected. Use it in the examples above.');
       }
     </script>
   </body>
