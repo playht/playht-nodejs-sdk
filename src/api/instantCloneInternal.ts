@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { APISettingsStore } from './APISettingsStore';
+import { convertResponseToVoiceInfo } from './availableClonedVoices';
 
 const API_URL = 'https://play.ht/api/v2/cloned-voices/instant';
 
@@ -19,9 +20,7 @@ export async function instantCloneFromFileInternal(voiceName: string, fileBlob: 
         'content-type': 'multipart/form-data',
       },
     })
-    .then(({ data }) => {
-      return data;
-    })
+    .then(({ data }) => convertResponseToVoiceInfo(data))
     .catch(function (error) {
       throw new Error(error);
     });
