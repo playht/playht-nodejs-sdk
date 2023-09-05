@@ -95,5 +95,55 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
         });
       }
     </script>
+
+    <hr />
+    <h2>Clone a voice</h2>
+    <label for="voiceName">Voice Name:</label>
+    <input type="text" id="voiceName" placeholder="Enter voice name" />
+    <br /><br />
+
+    <label for="audioFile">Audio File:</label>
+    <input type="file" id="audioFile" />
+    <br /><br />
+
+    <button onclick="uploadFile()">Upload</button>
+
+    <script>
+      function uploadFile() {
+        const fileInput = document.getElementById('audioFile');
+        const file = fileInput.files[0];
+
+        const voiceNameInput = document.getElementById('voiceName');
+        const voiceName = voiceNameInput.value;
+
+        if (!file) {
+          alert('Please select a file before uploading.');
+          return;
+        }
+
+        if (!voiceName) {
+          alert('Please enter a voice name.');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('audioFile', file);
+        formData.append('voiceName', voiceName);
+
+        fetch('/uploadInstantClone', {
+          method: 'POST',
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log('API Response:', data);
+            alert('File uploaded successfully!');
+          })
+          .catch((error) => {
+            console.error('Error uploading file:', error);
+            alert('Error uploading file.');
+          });
+      }
+    </script>
   </body>
 </html>

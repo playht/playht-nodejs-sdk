@@ -1,10 +1,12 @@
 /* eslint-disable no-process-env */
 import express from 'express';
 import dotenv from 'dotenv';
-import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import multer, { memoryStorage } from 'multer';
+import * as PlayHTAPI from '../../dist';
 import { textToSpeech } from './textToSpeech';
 import { streamSpeech } from './streamSpeech';
 import { listVoices } from './listVoices';
+import { uploadInstantClone } from './uploadInstantClone';
 
 dotenv.config();
 PlayHTAPI.init({
@@ -22,11 +24,16 @@ PlayHTAPI.init({
 
 const app = express();
 
+// Configure multer to store the uploaded file in memory
+const storage = memoryStorage();
+const upload = multer({ storage: storage });
+
 app.use(express.json());
 
 app.post('/textToSpeech', textToSpeech);
 app.get('/listVoices', listVoices);
 app.get('/streamSpeech', streamSpeech);
+app.post('/uploadInstantClone', upload.single('audioFile'), uploadInstantClone);
 app.use('/', express.static('public'));
 
 app.listen(3000, () => {

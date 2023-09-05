@@ -33,7 +33,7 @@ module.exports = {
     'import/no-duplicates': 'error',
     'import/no-self-import': 'error',
     'import/no-cycle': 'error',
-    'import/no-extraneous-dependencies': 'error',
+    'import/no-extraneous-dependencies': ['error', { devDependencies: true, packageDir: ['./example', './'] }],
     'import/no-import-module-exports': 'error',
     'import/prefer-default-export': 'off',
     'import/no-default-export': 'error',

@@ -8,9 +8,11 @@
     "lint": "prettier --write . && cd .. && eslint --ext .ts ./example/src --fix && cd example && tsc --noEmit"
   },
   "dependencies": {
-    "@playht/playht-nodejs-sdk": "file:../",
+    "@playht/playht-nodejs-sdk": "link:..",
+    "@types/multer": "^1.4.7",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
     "node-fetch": "^2"
   },
   "devDependencies": {

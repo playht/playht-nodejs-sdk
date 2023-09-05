@@ -1,6 +1,7 @@
 import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
+import { instantCloneFromFileInternal } from './api/instantCloneInternal';
 
 export type VoiceEngine = 'Standard' | 'PlayHT1.0';
 export type InputType = 'ssml' | 'plain';
@@ -93,4 +94,8 @@ export async function streamSpeech(
 
 export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
   return await commonGetAllVoices(filters);
+}
+
+export async function instantCloneFromFile(voiceName: string, fileBlob: Buffer, contentType = 'audio/mpeg') {
+  return await instantCloneFromFileInternal(voiceName, fileBlob, contentType);
 }
