@@ -96,6 +96,6 @@ export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInf
   return await commonGetAllVoices(filters);
 }
 
-export async function instantCloneFromFile(voiceName: string, fileBlob: Buffer, contentType = 'audio/mpeg') {
-  return await instantCloneFromFileInternal(voiceName, fileBlob, contentType);
+export async function instantCloneFromFile(voiceName: string, fileBlob: Buffer, mimeType?: string) {
+  return await instantCloneFromFileInternal(voiceName, fileBlob, mimeType);
 }
