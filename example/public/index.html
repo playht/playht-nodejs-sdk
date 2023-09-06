@@ -30,7 +30,7 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
 
     <script>
       let voiceId = 'florencio';
-      let voiceEngine = 'PlayHT1.0'
+      let voiceEngine = 'PlayHT1.0';
 
       function generateClick(event) {
         const text = document.getElementById('textToGenerate').value;
@@ -144,9 +144,14 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
           method: 'POST',
           body: formData,
         })
-          .then((response) => response.json())
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error(response.statusText);
+            }
+          })
           .then((data) => {
-            console.log('API Response:', data);
             clonedVoiceEngine = data.voiceEngine;
             clonedVoiceId = data.id;
             if (!clonedVoiceId) {
@@ -157,8 +162,7 @@ The clear, babbling stream meandered through the lush, sunlit meadow, creating a
             alert(`Cloned voice ${voiceName} created successfully!\nThe generate buttons above will use it.`);
           })
           .catch((error) => {
-            console.error('Error uploading file:', error);
-            alert('Error uploading file.');
+            alert('Error uploading file. ' + error);
           });
       }
     </script>

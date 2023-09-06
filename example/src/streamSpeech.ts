@@ -15,7 +15,7 @@ export async function streamSpeech(req: Request, res: Response, next: NextFuncti
     res.status(400).send('Invalid voice params');
     return next();
   }
-  
+
   res.setHeader('Content-Type', 'audio/mpeg');
   try {
     // Call the API
