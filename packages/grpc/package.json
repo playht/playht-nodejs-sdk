@@ -1,0 +1,53 @@
+{
+    "name": "playht",
+    "description": "The official Node.js / TypeScript library for the PlayHT API",
+    "version": "0.1.0",
+    "homepage": "https://github.com/playht/playht-node",
+    "license": "BSD-3-Clause",
+    "main": "lib/playht.js",
+    "module": "lib/playht.m.js",
+    "types": "lib/playht.d.ts",
+    "sideEffects": false,
+    "files": [
+        "lib/*",
+        "src/*"
+    ],
+    "scripts": {
+        "prepare": "make"
+    },
+    "dependencies": {
+        "@grpc/grpc-js": "^1.9.2",
+        "cross-fetch": "^4.0.0",
+        "protobufjs": "^7.2.5",
+        "tslib": "^2.1.0"
+    },
+    "devDependencies": {
+        "@rollup/plugin-alias": "^5.0.0",
+        "@rollup/plugin-commonjs": "^25.0.4",
+        "@rollup/plugin-json": "^6.0.0",
+        "@rollup/plugin-node-resolve": "^15.0.1",
+        "@rollup/plugin-typescript": "^11.1.3",
+        "@rollup/plugin-virtual": "^3.0.1",
+        "@types/chai": "^4.3.1",
+        "@types/mocha": "^10.0.0",
+        "@types/node": "^20.5.7",
+        "@typescript-eslint/eslint-plugin": "^6.5.0",
+        "@typescript-eslint/parser": "^6.5.0",
+        "chai": "^4.3.4",
+        "eslint": "^8.13.0",
+        "eslint-config-prettier": "^9.0.0",
+        "eslint-plugin-prettier": "^5.0.0",
+        "gh-pages": "^6.0.0",
+        "mocha": "^10.0.0",
+        "nyc": "^15.1.0",
+        "prettier": "^3.0.3",
+        "protobufjs-cli": "^1.1.2",
+        "rollup": "^3.2.3",
+        "rollup-plugin-dts": "^5.0.0",
+        "rollup-plugin-terser": "^7.0.2",
+        "ts-node": "^10.1.0",
+        "tsconfig-paths": "^4.0.0",
+        "typedoc": "^0.25.0",
+        "typescript": "^5.2.2"
+    }
+}
