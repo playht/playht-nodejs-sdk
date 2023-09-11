@@ -4,14 +4,14 @@ import * as PlayHTAPI from '../../dist';
 export async function streamSpeech(req: Request, res: Response, next: NextFunction) {
   const { text } = req.query;
   const voice = req.query.voiceId || 'florencio';
-  const voiceEngine = req.query.VoiceEngine || 'PlayHT1.0';
+  const voiceEngine = req.query.voiceEngine || 'PlayHT1.0';
 
   if (!text || typeof text !== 'string') {
     res.status(400).send('Text to generate not provided in the request');
     return next();
   }
 
-  if (typeof voice !== 'string' || (voiceEngine !== 'PlayHT1.0' && voiceEngine !== 'Standard')) {
+  if (typeof voice !== 'string' || (voiceEngine !== 'PlayHT2.0' && voiceEngine !== 'PlayHT1.0' && voiceEngine !== 'Standard')) {
     res.status(400).send('Invalid voice params');
     return next();
   }
