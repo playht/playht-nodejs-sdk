@@ -1,12 +1,13 @@
 import type { AxiosRequestConfig } from 'axios';
 import type { V2ApiOptions } from './apiCommon';
+import { Writable } from 'node:stream';
 import axios from 'axios';
 import { APISettingsStore } from './APISettingsStore';
 
 export async function generateV2Stream(
   text: string,
   voice: string,
-  outputStream: NodeJS.WritableStream,
+  outputStream: Writable,
   options?: V2ApiOptions,
 ): Promise<void> {
   const { apiKey, userId } = APISettingsStore.getSettings();

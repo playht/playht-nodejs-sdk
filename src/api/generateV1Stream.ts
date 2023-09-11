@@ -1,11 +1,12 @@
 import type { V1ApiOptions } from './apiCommon';
+import { Writable } from 'node:stream';
 import axios from 'axios';
 import { generateV1Speech } from './generateV1Speech';
 
 export async function generateV1Stream(
   content: string,
   voice: string,
-  outputStream: NodeJS.WritableStream,
+  outputStream: Writable,
   options?: V1ApiOptions,
 ): Promise<void> {
   const generated = await generateV1Speech(content, voice, options);

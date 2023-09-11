@@ -1,9 +1,11 @@
 import type { OutputFormat, SpeechOptions, SpeechOutput, OutputQuality } from '..';
+import { Writable } from 'node:stream';
 import { APISettingsStore } from './APISettingsStore';
 import { generateV1Speech } from './generateV1Speech';
 import { generateV1Stream } from './generateV1Stream';
 import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
+import { generateV3Stream } from './generateV3Stream';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -49,7 +51,7 @@ export async function commonGenerateSpeech(input: string, optionsInput?: SpeechO
 
 export async function commonGenerateStream(
   input: string,
-  outputStream: NodeJS.WritableStream,
+  outputStream: Writable,
   optionsInput?: SpeechOptions,
 ): Promise<void> {
   const options = addDefaultOptions(optionsInput);
@@ -57,6 +59,9 @@ export async function commonGenerateStream(
   if (options.voiceEngine === 'Standard') {
     const v1Options = toV1Options(options);
     return await generateV1Stream(input, options.voiceId, outputStream, v1Options);
+  } else if (options.voiceEngine === 'PlayHT2.0') {
+    const v2Options = toV2Options(options);
+    return await generateV3Stream(input, options.voiceId, outputStream, v2Options);
   } else {
     const v2Options = toV2Options(options);
     return await generateV2Stream(input, options.voiceId, outputStream, v2Options);
