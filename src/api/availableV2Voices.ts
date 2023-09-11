@@ -1,4 +1,4 @@
-import type { VoiceAgeGroup, VoiceInfo } from '..';
+import type { VoiceAgeGroup, VoiceEngine, VoiceInfo } from '..';
 import axios from 'axios';
 import { APISettingsStore } from './APISettingsStore';
 
@@ -17,6 +17,7 @@ export type V2APIVoiceInfo = {
   texture?: string | null;
   is_cloned?: boolean;
   type?: string;
+  voiceEngine?: VoiceEngine;
 };
 
 let _v2VoicesCache: Array<VoiceInfo>;
@@ -41,7 +42,7 @@ export async function availableV2Voices(): Promise<Array<VoiceInfo>> {
     .request(options)
     .then(({ data }: { data: Array<V2APIVoiceInfo> }) =>
       data.map((v2Voice) => ({
-        voiceEngine: 'PlayHT1.0' as const,
+        voiceEngine: v2Voice.voiceEngine || ('PlayHT1.0' as const),
         id: v2Voice.id,
         name: v2Voice.name,
         sampleUrl: v2Voice.sample ? v2Voice.sample : undefined,
@@ -56,9 +57,9 @@ export async function availableV2Voices(): Promise<Array<VoiceInfo>> {
     .catch(function (error) {
       throw new Error(error);
     });
-
   return _v2VoicesCache;
 }
+
 function toAgeGroup(age?: 'old' | 'adult' | 'youth' | null): VoiceAgeGroup | undefined {
   if (!age) {
     return undefined;

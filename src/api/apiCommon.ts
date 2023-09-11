@@ -29,14 +29,7 @@ type SpeechOptionsWithVoiceID = SpeechOptions & { voiceId: string };
 export async function commonGenerateSpeech(input: string, optionsInput?: SpeechOptions): Promise<SpeechOutput> {
   const options = addDefaultOptions(optionsInput);
 
-  if (options.voiceEngine === 'PlayHT1.0') {
-    const v2Options = toV2Options(options);
-    const result = await generateV2Speech(input, options.voiceId, v2Options);
-    return {
-      audioUrl: result.url,
-      generationId: result.id,
-    };
-  } else if (options.voiceEngine === 'Standard') {
+  if (options.voiceEngine === 'Standard') {
     const v1Options = toV1Options(options);
     const result = await generateV1Speech(input, options.voiceId, v1Options);
     return {
@@ -44,8 +37,14 @@ export async function commonGenerateSpeech(input: string, optionsInput?: SpeechO
       generationId: result.transcriptionId,
       message: result.message,
     };
+  } else {
+    const v2Options = toV2Options(options);
+    const result = await generateV2Speech(input, options.voiceId, v2Options);
+    return {
+      audioUrl: result.url,
+      generationId: result.id,
+    };
   }
-  throw new Error('Invalid engine.');
 }
 
 export async function commonGenerateStream(
@@ -55,14 +54,13 @@ export async function commonGenerateStream(
 ): Promise<void> {
   const options = addDefaultOptions(optionsInput);
 
-  if (options.voiceEngine === 'PlayHT1.0') {
-    const v2Options = toV2Options(options);
-    return await generateV2Stream(input, options.voiceId, outputStream, v2Options);
-  } else if (options.voiceEngine === 'Standard') {
+  if (options.voiceEngine === 'Standard') {
     const v1Options = toV1Options(options);
     return await generateV1Stream(input, options.voiceId, outputStream, v1Options);
+  } else {
+    const v2Options = toV2Options(options);
+    return await generateV2Stream(input, options.voiceId, outputStream, v2Options);
   }
-  throw new Error('Invalid engine.');
 }
 
 export function qualityToPreset(quality?: OutputQuality): Preset {
@@ -100,8 +98,8 @@ function addDefaultOptions(options?: SpeechOptions): SpeechOptionsWithVoiceID {
 }
 
 function toV2Options(options: SpeechOptionsWithVoiceID): V2ApiOptions {
-  if (options.voiceEngine !== 'PlayHT1.0') {
-    throw new Error('Invalid engine. Expected PlayHT1.0');
+  if (options.voiceEngine !== 'PlayHT1.0' && options.voiceEngine !== 'PlayHT2.0') {
+    throw new Error("Invalid engine. Expected 'PlayHT1.0' or 'PlayHT2.0'");
   }
   return {
     quality: options.quality,
@@ -115,7 +113,7 @@ function toV2Options(options: SpeechOptionsWithVoiceID): V2ApiOptions {
 
 function toV1Options(options: SpeechOptionsWithVoiceID): V1ApiOptions {
   if (options.voiceEngine !== 'Standard') {
-    throw new Error('Invalid engine. Expected PlayHT1.0');
+    throw new Error("Invalid engine. Expected 'Standard'");
   }
   return {
     narrationStyle: options.narrationStyle,

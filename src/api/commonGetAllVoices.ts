@@ -7,7 +7,11 @@ export async function commonGetAllVoices(filters?: VoicesFilter): Promise<Array<
   const needV1Voices =
     filters?.isCloned !== true && (!filters || !filters.voiceEngine || filters.voiceEngine.includes('Standard'));
   const needV2Voices =
-    filters?.isCloned !== true && (!filters || !filters.voiceEngine || filters.voiceEngine.includes('PlayHT1.0'));
+    filters?.isCloned !== true &&
+    (!filters ||
+      !filters.voiceEngine ||
+      filters.voiceEngine.includes('PlayHT1.0') ||
+      filters.voiceEngine.includes('PlayHT2.0'));
   const needClonedVoices = !filters || filters.isCloned === undefined || filters.isCloned;
 
   const [v1Voices, v2Voices, clonedVoices] = await Promise.all([

@@ -3,7 +3,7 @@ import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { instantCloneFromFileInternal } from './api/instantCloneInternal';
 
-export type VoiceEngine = 'Standard' | 'PlayHT1.0';
+export type VoiceEngine = 'Standard' | 'PlayHT1.0' | 'PlayHT2.0';
 export type InputType = 'ssml' | 'plain';
 export type OutputQuality = 'draft' | 'low' | 'medium' | 'high' | 'premium';
 export type OutputFormat = 'mp3' | 'ogg' | 'wav' | 'flac' | 'mulaw';
@@ -59,7 +59,17 @@ export type PlayHT10EngineOptions = {
   temperature?: number;
 };
 
+export type PlayHT20EngineOptions = {
+  voiceEngine: 'PlayHT2.0';
+  inputType?: 'plain';
+  outputFormat?: OutputFormat;
+  sampleRate?: number;
+  seed?: number;
+  temperature?: number;
+};
+
 export type SpeechOptions =
+  | (SharedSpeechOptions & PlayHT20EngineOptions)
   | (SharedSpeechOptions & PlayHT10EngineOptions)
   | (SharedSpeechOptions & StandardEngineOptions);
 
