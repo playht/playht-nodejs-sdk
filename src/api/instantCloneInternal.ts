@@ -1,3 +1,4 @@
+import type { VoiceInfo } from '..';
 import axios from 'axios';
 import { fileTypeFromBuffer } from 'file-type';
 import { APISettingsStore } from './APISettingsStore';
@@ -5,7 +6,11 @@ import { convertResponseToVoiceInfo } from './availableClonedVoices';
 
 const API_URL = 'https://play.ht/api/v2/cloned-voices/instant';
 
-export async function instantCloneFromFileInternal(voiceName: string, fileBlob: Buffer, mimeType?: string) {
+export async function instantCloneFromFileInternal(
+  voiceName: string,
+  fileBlob: Buffer,
+  mimeType?: string,
+): Promise<VoiceInfo> {
   const { apiKey, userId } = APISettingsStore.getSettings();
 
   if (!mimeType) {
