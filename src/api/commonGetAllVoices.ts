@@ -26,6 +26,9 @@ export async function commonGetAllVoices(filters?: VoicesFilter): Promise<Array<
     if (filters?.name && filters.name !== voice.name) {
       return false;
     }
+    if (filters?.voiceEngine && !filters.voiceEngine.includes(voice.voiceEngine)) {
+      return false;
+    }
     if (filters?.ageGroup && (!voice.ageGroup || !filters.ageGroup.includes(voice.ageGroup))) {
       return false;
     }
