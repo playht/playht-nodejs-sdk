@@ -93,7 +93,7 @@ For more speech generation options, see [Generating Speech Options](#generating-
 
 Both `generateSpeech()`  and `streamSpeech()` methods accept an optional `options` parameter. You can use it to generate audio with different voices, AI models, output file formats and much more. The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports 3 different types of models: 'PlayHT2.0', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](https://github.com/playht/playht-nodejs-sdk/blob/main/src/index.ts).
 
-To generate an audio file using a 'PlayHT2.0' voice with options:
+To generate an audio file using a PlayHT 2.0 voice with options:
 
 ```ts
 import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
@@ -116,7 +116,7 @@ const {audioUrl} = generated;
 console.log('The url for the audio file is', audioUrl);
 ```
 
-If you want a 'PlayHT1.0' voice instead:
+If you want a PlayHT 1.0 voice instead:
 
 ```ts
 import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
@@ -176,9 +176,21 @@ const voices = await PlayHTAPI.listVoices();
 console.log(JSON.stringify(voices, null, 2));
 ```
 
-The `listVoices()` method also takes in an optional parameter to filter the voices by different fields.
+The `listVoices()` method also takes in an optional parameter to filter the voices by different fields. To get all stock female PlayHT 2.0 voices:
 
-TODO
+```ts
+import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+
+// Fetch stock female PlayHT 2.0 voices
+const voices = await PlayHTAPI.listVoices({
+  gender: 'female',
+  voiceEngine: ['PlayHT2.0'],
+  isCloned: false,
+});
+
+// Output them to the console.
+console.log(JSON.stringify(voices, null, 2));
+```
 
 ## Instant Clone a Voice
 
