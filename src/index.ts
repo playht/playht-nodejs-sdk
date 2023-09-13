@@ -301,7 +301,7 @@ export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInf
 }
 
 /**
- * Creates a new voice by cloning from an audio file.
+ * Creates a new voice by cloning from audio file data.
  *
  * @async
  * @param {string} voiceName - The name for the new voice.
