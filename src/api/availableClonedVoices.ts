@@ -12,7 +12,7 @@ let _clonedVoicesCache: Array<VoiceInfo>;
 
 export function convertResponseToVoiceInfo(voice: ClonedAPIVoiceInfo): VoiceInfo {
   return {
-    voiceEngine: 'PlayHT1.0' as const,
+    voiceEngine: 'PlayHT2.0' as const,
     isCloned: true,
     id: voice.id,
     name: voice.name,
