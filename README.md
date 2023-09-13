@@ -75,10 +75,10 @@ To stream audio from text using the default settings, call the `streamSpeech()` 
 
 ```ts
 import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
-import { createWriteStream } from 'node:fs';
+import fs from 'fs';
 
 // Create a file stream
-const file = createWriteStream('hello-playht.mp3');
+const file = fs.createWriteStream('hello-playht.mp3');
 
 // Stream audio from text
 await PlayHTAPI.streamSpeech('This sounds very realistic.', file);
@@ -194,7 +194,26 @@ console.log(JSON.stringify(voices, null, 2));
 
 ## Instant Clone a Voice
 
-TODO
+You can use the `instantCloneFromBuffer()` to create a cloned voice from audio data. The cloned voice is ready to be used straight away.
+
+```ts
+import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import fs from 'fs';
+
+// Load an audio file
+const fileBlob = fs.readFileSync('voice-to-clone.mp3');
+
+// Clone the voice
+const clonedVoice = await PlayHTAPI.instantCloneFromBuffer('dolly', fileBlob);
+
+// Display the cloned voice information in the console
+console.log('Cloned voice info\n', JSON.stringify(clonedVoice, null, 2));
+
+// Use the cloned voice straight away to generate an audio file
+const file = fs.createWriteStream('hello-dolly.mp3');
+await PlayHTAPI.streamSpeech('Cloned voices sound realistic too.', file);
+await new Promise(resolve => file.on('finish', resolve));
+```
 
 # Example server
 
