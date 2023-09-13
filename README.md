@@ -78,13 +78,13 @@ import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
 import fs from 'fs';
 
 // Create a file stream
-const file = fs.createWriteStream('hello-playht.mp3');
+const fileStream = fs.createWriteStream('hello-playht.mp3');
 
 // Stream audio from text
-await PlayHTAPI.streamSpeech('This sounds very realistic.', file);
+await PlayHTAPI.streamSpeech('This sounds very realistic.', fileStream);
 
 // Wait for the file to finish writing
-await new Promise(resolve => file.on('finish', resolve));
+await new Promise(resolve => fileStream.on('finish', resolve));
 ```
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options) below.
@@ -210,9 +210,12 @@ const clonedVoice = await PlayHTAPI.instantCloneFromBuffer('dolly', fileBlob);
 console.log('Cloned voice info\n', JSON.stringify(clonedVoice, null, 2));
 
 // Use the cloned voice straight away to generate an audio file
-const file = fs.createWriteStream('hello-dolly.mp3');
-await PlayHTAPI.streamSpeech('Cloned voices sound realistic too.', file);
-await new Promise(resolve => file.on('finish', resolve));
+const fileStream = fs.createWriteStream('hello-dolly.mp3');
+await PlayHTAPI.streamSpeech('Cloned voices sound realistic too.', fileStream, {
+  voiceEngine: clonedVoice.voiceEngine,
+  voiceId: clonedVoice.id,
+});
+await new Promise(resolve => fileStream.on('finish', resolve));
 ```
 
 # Example server
