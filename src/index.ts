@@ -2,7 +2,7 @@ import { Writable } from 'node:stream';
 import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
-import { instantCloneFromFileInternal } from './api/instantCloneInternal';
+import { instantCloneFromBufferInternal } from './api/instantCloneInternal';
 
 /**
  * Type representing the various voice engines that can be used for speech synthesis.
@@ -309,6 +309,10 @@ export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInf
  * @param {string} [mimeType] - Optional MIME type for the source audio file.
  * @returns {Promise<VoiceInfo>} - A promise that resolves to a voice information object for the generated voice.
  */
-export async function instantCloneFromFile(voiceName: string, fileBlob: Buffer, mimeType?: string): Promise<VoiceInfo> {
-  return await instantCloneFromFileInternal(voiceName, fileBlob, mimeType);
+export async function instantCloneFromBuffer(
+  voiceName: string,
+  fileBlob: Buffer,
+  mimeType?: string,
+): Promise<VoiceInfo> {
+  return await instantCloneFromBufferInternal(voiceName, fileBlob, mimeType);
 }

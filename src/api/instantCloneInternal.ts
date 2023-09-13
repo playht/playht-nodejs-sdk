@@ -6,7 +6,7 @@ import { convertResponseToVoiceInfo } from './availableClonedVoices';
 
 const API_URL = 'https://play.ht/api/v2/cloned-voices/instant';
 
-export async function instantCloneFromFileInternal(
+export async function instantCloneFromBufferInternal(
   voiceName: string,
   fileBlob: Buffer,
   mimeType?: string,

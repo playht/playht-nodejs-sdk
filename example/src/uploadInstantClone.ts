@@ -15,7 +15,7 @@ export async function uploadInstantClone(req: Request, res: Response) {
 
   try {
     // Call the API
-    const clonedVoice = await PlayHTAPI.instantCloneFromFile(voiceName, fileBuffer);
+    const clonedVoice = await PlayHTAPI.instantCloneFromBuffer(voiceName, fileBuffer);
 
     res.status(200).json(clonedVoice);
   } catch (error: any) {
