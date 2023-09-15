@@ -1,5 +1,5 @@
 {
-  "name": "play-api-example",
+  "name": "play-sdk-example",
   "version": "1.0.0",
   "description": "Example usage of PlayHT SDK",
   "scripts": {
@@ -8,7 +8,7 @@
     "lint": "prettier --write . && cd .. && eslint --ext .ts ./example/src --fix && cd example && tsc --noEmit"
   },
   "dependencies": {
-    "@playht/playht-nodejs-sdk": "link:..",
+    "@playht/playht": "0.0.4",
     "@types/multer": "^1.4.7",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -27,5 +27,8 @@
     "prettier": "3.0.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
+  },
+  "resolutions": {
+    "@playht/playht": "portal:../playht"
   }
 }

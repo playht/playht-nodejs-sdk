@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import * as PlayHTAPI from '../../dist';
+import * as PlayHTAPI from '@playht/playht';
 
 export async function streamSpeech(req: Request, res: Response, next: NextFunction) {
   const { text } = req.query;
@@ -11,7 +11,10 @@ export async function streamSpeech(req: Request, res: Response, next: NextFuncti
     return next();
   }
 
-  if (typeof voice !== 'string' || (voiceEngine !== 'PlayHT2.0' && voiceEngine !== 'PlayHT1.0' && voiceEngine !== 'Standard')) {
+  if (
+    typeof voice !== 'string' ||
+    (voiceEngine !== 'PlayHT2.0' && voiceEngine !== 'PlayHT1.0' && voiceEngine !== 'Standard')
+  ) {
     res.status(400).send('Invalid voice params');
     return next();
   }

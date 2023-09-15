@@ -2,7 +2,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import multer, { memoryStorage } from 'multer';
-import * as PlayHTAPI from '../../dist';
+import * as PlayHTAPI from '@playht/playht';
 import { textToSpeech } from './textToSpeech';
 import { streamSpeech } from './streamSpeech';
 import { listVoices } from './listVoices';

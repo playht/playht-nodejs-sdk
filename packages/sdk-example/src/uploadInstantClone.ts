@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as PlayHTAPI from '../../dist';
+import * as PlayHTAPI from '@playht/playht';
 
 export async function uploadInstantClone(req: Request, res: Response) {
   if (!req.file) {
