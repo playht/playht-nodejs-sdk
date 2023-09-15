@@ -60,7 +60,7 @@ import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
 const generated = await PlayHTAPI.generateSpeech('Computers can speak now!');
 
 // Grab the generated file URL
-const {audioUrl} = generated;
+const { audioUrl } = generated;
 
 console.log('The url for the audio file is', audioUrl);
 ```
@@ -84,14 +84,14 @@ const fileStream = fs.createWriteStream('hello-playht.mp3');
 await PlayHTAPI.streamSpeech('This sounds very realistic.', fileStream);
 
 // Wait for the file to finish writing
-await new Promise(resolve => fileStream.on('finish', resolve));
+await new Promise((resolve) => fileStream.on('finish', resolve));
 ```
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options) below.
 
 ## Generating Speech Options
 
-Both `generateSpeech()`  and `streamSpeech()` methods accept an optional `options` parameter. You can use it to generate audio with different voices, AI models, output file formats and much more. The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports 3 different types of models: 'PlayHT2.0', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](https://github.com/playht/playht-nodejs-sdk/blob/main/src/index.ts).
+Both `generateSpeech()` and `streamSpeech()` methods accept an optional `options` parameter. You can use it to generate audio with different voices, AI models, output file formats and much more. The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports 3 different types of models: 'PlayHT2.0', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](https://github.com/playht/playht-nodejs-sdk/blob/main/src/index.ts).
 
 To generate an audio file using a PlayHT 2.0 voice with options:
 
@@ -111,7 +111,7 @@ const generated = await PlayHTAPI.generateSpeech(text, {
 });
 
 // Grab the generated file URL
-const {audioUrl} = generated;
+const { audioUrl } = generated;
 
 console.log('The url for the audio file is', audioUrl);
 ```
@@ -121,7 +121,7 @@ If you want a PlayHT 1.0 voice instead:
 ```ts
 import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
 
-const text = "Options are never enough.";
+const text = 'Options are never enough.';
 
 // Generate audio from text
 const generated = await PlayHTAPI.generateSpeech(text, {
@@ -134,7 +134,7 @@ const generated = await PlayHTAPI.generateSpeech(text, {
 });
 
 // Grab the generated file URL
-const {audioUrl} = generated;
+const { audioUrl } = generated;
 
 console.log('The url for the audio file is', audioUrl);
 ```
@@ -144,7 +144,7 @@ And an example with standard voice in Spanish:
 ```ts
 import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
 
-const text = "La inteligencia artificial puede hablar español.";
+const text = 'La inteligencia artificial puede hablar español.';
 
 // Generate audio from text
 const generated = await PlayHTAPI.generateSpeech(text, {
@@ -155,7 +155,7 @@ const generated = await PlayHTAPI.generateSpeech(text, {
 });
 
 // Grab the generated file URL
-const {audioUrl} = generated;
+const { audioUrl } = generated;
 
 console.log('The url for the audio file is', audioUrl);
 ```
@@ -204,7 +204,7 @@ import fs from 'fs';
 const fileBlob = fs.readFileSync('voice-to-clone.mp3');
 
 // Clone the voice
-const clonedVoice = await PlayHTAPI.instantCloneFromBuffer('dolly', fileBlob);
+const clonedVoice = await PlayHTAPI.instantCloneFromBuffer('dolly', fileBlob, 'male');
 
 // Display the cloned voice information in the console
 console.log('Cloned voice info\n', JSON.stringify(clonedVoice, null, 2));
@@ -215,7 +215,7 @@ await PlayHTAPI.streamSpeech('Cloned voices sound realistic too.', fileStream, {
   voiceEngine: clonedVoice.voiceEngine,
   voiceId: clonedVoice.id,
 });
-await new Promise(resolve => fileStream.on('finish', resolve));
+await new Promise((resolve) => fileStream.on('finish', resolve));
 ```
 
 # Example server
