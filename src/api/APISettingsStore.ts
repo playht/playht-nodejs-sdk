@@ -1,10 +1,7 @@
 import type { APISettingsInput, VoiceEngine } from '..';
 
-const DEFAULT_VOICE_ID =
-  's3://mockingbird-prod/larry_vo_narrative_4bd5c1bd-f662-4a38-b5b9-76563f7b92ec/voices/speaker/manifest.json';
-const DEFAULT_VOICE_ENGINE: VoiceEngine = 'PlayHT1.0';
-
-// type Overwrite<T, U> = Pick<T, Exclude<keyof T, keyof U>> & U;
+const DEFAULT_VOICE_ID = 's3://peregrine-voices/larry_ads3_parrot_saad/manifest.json';
+const DEFAULT_VOICE_ENGINE: VoiceEngine = 'PlayHT2.0';
 
 type APISettings = APISettingsInput & { defaultVoiceId: string; defaultVoiceEngine: VoiceEngine };
 
