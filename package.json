@@ -1,5 +1,9 @@
 {
   "private": true,
+  "scripts": {
+    "build": "yarn workspace @playht/playht build && yarn workspace play-sdk-example build",
+    "start": "yarn workspace play-sdk-example start"
+  },
   "workspaces": [
     "packages/*"
   ],
