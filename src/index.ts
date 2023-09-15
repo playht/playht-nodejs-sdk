@@ -306,13 +306,16 @@ export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInf
  * @async
  * @param {string} voiceName - The name for the new voice.
  * @param {Buffer} fileBlob - The audio file to use as the source for the new voice.
+ * @param {VoiceGender} [voiceGender] - The gender for the new voice. The AI model needs this information to
+ * support certain features.
  * @param {string} [mimeType] - Optional MIME type for the source audio file.
  * @returns {Promise<VoiceInfo>} - A promise that resolves to a voice information object for the generated voice.
  */
 export async function instantCloneFromBuffer(
   voiceName: string,
   fileBlob: Buffer,
+  voiceGender?: VoiceGender,
   mimeType?: string,
 ): Promise<VoiceInfo> {
-  return await instantCloneFromBufferInternal(voiceName, fileBlob, mimeType);
+  return await instantCloneFromBufferInternal(voiceName, fileBlob, voiceGender, mimeType);
 }
