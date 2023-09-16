@@ -7,17 +7,17 @@
   },
   "description": "NodeJS SDK for PlayHT generative AI text-to-speech APIs",
   "files": [
-    "dist",
-    "package.json"
+    "dist/**/*"
   ],
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
   "repository": "https://github.com/playht/playht-nodejs-sdk",
   "license": "MIT",
   "scripts": {
-    "build:cjs": "tsc --emitDeclarationOnly --outdir dist/cjs && esbuild src/index.ts --bundle --platform=node --format=cjs --outdir=dist/cjs",
-    "build:esm": "tsc --emitDeclarationOnly --outdir dist/esm && esbuild src/index.ts --bundle --platform=node --format=esm --outdir=dist/esm",
-    "build": "rm -rf ./dist && yarn build:cjs && yarn build:esm",
+    "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outdir=dist/cjs",
+    "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outdir=dist/esm",
+    "build": "rm -rf ./dist && tsc --emitDeclarationOnly --outdir dist && yarn build:cjs && yarn build:esm",
     "test": "jest",
     "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit",
     "verify": "yarn check && yarn test",
