@@ -15,31 +15,29 @@
 
 The `playht/playht-nodejs-sdk` library provides easy to use methods that wrap the [PlayHT API](https://docs.play.ht/reference/api-getting-started).
 
-## Getting started
-
-Before you can start using the API, you need to generate an API Secret Key and obtain your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/app/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
-
-## Installation
+# Installation
 
 This module is distributed via [npm](https://www.npmjs.com/) and
 should be installed as one of your project's dependencies:
 
 ```shell
-npm install --save @playht/playht-nodejs-sdk
+npm install --save @playht/playht
 ```
 
 or for installation with [yarn](https://yarnpkg.com/) package manager:
 
 ```
-yarn add @playht/playht-nodejs-sdk
+yarn add @playht/playht
 ```
 
 # Usage
 
-First you need to set up the library with your API credentials. Import methods from the library and call `init()` with your credentials:
+Before using the API, you need to generate an API Secret Key and obtain your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/app/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
+
+Import methods from the library and call `init()` with your credentials to set up the SDK:
 
 ```ts
-import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import * as PlayHTAPI from '@playht/playht';
 
 PlayHTAPI.init({
   apiKey: '<YOUR API KEY>',
@@ -47,14 +45,14 @@ PlayHTAPI.init({
 });
 ```
 
-**Important:** Keep your API Secret Key confidential. Do not share it with anyone or include it in publicly accessible code repositories.
+_**Important:** Keep your API Secret Key confidential. Do not share it with anyone or include it in publicly accessible code repositories._
 
 ## Generating Speech
 
 To get an URL with the audio for a generated file using the default settings, call the `generateSpeech()` method with the text you wish to convert.
 
 ```ts
-import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import * as PlayHTAPI from '@playht/playht';
 
 // Generate audio from text
 const generated = await PlayHTAPI.generateSpeech('Computers can speak now!');
@@ -74,7 +72,7 @@ For more speech generation options, see [Generating Speech Options](#generating-
 To stream audio from text using the default settings, call the `streamSpeech()` method with the text you wish to convert and a writable stream where you want the audio bytes to be piped to. For example to write it into a file:
 
 ```ts
-import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import * as PlayHTAPI from '@playht/playht';
 import fs from 'fs';
 
 // Create a file stream
@@ -96,7 +94,7 @@ Both `generateSpeech()` and `streamSpeech()` methods accept an optional `options
 To generate an audio file using a PlayHT 2.0 voice with options:
 
 ```ts
-import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import * as PlayHTAPI from '@playht/playht';
 
 const text = "I'm a conversational voice with options.";
 
@@ -119,7 +117,7 @@ console.log('The url for the audio file is', audioUrl);
 If you want a PlayHT 1.0 voice instead:
 
 ```ts
-import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import * as PlayHTAPI from '@playht/playht';
 
 const text = 'Options are never enough.';
 
@@ -142,7 +140,7 @@ console.log('The url for the audio file is', audioUrl);
 And an example with standard voice in Spanish:
 
 ```ts
-import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import * as PlayHTAPI from '@playht/playht';
 
 const text = 'La inteligencia artificial puede hablar español.';
 
@@ -167,7 +165,7 @@ For a full list of available voices and the languages they speak, see [Listing A
 To list all available voices in our platform, including voices you cloned, you can call the `listVoices()` method with no parameters:
 
 ```ts
-import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import * as PlayHTAPI from '@playht/playht';
 
 // Fetch all available voices
 const voices = await PlayHTAPI.listVoices();
@@ -179,7 +177,7 @@ console.log(JSON.stringify(voices, null, 2));
 The `listVoices()` method also takes in an optional parameter to filter the voices by different fields. To get all stock female PlayHT 2.0 voices:
 
 ```ts
-import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import * as PlayHTAPI from '@playht/playht';
 
 // Fetch stock female PlayHT 2.0 voices
 const voices = await PlayHTAPI.listVoices({
@@ -197,7 +195,7 @@ console.log(JSON.stringify(voices, null, 2));
 You can use the `instantCloneFromBuffer()` to create a cloned voice from audio data. The cloned voice is ready to be used straight away.
 
 ```ts
-import * as PlayHTAPI from '@playht/playht-nodejs-sdk';
+import * as PlayHTAPI from '@playht/playht';
 import fs from 'fs';
 
 // Load an audio file
@@ -222,12 +220,15 @@ await new Promise((resolve) => fileStream.on('finish', resolve));
 
 This repository contains an [Express](https://expressjs.com/) server implementation example for the API.
 
+To authenticate requests from the server, you need to generate an API Secret Key and obtain your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/app/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
+
+Create a new `.env` file in the `packages/sdk-example` folder by copying the `.env.example` file provided. Then edit the file with your credentials.
+
 To run it locally:
 
-```console
-> yarn
-> yarn build
-> cd example
-> yarn
-> yarn start
+```shell
+yarn install
+yarn start
 ```
+
+Navigate to http://localhost:3000/ to see the example server.
