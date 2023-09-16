@@ -3,10 +3,10 @@ import express from 'express';
 import dotenv from 'dotenv';
 import multer, { memoryStorage } from 'multer';
 import * as PlayHTAPI from '@playht/playht';
-import { textToSpeech } from './textToSpeech';
-import { streamSpeech } from './streamSpeech';
-import { listVoices } from './listVoices';
-import { uploadInstantClone } from './uploadInstantClone';
+import { textToSpeech } from './textToSpeech.js';
+import { streamSpeech } from './streamSpeech.js';
+import { listVoices } from './listVoices.js';
+import { uploadInstantClone } from './uploadInstantClone.js';
 
 dotenv.config();
 PlayHTAPI.init({
