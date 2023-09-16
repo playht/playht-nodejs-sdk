@@ -1,9 +1,11 @@
 {
+  "private": true,
   "name": "play-sdk-example",
-  "version": "1.0.0",
+  "version": "0.0.1",
+  "type": "module",
   "description": "Example usage of PlayHT SDK",
   "scripts": {
-    "build": "rm -rf ./dist && tsc",
+    "build": "rm -rf ./dist && tsc -b",
     "start": "yarn build && nodemon dist/server.js",
     "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit"
   },
