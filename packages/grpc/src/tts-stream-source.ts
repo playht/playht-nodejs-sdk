@@ -48,8 +48,10 @@ export default class TTSStreamSource implements UnderlyingByteSource {
                     }
                 }
             }
-            if (data.data) {
-                controller.enqueue(data.data)
+            if (data.data && data.data.byteLength > 0) {
+                const buffer = new Uint8Array(data.data.byteLength)
+                buffer.set(data.data)
+                controller.enqueue(buffer)
             }
         })
         this.stream.on('error', (err) => {
