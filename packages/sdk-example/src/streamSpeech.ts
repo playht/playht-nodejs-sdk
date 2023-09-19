@@ -22,7 +22,8 @@ export async function streamSpeech(req: Request, res: Response, next: NextFuncti
   res.setHeader('Content-Type', 'audio/mpeg');
   try {
     // Call the API
-    await PlayHTAPI.streamSpeech(text, res, { voiceEngine: voiceEngine, voiceId: voice });
+    const stream = await PlayHTAPI.streamSpeech(text, { voiceEngine: voiceEngine, voiceId: voice });
+    await stream.pipe(res);
   } catch (error: any) {
     res.statusMessage = error?.message;
     res.status(error?.status || 500).send();
