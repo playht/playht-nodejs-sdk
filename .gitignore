@@ -9,3 +9,4 @@ install-state.gz
 !**/.yarn/releases
 !**/.yarn/sdks
 !**/.yarn/versions
+**/.DS_Store
