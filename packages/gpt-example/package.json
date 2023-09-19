@@ -1,0 +1,10 @@
+{
+  "name": "gpt-example",
+  "packageManager": "yarn@3.6.3",
+  "scripts": {
+    "dev": "concurrently \"cd client && yarn dev\" \"cd server && yarn dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.1"
+  }
+}
