@@ -13,7 +13,7 @@
 
 ---
 
-The `playht/playht-nodejs-sdk` library provides easy to use methods that wrap the [PlayHT API](https://docs.play.ht/reference/api-getting-started).
+The PlayHT SDK provides easy to use methods that wrap the [PlayHT API](https://docs.play.ht/reference/api-getting-started).
 
 # Installation
 
@@ -26,7 +26,7 @@ npm install --save @playht/playht
 
 or for installation with [yarn](https://yarnpkg.com/) package manager:
 
-```
+```shell
 yarn add @playht/playht
 ```
 
@@ -36,7 +36,7 @@ Before using the API, you need to generate an API Secret Key and obtain your Use
 
 Import methods from the library and call `init()` with your credentials to set up the SDK:
 
-```ts
+```javascript
 import * as PlayHTAPI from '@playht/playht';
 
 PlayHTAPI.init({
@@ -51,7 +51,7 @@ _**Important:** Keep your API Secret Key confidential. Do not share it with anyo
 
 To get an URL with the audio for a generated file using the default settings, call the `generateSpeech()` method with the text you wish to convert.
 
-```ts
+```javascript
 import * as PlayHTAPI from '@playht/playht';
 
 // Generate audio from text
@@ -71,7 +71,7 @@ For more speech generation options, see [Generating Speech Options](#generating-
 
 To stream audio from text using the default settings, call the `streamSpeech()` method with the text you wish to convert and a writable stream where you want the audio bytes to be piped to. For example to write it into a file:
 
-```ts
+```javascript
 import * as PlayHTAPI from '@playht/playht';
 import fs from 'fs';
 
@@ -93,7 +93,7 @@ Both `generateSpeech()` and `streamSpeech()` methods accept an optional `options
 
 To generate an audio file using a PlayHT 2.0 voice with options:
 
-```ts
+```javascript
 import * as PlayHTAPI from '@playht/playht';
 
 const text = "I'm a conversational voice with options.";
@@ -116,7 +116,7 @@ console.log('The url for the audio file is', audioUrl);
 
 If you want a PlayHT 1.0 voice instead:
 
-```ts
+```javascript
 import * as PlayHTAPI from '@playht/playht';
 
 const text = 'Options are never enough.';
@@ -139,7 +139,7 @@ console.log('The url for the audio file is', audioUrl);
 
 And an example with standard voice in Spanish:
 
-```ts
+```javascript
 import * as PlayHTAPI from '@playht/playht';
 
 const text = 'La inteligencia artificial puede hablar español.';
@@ -164,7 +164,7 @@ For a full list of available voices and the languages they speak, see [Listing A
 
 To list all available voices in our platform, including voices you cloned, you can call the `listVoices()` method with no parameters:
 
-```ts
+```javascript
 import * as PlayHTAPI from '@playht/playht';
 
 // Fetch all available voices
@@ -176,7 +176,7 @@ console.log(JSON.stringify(voices, null, 2));
 
 The `listVoices()` method also takes in an optional parameter to filter the voices by different fields. To get all stock female PlayHT 2.0 voices:
 
-```ts
+```javascript
 import * as PlayHTAPI from '@playht/playht';
 
 // Fetch stock female PlayHT 2.0 voices
@@ -194,7 +194,7 @@ console.log(JSON.stringify(voices, null, 2));
 
 You can use the `instantCloneFromBuffer()` to create a cloned voice from audio data. The cloned voice is ready to be used straight away.
 
-```ts
+```javascript
 import * as PlayHTAPI from '@playht/playht';
 import fs from 'fs';
 
