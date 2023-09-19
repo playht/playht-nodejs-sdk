@@ -1,5 +1,4 @@
 import type { OutputFormat, SpeechOptions, SpeechOutput, OutputQuality } from '..';
-import { Writable } from 'node:stream';
 import { APISettingsStore } from './APISettingsStore';
 import { generateV1Speech } from './generateV1Speech';
 import { generateV1Stream } from './generateV1Stream';
@@ -50,17 +49,16 @@ export async function commonGenerateSpeech(input: string, optionsInput?: SpeechO
 
 export async function commonGenerateStream(
   input: string,
-  outputStream: Writable,
   optionsInput?: SpeechOptions,
-): Promise<void> {
+): Promise<NodeJS.ReadableStream> {
   const options = addDefaultOptions(optionsInput);
 
   if (options.voiceEngine === 'Standard') {
     const v1Options = toV1Options(options);
-    return await generateV1Stream(input, options.voiceId, outputStream, v1Options);
+    return await generateV1Stream(input, options.voiceId, v1Options);
   } else {
     const v2Options = toV2Options(options);
-    return await generateV2Stream(input, options.voiceId, outputStream, v2Options);
+    return await generateV2Stream(input, options.voiceId, v2Options);
   }
 }
 
