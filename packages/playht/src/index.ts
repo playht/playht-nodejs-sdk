@@ -1,4 +1,3 @@
-import { Writable } from 'node:stream';
 import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
@@ -281,12 +280,11 @@ export async function generateSpeech(input: string, options?: SpeechOptions): Pr
  *
  * @async
  * @param {string} input - The input text to generate speech from.
- * @param {Writable} outputStream - The stream where the speech will be piped to.
  * @param {SpeechOptions} [options] - Optional parameters to customize speech generation.
- * @returns {Promise<void>} - A promise that resolves when the speech starts to be written to the stream.
+ * @returns {Promise<NodeJS.ReadableStream>} - A promise that resolves to a ReadableStream object that streams audio data.
  */
-export async function streamSpeech(input: string, outputStream: Writable, options?: SpeechOptions): Promise<void> {
-  return await commonGenerateStream(input, outputStream, options);
+export async function streamSpeech(input: string, options?: SpeechOptions): Promise<NodeJS.ReadableStream> {
+  return await commonGenerateStream(input, options);
 }
 
 /**

@@ -1,15 +1,13 @@
 import type { AxiosRequestConfig } from 'axios';
 import type { V2ApiOptions } from './apiCommon';
-import { Writable } from 'node:stream';
 import axios from 'axios';
 import { APISettingsStore } from './APISettingsStore';
 
 export async function generateV2Stream(
   text: string,
   voice: string,
-  outputStream: Writable,
   options?: V2ApiOptions,
-): Promise<void> {
+): Promise<NodeJS.ReadableStream> {
   const { apiKey, userId } = APISettingsStore.getSettings();
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
@@ -37,5 +35,5 @@ export async function generateV2Stream(
     throw new Error(error);
   });
 
-  response.data.pipe(outputStream);
+  return response.data;
 }
