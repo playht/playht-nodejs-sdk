@@ -79,10 +79,10 @@ import fs from 'fs';
 const fileStream = fs.createWriteStream('hello-playht.mp3');
 
 // Stream audio from text
-await PlayHTAPI.streamSpeech('This sounds very realistic.', fileStream);
+const stream = await PlayHTAPI.streamSpeech('This sounds very realistic.');
 
-// Wait for the file to finish writing
-await new Promise((resolve) => fileStream.on('finish', resolve));
+// Pipe stream into file
+await stream.pipe(fileStream);
 ```
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options) below.
@@ -209,11 +209,11 @@ console.log('Cloned voice info\n', JSON.stringify(clonedVoice, null, 2));
 
 // Use the cloned voice straight away to generate an audio file
 const fileStream = fs.createWriteStream('hello-dolly.mp3');
-await PlayHTAPI.streamSpeech('Cloned voices sound realistic too.', fileStream, {
+const stream = await PlayHTAPI.streamSpeech('Cloned voices sound realistic too.', {
   voiceEngine: clonedVoice.voiceEngine,
   voiceId: clonedVoice.id,
 });
-await new Promise((resolve) => fileStream.on('finish', resolve));
+await stream.pipe(fileStream);
 ```
 
 # Example server
