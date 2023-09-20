@@ -1,10 +1,11 @@
 {
   "name": "server",
   "packageManager": "yarn@3.6.3",
+  "type": "module",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "ts-node server.ts",
-    "build": "tsc --outDir dist"
+    "build": "rm -rf dist && tsc --outDir dist",
+    "dev": "nodemon --ext ts,tsx --watch 'src/**/*.ts' --watch '../client/src/**/*.tsx' --exec \"yarn run build && cd ../client && yarn build && cd ../server && yarn run start\""
   },
   "dependencies": {
     "@playht/playht": "0.0.4",
@@ -19,6 +20,7 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.45.0",
+    "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },

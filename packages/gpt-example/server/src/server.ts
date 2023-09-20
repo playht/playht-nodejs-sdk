@@ -1,8 +1,8 @@
 import * as PlayHTAPI from '@playht/playht';
 import express from 'express';
 import dotenv from 'dotenv';
-import { streamGptResponse } from './streamGptSentences';
-import { audioFromSentences } from './audioFromSentences';
+import { streamGptResponse } from './streamGptSentences.js';
+import { audioFromSentences } from './audioFromSentences.js';
 dotenv.config();
 
 // Initialize the SDK
