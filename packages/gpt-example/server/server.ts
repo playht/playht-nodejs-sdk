@@ -22,9 +22,14 @@ PlayHTAPI.init({
 const app = express();
 const PORT = 5040;
 
-app.get('/say-prompt', async (req, res) => {
+app.get('/say-prompt', async (req, res, next) => {
   try {
-    const prompt = 'In a few sentences, what is the meaning of life?';
+    const { prompt } = req.query;
+
+    if (!prompt || typeof prompt !== 'string') {
+      res.status(400).send('ChatGPT prompt not provided in the request');
+      return next();
+    }
 
     const gptSentencesStream = streamGptResponse(prompt);
 
