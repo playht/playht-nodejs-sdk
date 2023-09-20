@@ -198,7 +198,7 @@ export type PlayHT10EngineOptions = {
  * run to vary more, creating voices that sound less like the baseline.
  */
 export type PlayHT10EngineStreamOptions = Omit<PlayHT10EngineOptions, 'outputFormat'> & {
-  outputFormat: OutputStreamFormat;
+  outputFormat?: OutputStreamFormat;
 };
 
 /**
@@ -247,7 +247,7 @@ export type PlayHT20EngineOptions = {
  * run to vary more, creating voices that sound less like the baseline.
  */
 export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat'> & {
-  outputFormat: OutputStreamFormat;
+  outputFormat?: OutputStreamFormat;
 };
 
 /**
