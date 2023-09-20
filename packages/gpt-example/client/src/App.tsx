@@ -14,9 +14,8 @@ function App() {
   useEffect(() => {
     if (!audioRef.current) return;
     const audioElement = audioRef.current;
-    if (audioElement == null || audioSrc == null) return;
+    if (audioElement == null || audioSrc == null || audioSrc.length === 0) return;
 
-    console.log('in effect', audioSrc);
     audioElement.load();
 
     const playAudio = () => {
@@ -25,10 +24,10 @@ function App() {
       setLoading(false);
     };
 
-    audioElement.addEventListener('canplaythrough', playAudio);
+    audioElement.addEventListener('loadeddata', playAudio);
 
     return () => {
-      audioElement.removeEventListener('canplaythrough', playAudio);
+      audioElement.removeEventListener('loadeddata', playAudio);
     };
   }, [audioSrc]);
 
