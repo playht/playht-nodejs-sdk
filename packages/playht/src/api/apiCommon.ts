@@ -1,4 +1,4 @@
-import type { OutputFormat, SpeechOptions, SpeechOutput, OutputQuality } from '..';
+import type { OutputFormat, SpeechOptions, SpeechStreamOptions, SpeechOutput, OutputQuality } from '..';
 import { APISettingsStore } from './APISettingsStore';
 import { generateV1Speech } from './generateV1Speech';
 import { generateV1Stream } from './generateV1Stream';
@@ -49,7 +49,7 @@ export async function commonGenerateSpeech(input: string, optionsInput?: SpeechO
 
 export async function commonGenerateStream(
   input: string,
-  optionsInput?: SpeechOptions,
+  optionsInput?: SpeechStreamOptions,
 ): Promise<NodeJS.ReadableStream> {
   const options = addDefaultOptions(optionsInput);
 

@@ -9,11 +9,15 @@ export async function generateV2Stream(
   options?: V2ApiOptions,
 ): Promise<NodeJS.ReadableStream> {
   const { apiKey, userId } = APISettingsStore.getSettings();
+
+  const outputFormat = options?.outputFormat || 'mp3';
+  const accept = outputFormat === 'mp3' ? 'audio/mpeg' : 'audio/basic';
+
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
     url: 'https://play.ht/api/v2/tts/stream',
     headers: {
-      accept: 'audio/mpeg',
+      accept,
       'content-type': 'application/json',
       AUTHORIZATION: apiKey,
       'X-USER-ID': userId,
@@ -23,7 +27,7 @@ export async function generateV2Stream(
       text,
       voice,
       quality: options?.quality || 'medium',
-      output_format: options?.outputFormat || 'mp3',
+      output_format: outputFormat,
       speed: options?.speed || 1,
       sample_rate: options?.sampleRate || 24000,
       seed: options?.seed,
