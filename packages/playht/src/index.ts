@@ -32,6 +32,13 @@ export type OutputQuality = 'draft' | 'low' | 'medium' | 'high' | 'premium';
 export type OutputFormat = 'mp3' | 'ogg' | 'wav' | 'flac' | 'mulaw';
 
 /**
+ * Type representing the various formats that the output audio stream can have.
+ *
+ * @typedef {'mp3' | 'mulaw'} OutputStreamFormat
+ */
+export type OutputStreamFormat = 'mp3' | 'mulaw';
+
+/**
  * Type representing the different gender options available for voice selection.
  *
  * @typedef {'male' | 'female'} VoiceGender
@@ -173,6 +180,28 @@ export type PlayHT10EngineOptions = {
 };
 
 /**
+ * The options available for configuring the PlayHT 1.0 voice engine for streaming.
+ *
+ * @typedef {Object} PlayHT10EngineOptions
+ *
+ * @property {'PlayHT1.0'} voiceEngine - The identifier for the PlayHT 1.0 voice engine.
+ * @property {'plain'} [inputType] - The optional input type for the audio. Only 'plain' is supported for PlayHT 1.0
+ * voices.
+ * @property {OutputFormat} [outputFormat] - The optional format in which the output audio stream should be generated.
+ * Defaults to 'mp3'.
+ * @property {number} [sampleRate] - The optional sample rate for the output audio.
+ * @property {number} [seed] - An integer number greater than or equal to 0. If equal to null or not provided, a random
+ * seed will be used. Useful to control the reproducibility of the generated audio. Assuming all other properties
+ * didn't change, a fixed seed will generate the exact same audio file.
+ * @property {number} [temperature] - A floating point number between 0, inclusive, and 2, inclusive. The temperature
+ * parameter controls variance. Lower temperatures result in more predictable results. Higher temperatures allow each
+ * run to vary more, creating voices that sound less like the baseline.
+ */
+export type PlayHT10EngineStreamOptions = Omit<PlayHT10EngineOptions, 'outputFormat'> & {
+  outputFormat: OutputStreamFormat;
+};
+
+/**
  * The options available for configuring the PlayHT 2.0 voice engine.
  *
  * @typedef {Object} PlayHT20EngineOptions
@@ -200,21 +229,47 @@ export type PlayHT20EngineOptions = {
 };
 
 /**
+ * The options available for configuring the PlayHT 2.0 voice engine for streaming.
+ *
+ * @typedef {Object} PlayHT20EngineOptions
+ *
+ * @property {'PlayHT2.0'} voiceEngine - The identifier for the PlayHT 2.0 voice engine.
+ * @property {'plain'} [inputType] - The optional input type for the audio. Only 'plain' is supported for PlayHT 1.0
+ * voices.
+ * @property {OutputFormat} [outputFormat] - The optional format in which the output audio stream should be generated.
+ * Defaults to 'mp3'.
+ * @property {number} [sampleRate] - The optional sample rate for the output audio.
+ * @property {number} [seed] - An integer number greater than or equal to 0. If equal to null or not provided, a random
+ * seed will be used. Useful to control the reproducibility of the generated audio. Assuming all other properties
+ * didn't change, a fixed seed will generate the exact same audio file.
+ * @property {number} [temperature] - A floating point number between 0, inclusive, and 2, inclusive. The temperature
+ * parameter controls variance. Lower temperatures result in more predictable results. Higher temperatures allow each
+ * run to vary more, creating voices that sound less like the baseline.
+ */
+export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat'> & {
+  outputFormat: OutputStreamFormat;
+};
+
+/**
  * The options available for configuring speech synthesis, which include shared options combined with engine-specific
  * options.
  *
  * @typedef {Object} SpeechOptions
- *
- * @property {SharedSpeechOptions & PlayHT20EngineOptions} - Combination of shared speech options and PlayHT 2.0
- * engine-specific options.
- * @property {SharedSpeechOptions & PlayHT10EngineOptions} - Combination of shared speech options and PlayHT 1.0
- * engine-specific options.
- * @property {SharedSpeechOptions & StandardEngineOptions} - Combination of shared speech options and standard
- * engine-specific options.
  */
 export type SpeechOptions =
   | (SharedSpeechOptions & PlayHT20EngineOptions)
   | (SharedSpeechOptions & PlayHT10EngineOptions)
+  | (SharedSpeechOptions & StandardEngineOptions);
+
+/**
+ * The options available for configuring speech stream, which include shared options combined with engine-specific
+ * options.
+ *
+ * @typedef {Object} SpeechStreamOptions
+ */
+export type SpeechStreamOptions =
+  | (SharedSpeechOptions & PlayHT20EngineStreamOptions)
+  | (SharedSpeechOptions & PlayHT10EngineStreamOptions)
   | (SharedSpeechOptions & StandardEngineOptions);
 
 /**
@@ -280,10 +335,10 @@ export async function generateSpeech(input: string, options?: SpeechOptions): Pr
  *
  * @async
  * @param {string} input - The input text to generate speech from.
- * @param {SpeechOptions} [options] - Optional parameters to customize speech generation.
+ * @param {SpeechStreamOptions} [options] - Optional parameters to customize speech stream generation.
  * @returns {Promise<NodeJS.ReadableStream>} - A promise that resolves to a ReadableStream object that streams audio data.
  */
-export async function streamSpeech(input: string, options?: SpeechOptions): Promise<NodeJS.ReadableStream> {
+export async function streamSpeech(input: string, options?: SpeechStreamOptions): Promise<NodeJS.ReadableStream> {
   return await commonGenerateStream(input, options);
 }
 
