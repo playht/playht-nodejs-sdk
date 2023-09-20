@@ -14,21 +14,29 @@ function App() {
   useEffect(() => {
     if (!audioRef.current) return;
     const audioElement = audioRef.current;
-    if (audioElement === null) return;
+    if (audioElement == null || audioSrc == null) return;
+
+    console.log('in effect', audioSrc);
+    audioElement.load();
 
     const playAudio = () => {
+      console.log('playing audio');
       audioElement.play();
       setLoading(false);
     };
 
-    audioElement.addEventListener('canPlay', playAudio);
+    audioElement.addEventListener('canplaythrough', playAudio);
 
     return () => {
-      audioElement.removeEventListener('canPlay', playAudio);
+      audioElement.removeEventListener('canplaythrough', playAudio);
     };
   }, [audioSrc]);
 
   const sayPrompt = () => {
+    if (!audioRef.current) return;
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+
     const searchParams = new URLSearchParams();
     searchParams.set('prompt', prompt);
     setAudioSrc(`/say-prompt?${searchParams.toString()}`);
@@ -38,27 +46,29 @@ function App() {
   return (
     <>
       <PlayhtLogo />
-      <h1 className="pb-8">PlayHT SDK ChatGPT Example</h1>
+      <h1 className="pb-8 max-sm:text-2xl font-bold">PlayHT SDK ChatGPT Example</h1>
 
-      <div className="font-bold text-lg">Enter prompt for ChatGPT</div>
+      <div className="font-bold text-lg pb-4">Enter prompt for ChatGPT</div>
       <textarea
         className="w-full h-32 bg-inherit resize-none border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-lg"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
       />
-      <div className="py-4">
-        <button
-          className="disabled:text-neutral-500 py-4 px-8"
-          onClick={sayPrompt}
-          disabled={loading || !prompt || prompt.length === 0}
-        >
-          <div role="status" className={`inline-flex h-full w-full items-center justify-center`}>
-            {loading && <Spinner />} <span className="bold">Speak</span>
-          </div>
-        </button>
-      </div>
+
+      <button
+        className="disabled:text-neutral-500 mt-6 mb-8 py-4 px-8 bg-green-600 text-white font-bold text-xl enabled:hover:bg-green-400 transition-all"
+        onClick={sayPrompt}
+        disabled={loading || !prompt || prompt.length === 0}
+      >
+        <div role="status" className="inline-flex h-full w-full items-center justify-center">
+          {loading && <Spinner />} <span className="bold">Speak</span>
+        </div>
+      </button>
+
       <p>
-        <audio className="w-full" ref={audioRef} controls src={audioSrc} />
+        <audio className="w-full" ref={audioRef} controls>
+          {audioSrc && <source src={audioSrc} type="audio/mpeg" />}
+        </audio>
       </p>
     </>
   );
