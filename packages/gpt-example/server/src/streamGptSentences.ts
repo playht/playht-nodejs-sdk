@@ -29,4 +29,9 @@ export async function* streamGptResponse(prompt: string): AsyncGenerator<string>
       yield sentence;
     }
   }
+
+  // Yield the last sentence in the response
+  if (chatGptText) {
+    yield chatGptText + '.';
+  }
 }
