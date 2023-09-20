@@ -1,6 +1,10 @@
+import { describe, expect, test } from '@jest/globals';
 import * as PlayHTAPI from './index';
 
-test('exists', () => {
-  expect(PlayHTAPI.init).toBeDefined();
-  expect(typeof PlayHTAPI.generateSpeech).toBe('function');
+describe('exists', () => {
+  test('PlayHTAPI', () => {
+    expect(PlayHTAPI).toBeDefined();
+    expect(PlayHTAPI.init).toBeDefined();
+    expect(typeof PlayHTAPI.generateSpeech).toBe('function');
+  });
 });

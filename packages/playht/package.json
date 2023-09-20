@@ -1,6 +1,7 @@
 {
   "name": "@playht/playht",
   "version": "0.0.4",
+  "type": "module",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/",
     "access": "restricted"
@@ -18,14 +19,15 @@
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outdir=dist/cjs",
     "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outdir=dist/esm",
     "build": "rm -rf ./dist && tsc --emitDeclarationOnly --outdir dist && yarn build:cjs && yarn build:esm",
-    "test": "jest",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit",
     "verify": "yarn check && yarn test",
     "check": "tsc --noEmit && prettier --check . && eslint --ext .ts ./src",
     "release": "yarn && yarn build && npm publish"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.4",
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.5",
     "@types/node": "^20.5.4",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "@typescript-eslint/parser": "^6.4.1",
