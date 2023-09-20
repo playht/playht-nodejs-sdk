@@ -1,23 +1,42 @@
+import * as PlayHTAPI from '@playht/playht';
 import express from 'express';
 import dotenv from 'dotenv';
 import { streamGptResponse } from './streamGptSentences';
+import { audioFromSentences } from './audioFromSentences';
 dotenv.config();
+
+// Initialize the SDK
+PlayHTAPI.init({
+  apiKey:
+    process.env.PLAYHT_API_KEY ||
+    (function () {
+      throw new Error('PLAYHT_API_KEY not found in .env file. Please read .env.example to see how to create it.');
+    })(),
+  userId:
+    process.env.PLAYHT_USER_ID ||
+    (function () {
+      throw new Error('PLAYHT_USER_ID not found in .env file. Please read .env.example to see how to create it.');
+    })(),
+});
 
 const app = express();
 const PORT = 5040;
 
-app.post('/say-prompt', async (req, res) => {
+app.get('/say-prompt', async (req, res) => {
   try {
     const prompt = 'In a few sentences, what is the meaning of life?';
 
-    for await (const sentence of streamGptResponse(prompt)) {
-      console.log('Sentence:', sentence);
-    }
+    const gptSentencesStream = streamGptResponse(prompt);
+
+    res.setHeader('Content-Type', 'audio/mpeg');
+    await audioFromSentences(gptSentencesStream, res);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
   }
 });
+
+app.use('/', express.static('../client/dist'));
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
