@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import './App.css';
 import { PlayhtLogo } from './components/PlayhtLogo';
 import { Spinner } from './components/Spinner';
@@ -11,10 +11,16 @@ function App() {
   const [loading, setLoading] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  useEffect(() => {
+  const sayPrompt = () => {
     if (!audioRef.current) return;
     const audioElement = audioRef.current;
-    if (audioElement == null || audioSrc == null || audioSrc.length === 0) return;
+    audioElement.pause();
+    audioElement.currentTime = 0;
+
+    const searchParams = new URLSearchParams();
+    searchParams.set('prompt', prompt);
+    setAudioSrc(`/say-prompt?${searchParams.toString()}`);
+    setLoading(true);
 
     audioElement.load();
 
@@ -29,17 +35,6 @@ function App() {
     return () => {
       audioElement.removeEventListener('loadeddata', playAudio);
     };
-  }, [audioSrc]);
-
-  const sayPrompt = () => {
-    if (!audioRef.current) return;
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
-
-    const searchParams = new URLSearchParams();
-    searchParams.set('prompt', prompt);
-    setAudioSrc(`/say-prompt?${searchParams.toString()}`);
-    setLoading(true);
   };
 
   return (
