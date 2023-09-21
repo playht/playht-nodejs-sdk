@@ -9,22 +9,34 @@ export async function audioFromSentences(
   sentencesStream: AsyncGenerator<string>,
   writableStream: NodeJS.WritableStream,
 ) {
-  // Create a cuncurrency queue to limit the number of concurrent API calls
-  const queue = new PQueue({ concurrency: 3 });
+  // Create a concurrency queue to call the streaming API
+  const concurrencyQueue = new PQueue({ concurrency: 5 });
+  // Create an array to keep track of the order of the API calls
+  const orderedPromises = [];
 
   // For each sentence in the stream, add a task to the queue
   for await (const sentence of sentencesStream) {
-    (async () => {
-      await queue.add(async () => {
-        const currentStreamPromise = await PlayHTAPI.streamSpeech(sentence);
-
-        // Pipe the result of the API call to the writable stream, keeping the writable stream open
-        await pipelineAsync(currentStreamPromise, writableStream, { end: false });
-      });
-    })();
+    // Use an async immediately invoked function expression to enqueue a promise without blocking execution.
+    orderedPromises.push(
+      (async () => {
+        const currentStreamPromise = PlayHTAPI.streamSpeech(sentence);
+        return await concurrencyQueue.add(() => currentStreamPromise);
+      })(),
+    );
   }
-  // Wait for all tasks to be completed
-  await queue.onIdle();
+
+  // Wait for each API call to finish in order
+  while (orderedPromises.length > 0) {
+    const nextStreamPromise = orderedPromises.shift();
+    const resultStream = await nextStreamPromise;
+
+    if (!resultStream) {
+      throw new Error('Stream is undefined');
+    }
+
+    // Pipe the result of the API call to the writable stream, keeping the writable stream open
+    await pipelineAsync(resultStream, writableStream, { end: false });
+  }
 
   // Close the writable stream
   writableStream.end();
