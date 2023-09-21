@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const PUNCTUATION_REGEX = /[.!?]/;
+const PUNCTUATION_REGEX = /[.!?:…]/;
 
 const openai = new OpenAI({
   organization: process.env.OPENAI_ORG_ID,
@@ -26,7 +26,7 @@ export async function* streamGptResponse(prompt: string): AsyncGenerator<string>
     if (punctuationMatch && punctuationMatch.index !== undefined) {
       const sentence = chatGptText.substring(0, punctuationMatch.index + 1);
       chatGptText = chatGptText.substring(punctuationMatch.index + 1);
-      yield sentence;
+      yield sentence.trim();
     }
   }
 
