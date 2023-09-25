@@ -145,7 +145,6 @@ export const generateAudioStream = async (
           // eslint-disable-next-line no-constant-condition
           while (true) {
             const { done, value } = await reader.read();
-            console.log('mediaSource.readyState', mediaSource.readyState);
 
             if (done) {
               if (mediaSource.readyState === 'open') {

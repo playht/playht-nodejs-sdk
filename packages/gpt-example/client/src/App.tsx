@@ -25,7 +25,6 @@ function App() {
     audioElement.load();
 
     const playAudio = () => {
-      console.log('playing audio');
       audioElement.play();
       setLoading(false);
     };

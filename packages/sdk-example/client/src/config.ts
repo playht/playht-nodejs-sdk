@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-console.log('env', import.meta.env);
-
 const EnvVars = z
   .object({
     VITE_BACKEND_HOST_URL: z.string().optional(),
