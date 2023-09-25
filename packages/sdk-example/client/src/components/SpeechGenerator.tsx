@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { generateSpeech } from '../API/tts.requests';
 import { Spinner } from './Spinner';
 import { Voice } from '../hooks/useVoices';
@@ -9,14 +9,39 @@ export const SpeechGenerator: React.FC<{ selectedVoice: Voice }> = ({ selectedVo
   );
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [audioURL, setAudioURL] = useState<string | null>(null);
+  const [audioURL, setAudioURL] = useState<string>('');
+  const audioElementRef = useRef<HTMLAudioElement>(null);
 
   const handleGenerateSpeech = async () => {
+    if (!audioElementRef.current) return;
     setLoading(true);
-    setAudioURL(null);
+    setAudioURL('');
     try {
       const apiResponse = await generateSpeech(text, selectedVoice);
       setAudioURL(apiResponse.audioUrl);
+
+      const audioElement = audioElementRef.current;
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      audioElementRef.current.load();
+
+      const playAudio = () => {
+        audioElement.play();
+        setLoading(false);
+      };
+
+      const onError = () => {
+        setLoading(false);
+        console.error('Error loading audio');
+      };
+
+      audioElement.addEventListener('loadeddata', playAudio);
+      audioElement.addEventListener('error', onError);
+
+      return () => {
+        audioElement.removeEventListener('loadeddata', playAudio);
+        audioElement.removeEventListener('error', onError);
+      };
     } catch (error) {
       console.log({ error });
     } finally {
@@ -49,12 +74,10 @@ export const SpeechGenerator: React.FC<{ selectedVoice: Voice }> = ({ selectedVo
           </div>
         </button>
       </div>
-      <div className="mt-2">
-        {audioURL && !loading && (
-          <audio id="audioPlayer" controls className="w-full" src={audioURL}>
-            Your browser does not support the audio element.
-          </audio>
-        )}
+      <div className="mt-4">
+        <audio id="audioPlayer" controls ref={audioElementRef} className="w-full" src={audioURL}>
+          Your browser does not support the audio element.
+        </audio>
       </div>
     </div>
   );
