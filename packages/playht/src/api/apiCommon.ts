@@ -1,9 +1,13 @@
 import type { OutputFormat, SpeechOptions, SpeechStreamOptions, SpeechOutput, OutputQuality } from '..';
+import { PassThrough, pipeline } from 'node:stream';
+import { promisify } from 'node:util';
+import PQueue from 'p-queue';
 import { APISettingsStore } from './APISettingsStore';
 import { generateV1Speech } from './generateV1Speech';
 import { generateV1Stream } from './generateV1Stream';
 import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
+import { textStreamToSentences } from './textStreamToSentences';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -60,6 +64,16 @@ export async function commonGenerateStream(
     const v2Options = toV2Options(options);
     return await generateV2Stream(input, options.voiceId, v2Options);
   }
+}
+
+export async function commonGenerateStreamFromInputStream(
+  inputStream: NodeJS.ReadableStream,
+  options?: SpeechStreamOptions,
+): Promise<NodeJS.ReadableStream> {
+  const stentencesStream = textStreamToSentences(inputStream);
+  const passThrough = new PassThrough();
+  audioStreamFromSentences(stentencesStream, passThrough, options);
+  return passThrough;
 }
 
 export function qualityToPreset(quality?: OutputQuality): Preset {
@@ -121,4 +135,46 @@ function toV1Options(options: SpeechOptionsWithVoiceID): V1ApiOptions {
     preset: qualityToPreset(options.quality),
     globalSpeed: `${Math.trunc((options.speed || 1) * 100)}%`,
   };
+}
+
+const pipelineAsync = promisify(pipeline);
+const CONCURRENCY = 5;
+
+async function audioStreamFromSentences(
+  sentencesStream: AsyncGenerator<string>,
+  writableStream: NodeJS.WritableStream,
+  options?: SpeechStreamOptions,
+) {
+  // Create a concurrency queue to call the streaming API
+  const concurrencyQueue = new PQueue({ concurrency: CONCURRENCY });
+
+  // Create an array to keep track of the order of the API calls
+  const orderedPromises = [];
+
+  // For each sentence in the stream, add a task to the queue
+  for await (const sentence of sentencesStream) {
+    // Use an async immediately invoked function expression to enqueue a promise without blocking execution.
+    orderedPromises.push(
+      (async () => {
+        const currentStreamPromise = commonGenerateStream(sentence, options);
+        return await concurrencyQueue.add(() => currentStreamPromise);
+      })(),
+    );
+  }
+
+  // Wait for each API call to finish in order
+  while (orderedPromises.length > 0) {
+    const nextStreamPromise = orderedPromises.shift();
+    const resultStream = await nextStreamPromise;
+
+    if (!resultStream) {
+      throw new Error('Stream is undefined');
+    }
+
+    // Pipe the result of the API call to the writable stream, keeping the writable stream open
+    await pipelineAsync(resultStream, writableStream, { end: false });
+  }
+
+  // Close the writable stream
+  writableStream.end();
 }
