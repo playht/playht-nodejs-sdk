@@ -1,8 +1,7 @@
 import * as PlayHTAPI from '@playht/playht';
 import express from 'express';
 import dotenv from 'dotenv';
-import { streamGptResponse } from './streamGptSentences.js';
-import { audioFromSentences } from './audioFromSentences.js';
+import { streamGptText } from './streamGptText.js';
 dotenv.config();
 
 // Initialize the SDK
@@ -31,10 +30,13 @@ app.get('/say-prompt', async (req, res, next) => {
       return next();
     }
 
-    const gptSentencesStream = streamGptResponse(prompt);
-
     res.setHeader('Content-Type', 'audio/mpeg');
-    await audioFromSentences(gptSentencesStream, res);
+
+    // Create a text stream from ChatGPT responses
+    const gptStream = await streamGptText(prompt);
+    // Generate a stream with PlayHT's API
+    const stream = await PlayHTAPI.streamSpeechFromInputStream(gptStream);
+    stream.pipe(res);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
