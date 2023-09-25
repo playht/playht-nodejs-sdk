@@ -19,7 +19,7 @@ export async function commonGetAllVoices(filters?: VoicesFilter): Promise<Array<
     needV2Voices ? availableV2Voices() : [],
     needClonedVoices ? availableClonedVoices() : [],
   ]);
-  return [...v1Voices, ...v2Voices, ...clonedVoices].filter((voice) => {
+  return [...clonedVoices, ...v2Voices, ...v1Voices].filter((voice) => {
     if (filters?.id && filters.id !== voice.id) {
       return false;
     }

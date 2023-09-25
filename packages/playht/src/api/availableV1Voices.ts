@@ -16,7 +16,10 @@ type V1APIVoiceInfo = {
   styles?: Array<string>;
 };
 
+const CACHE_EXPIRE_TIME = 1000 * 60 * 60 * 12; // 12 hours
+
 let _v1VoicesCache: Array<VoiceInfo>;
+let _cacheUpdatedTime: number;
 
 export async function availableV1Voices(): Promise<Array<VoiceInfo>> {
   const { apiKey, userId } = APISettingsStore.getSettings();
@@ -30,7 +33,7 @@ export async function availableV1Voices(): Promise<Array<VoiceInfo>> {
     },
   };
 
-  if (_v1VoicesCache) {
+  if (_v1VoicesCache && _cacheUpdatedTime && Date.now() - _cacheUpdatedTime < CACHE_EXPIRE_TIME) {
     return _v1VoicesCache;
   }
 
@@ -67,5 +70,6 @@ export async function availableV1Voices(): Promise<Array<VoiceInfo>> {
       throw new Error(error);
     });
 
+  _cacheUpdatedTime = Date.now();
   return _v1VoicesCache;
 }

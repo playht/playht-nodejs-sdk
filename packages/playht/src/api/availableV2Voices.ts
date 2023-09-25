@@ -17,10 +17,13 @@ export type V2APIVoiceInfo = {
   texture?: string | null;
   is_cloned?: boolean;
   type?: string;
-  voiceEngine?: VoiceEngine;
+  voice_engine?: VoiceEngine;
 };
 
+const CACHE_EXPIRE_TIME = 1000 * 60 * 60 * 12; // 12 hours
+
 let _v2VoicesCache: Array<VoiceInfo>;
+let _cacheUpdatedTime: number;
 
 export async function availableV2Voices(): Promise<Array<VoiceInfo>> {
   const { apiKey, userId } = APISettingsStore.getSettings();
@@ -34,7 +37,7 @@ export async function availableV2Voices(): Promise<Array<VoiceInfo>> {
     },
   };
 
-  if (_v2VoicesCache) {
+  if (_v2VoicesCache && _cacheUpdatedTime && Date.now() - _cacheUpdatedTime < CACHE_EXPIRE_TIME) {
     return _v2VoicesCache;
   }
 
@@ -42,7 +45,7 @@ export async function availableV2Voices(): Promise<Array<VoiceInfo>> {
     .request(options)
     .then(({ data }: { data: Array<V2APIVoiceInfo> }) =>
       data.map((v2Voice) => ({
-        voiceEngine: v2Voice.voiceEngine || ('PlayHT1.0' as const),
+        voiceEngine: v2Voice.voice_engine || ('PlayHT1.0' as const),
         id: v2Voice.id,
         name: v2Voice.name,
         sampleUrl: v2Voice.sample ? v2Voice.sample : undefined,
@@ -57,6 +60,8 @@ export async function availableV2Voices(): Promise<Array<VoiceInfo>> {
     .catch(function (error) {
       throw new Error(error);
     });
+
+  _cacheUpdatedTime = Date.now();
   return _v2VoicesCache;
 }
 
