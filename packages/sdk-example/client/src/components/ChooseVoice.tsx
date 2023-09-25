@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import useVoices, { Voice } from '../hooks/useVoices';
 import { Select } from './Select';
+import { Spinner } from './Spinner';
 
 export const ChooseVoice = ({
   selectedVoice,
@@ -10,37 +10,31 @@ export const ChooseVoice = ({
   setSelectedVoice: (voice: Voice) => void;
 }) => {
   const { data: voices, loading: loadingVoices, error: errorLoadingVoices } = useVoices();
-  const [updatedVoices, setUpdatedVoices] = useState<Voice[]>([]);
-
-  useEffect(() => {
-    if (selectedVoice && voices && !voices.some((v: Voice) => v.id === selectedVoice.id)) {
-      setUpdatedVoices([...voices, selectedVoice]);
-    } else {
-      setUpdatedVoices(voices);
-    }
-  }, [selectedVoice, voices]);
-
-  if (!updatedVoices) return null;
 
   return loadingVoices ? (
-    <p>Loading voices...</p>
+    <Spinner label="Loading voices..." />
   ) : errorLoadingVoices ? (
-    <p>Error loading voices</p>
+    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+      Error loading voices
+    </div>
   ) : (
-    <Select
-      label="Voice"
-      id="voice"
-      options={updatedVoices.map((v: Voice) => ({
-        name: v.name + `- ${v.language}` + ` - (${v.voiceEngine})`,
-        value: v.id,
-      }))}
-      value={selectedVoice.id}
-      onChange={(id) => {
-        const voice = updatedVoices.find((v: Voice) => v.id === id);
-        if (voice) {
-          setSelectedVoice(voice);
-        }
-      }}
-    />
+    <>
+      <h2 className="text-2xl font-semibold">Choose a voice</h2>
+      <Select
+        label="Voice"
+        id="voice"
+        options={voices.map((v: Voice) => ({
+          name: `${v.name} ${v.language ? `- ${v.language}` : ''} - (${v.voiceEngine})`,
+          value: v.id,
+        }))}
+        value={selectedVoice.id}
+        onChange={(id) => {
+          const voice = voices.find((v: Voice) => v.id === id);
+          if (voice) {
+            setSelectedVoice(voice);
+          }
+        }}
+      />
+    </>
   );
 };
