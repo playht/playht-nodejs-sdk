@@ -9,12 +9,15 @@ export async function textToSpeech(req: Request, res: Response, next: NextFuncti
 
   const text = req.body.text;
   const voice = req.body.voiceId || 'florencio';
-  const voiceEngine = req.body.VoiceEngine || 'PlayHT1.0';
+  const voiceEngine = req.body.voiceEngine || 'PlayHT1.0';
 
   res.set('Content-Type', 'application/json');
   try {
     // Call the API
-    const generated = await PlayHT.generateSpeech(text, { voiceEngine: voiceEngine, voiceId: voice });
+    const generated = await PlayHT.generateSpeech(text, {
+      voiceEngine: voiceEngine,
+      voiceId: voice,
+    });
 
     res.status(200).json(generated);
   } catch (error: any) {
