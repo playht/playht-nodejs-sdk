@@ -13,27 +13,37 @@ function App() {
 
   const sayPrompt = () => {
     if (!audioRef.current) return;
-    const audioElement = audioRef.current;
-    audioElement.pause();
-    audioElement.currentTime = 0;
-
-    const searchParams = new URLSearchParams();
-    searchParams.set('prompt', prompt);
-    setAudioSrc(`/say-prompt?${searchParams.toString()}`);
-    setLoading(true);
-
-    audioElement.load();
-
-    const playAudio = () => {
-      audioElement.play();
+    const onError = () => {
       setLoading(false);
+      console.error('Error loading audio');
     };
+    try {
+      const audioElement = audioRef.current;
+      audioElement.pause();
+      audioElement.currentTime = 0;
 
-    audioElement.addEventListener('loadeddata', playAudio);
+      const searchParams = new URLSearchParams();
+      searchParams.set('prompt', prompt);
+      setAudioSrc(`/say-prompt?${searchParams.toString()}`);
+      setLoading(true);
 
-    return () => {
-      audioElement.removeEventListener('loadeddata', playAudio);
-    };
+      audioElement.load();
+
+      const playAudio = () => {
+        audioElement.play();
+        setLoading(false);
+      };
+
+      audioElement.addEventListener('loadeddata', playAudio);
+      audioElement.addEventListener('error', onError);
+
+      return () => {
+        audioElement.removeEventListener('loadeddata', playAudio);
+        audioElement.removeEventListener('error', onError);
+      };
+    } catch (error) {
+      onError();
+    }
   };
 
   return (
@@ -59,9 +69,7 @@ function App() {
       </button>
 
       <p>
-        <audio className="w-full" ref={audioRef} controls>
-          {audioSrc && <source src={audioSrc} type="audio/mpeg" />}
-        </audio>
+        <audio className="w-full" ref={audioRef} src={audioSrc} controls />
       </p>
     </>
   );
