@@ -5,9 +5,11 @@
   "type": "module",
   "description": "Example usage of PlayHT SDK",
   "scripts": {
-    "build": "rm -rf ./dist && tsc -b",
+    "install:all": "yarn install && cd ./client && yarn install",
+    "build:server": "rm -rf ./dist && tsc -b",
     "build:client": "cd ./client && yarn build",
-    "start": "yarn build:client && yarn build && nodemon dist/server.js",
+    "build": "yarn build:server && yarn build:client",
+    "start": "yarn build && nodemon dist/server.js",
     "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit"
   },
   "dependencies": {

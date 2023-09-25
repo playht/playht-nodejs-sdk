@@ -2,7 +2,8 @@
   "name": "gpt-example",
   "packageManager": "yarn@3.6.3",
   "scripts": {
-    "install": "yarn install && cd server && yarn install && cd ../client && yarn install",
-    "dev": "cd server && yarn dev"
+    "install:all": "cd ./server && yarn install && cd ../client && yarn install",
+    "build:all": "cd ./server && yarn build && cd ../client && yarn build",
+    "start": "yarn build:all && cd server && yarn start"
   }
 }

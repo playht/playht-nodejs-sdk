@@ -44,5 +44,5 @@ app.get('/say-prompt', async (req, res, next) => {
 app.use('/', express.static('../client/dist'));
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`PlayHT-GPT-Example server is running on http://localhost:${PORT}`);
 });

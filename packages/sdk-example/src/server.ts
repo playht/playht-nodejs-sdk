@@ -40,5 +40,5 @@ app.post('/uploadInstantClone', upload.single('audioFile'), uploadInstantClone);
 app.use('/', express.static('client/dist'));
 
 app.listen(3000, () => {
-  console.log('PlayHT-API-Example app is listening on port 3000.');
+  console.log(`PlayHT-API-Example server is running on http://localhost:3000`);
 });
