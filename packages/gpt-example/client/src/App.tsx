@@ -63,7 +63,7 @@ function App() {
         onClick={sayPrompt}
         disabled={loading || !prompt || prompt.length === 0}
       >
-        <div role="status" className="inline-flex h-full w-full items-center justify-center">
+        <div className="inline-flex h-full w-full items-center justify-center">
           {loading && <Spinner />} <span className="bold">Speak</span>
         </div>
       </button>

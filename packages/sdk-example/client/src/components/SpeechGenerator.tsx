@@ -39,12 +39,17 @@ export const SpeechGenerator: React.FC<{ selectedVoice: Voice }> = ({ selectedVo
         ></textarea>
       </div>
       <div className="mt-2">
-        <button onClick={handleGenerateSpeech} disabled={loading} className="px-4 py-2 bg-blue-500 text-white rounded">
-          Generate Speech
+        <button
+          onClick={handleGenerateSpeech}
+          disabled={loading}
+          className="px-4 py-2 disabled:text-neutral-500 bg-green-600 text-white font-bold text-xl enabled:hover:bg-green-400 transition-all rounded"
+        >
+          <div role="status" className="inline-flex h-full w-full items-center justify-center">
+            {loading && <Spinner />} <span className="bold">Generate Speech</span>
+          </div>
         </button>
       </div>
       <div className="mt-2">
-        {loading && <Spinner label="Generating speech..." />}
         {audioURL && !loading && (
           <audio id="audioPlayer" controls className="w-full" src={audioURL}>
             Your browser does not support the audio element.

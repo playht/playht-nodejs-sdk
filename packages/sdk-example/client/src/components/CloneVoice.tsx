@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { VoiceData, uploadAndCloneVoice } from '../API/cloning.requests';
 import { Voice } from '../hooks/useVoices';
+import { Spinner } from './Spinner';
 
 interface CloneVoiceProps {
   setSelectedVoice: React.Dispatch<React.SetStateAction<Voice>>;
@@ -69,10 +70,12 @@ export const CloneVoice: React.FC<CloneVoiceProps> = ({ setSelectedVoice }) => {
         </div>
         <button
           onClick={uploadFile}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-fit"
+          className="disabled:text-neutral-500 bg-green-600 text-white font-bold text-xl enabled:hover:bg-green-400 transition-all py-2 px-4 rounded w-fit"
           disabled={isLoading}
         >
-          Clone Voice
+          <div role="status" className="inline-flex h-full w-full items-center justify-center">
+            {isLoading && <Spinner />} <span className="bold">Clone Voice</span>
+          </div>
         </button>
       </div>
     </div>

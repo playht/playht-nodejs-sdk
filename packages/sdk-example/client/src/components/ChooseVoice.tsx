@@ -12,7 +12,10 @@ export const ChooseVoice = ({
   const { data: voices, loading: loadingVoices, error: errorLoadingVoices } = useVoices();
 
   return loadingVoices ? (
-    <Spinner label="Loading voices..." />
+    <div className="inline-flex h-full w-full items-center justify-center">
+      <Spinner />
+      <span className="bold">Loading voices...</span>
+    </div>
   ) : errorLoadingVoices ? (
     <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
       Error loading voices

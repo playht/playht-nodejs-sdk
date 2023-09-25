@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { generateAudioStream } from '../API/tts.requests';
 import { Voice } from '../hooks/useVoices';
+import { Spinner } from './Spinner';
 
 export const SpeechStreamer: React.FC<{ selectedVoice: Voice }> = ({ selectedVoice }) => {
   const [text, setText] = useState<string>(
@@ -40,12 +41,14 @@ export const SpeechStreamer: React.FC<{ selectedVoice: Voice }> = ({ selectedVoi
         <button
           onClick={handleStreamSpeech}
           disabled={isGeneratingStream}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
+          className="px-4 py-2 disabled:text-neutral-500 bg-green-600 text-white font-bold text-xl enabled:hover:bg-green-400 transition-all rounded"
         >
-          Stream Speech
+          <div role="status" className="inline-flex h-full w-full items-center justify-center">
+            {isGeneratingStream && <Spinner />} <span className="bold">Stream Speech</span>
+          </div>
         </button>
       </div>
-      <div className="mt-2">
+      <div className="mt-4">
         <audio id="streamAudioPlayer" controls ref={audioElementRef} className="w-full">
           Your browser does not support the audio element.
         </audio>
