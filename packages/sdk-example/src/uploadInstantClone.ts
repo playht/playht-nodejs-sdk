@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as PlayHTAPI from 'playht';
+import * as PlayHT from 'playht';
 
 export async function uploadInstantClone(req: Request, res: Response) {
   if (!req.file) {
@@ -15,7 +15,7 @@ export async function uploadInstantClone(req: Request, res: Response) {
 
   try {
     // Call the API
-    const clonedVoice = await PlayHTAPI.instantCloneFromBuffer(voiceName, fileBuffer);
+    const clonedVoice = await PlayHT.instantCloneFromBuffer(voiceName, fileBuffer);
 
     res.status(200).json(clonedVoice);
   } catch (error: any) {

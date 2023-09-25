@@ -1,11 +1,11 @@
-import * as PlayHTAPI from 'playht';
+import * as PlayHT from 'playht';
 import express from 'express';
 import dotenv from 'dotenv';
 import { streamGptText } from './streamGptText.js';
 dotenv.config();
 
 // Initialize the SDK
-PlayHTAPI.init({
+PlayHT.init({
   apiKey:
     process.env.PLAYHT_API_KEY ||
     (function () {
@@ -35,7 +35,7 @@ app.get('/say-prompt', async (req, res, next) => {
     // Create a text stream from ChatGPT responses
     const gptStream = await streamGptText(prompt);
     // Generate a stream with PlayHT's API
-    const stream = await PlayHTAPI.streamSpeechFromInputStream(gptStream);
+    const stream = await PlayHT.streamSpeechFromInputStream(gptStream);
     stream.pipe(res);
   } catch (error) {
     console.error('Error:', error);

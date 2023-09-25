@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import * as PlayHTAPI from 'playht';
+import * as PlayHT from 'playht';
 
 export async function textToSpeech(req: Request, res: Response, next: NextFunction) {
   if (!req.body?.text) {
@@ -14,7 +14,7 @@ export async function textToSpeech(req: Request, res: Response, next: NextFuncti
   res.set('Content-Type', 'application/json');
   try {
     // Call the API
-    const generated = await PlayHTAPI.generateSpeech(text, { voiceEngine: voiceEngine, voiceId: voice });
+    const generated = await PlayHT.generateSpeech(text, { voiceEngine: voiceEngine, voiceId: voice });
 
     res.status(200).json(generated);
   } catch (error: any) {

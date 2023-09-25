@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
-import * as PlayHTAPI from 'playht';
+import * as PlayHT from 'playht';
 
 export async function listVoices(req: Request, res: Response, next: NextFunction) {
   res.set('Content-Type', 'application/json');
   try {
     // Call the API
-    const voices = await PlayHTAPI.listVoices();
+    const voices = await PlayHT.listVoices();
 
     res.status(200).json(voices);
   } catch (error: any) {
