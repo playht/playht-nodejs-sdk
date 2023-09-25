@@ -53,6 +53,49 @@ export type VoiceGender = 'male' | 'female';
 export type VoiceAgeGroup = 'youth' | 'adult' | 'senior';
 
 /**
+ * Potential values for emotions to be applied to speech. This includes generic emotions and gender-specific emotions.
+ * @typedef {(
+ *   'happy' |
+ *   'sad' |
+ *   'angry' |
+ *   'fearful' |
+ *   'disgust' |
+ *   'surprised' |
+ *   'female_happy' |
+ *   'female_sad' |
+ *   'female_angry' |
+ *   'female_fearful' |
+ *   'female_disgust' |
+ *   'female_surprised' |
+ *   'male_happy' |
+ *   'male_sad' |
+ *   'male_angry' |
+ *   'male_fearful' |
+ *   'male_disgust' |
+ *   'male_surprised'
+ * )} Emotion
+ */
+export type Emotion =
+  | 'happy'
+  | 'sad'
+  | 'angry'
+  | 'fearful'
+  | 'disgust'
+  | 'surprised'
+  | 'female_happy'
+  | 'female_sad'
+  | 'female_angry'
+  | 'female_fearful'
+  | 'female_disgust'
+  | 'female_surprised'
+  | 'male_happy'
+  | 'male_sad'
+  | 'male_angry'
+  | 'male_fearful'
+  | 'male_disgust'
+  | 'male_surprised';
+
+/**
  * Type representing detailed information about a voice.
  *
  * @typedef {Object} VoiceInfo
@@ -218,6 +261,15 @@ export type PlayHT10EngineStreamOptions = Omit<PlayHT10EngineOptions, 'outputFor
  * @property {number} [temperature] - A floating point number between 0, inclusive, and 2, inclusive. The temperature
  * parameter controls variance. Lower temperatures result in more predictable results. Higher temperatures allow each
  * run to vary more, creating voices that sound less like the baseline.
+ * @property {Emotion} [emotion] - An emotion to be applied to the speech. When using a stock voice or a cloned voice
+ * where gender was provided, genderless emotions can be used. For cloned voices with no gender set, use a gender
+ * prefixed emotion. Only supported when `voice_engine` is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [voiceGuidance] - A number between 1 and 6. Use lower numbers to reduce how unique your chosen
+ * voice will be compared to other voices. Higher numbers will maximize its individuality. Only supported when
+ * `voice_engine` is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [styleGuidance] - A number between 1 and 30. Use lower numbers to to reduce how strong your
+ * chosen emotion will be. Higher numbers will create a very emotional performance. Only supported when `voice_engine`
+ * is set to `PlayHT2.0`, and `voice` uses that engine.
  */
 export type PlayHT20EngineOptions = {
   voiceEngine: 'PlayHT2.0';
@@ -226,6 +278,9 @@ export type PlayHT20EngineOptions = {
   sampleRate?: number;
   seed?: number;
   temperature?: number;
+  emotion?: Emotion;
+  voiceGuidance?: number;
+  styleGuidance?: number;
 };
 
 /**
@@ -245,6 +300,15 @@ export type PlayHT20EngineOptions = {
  * @property {number} [temperature] - A floating point number between 0, inclusive, and 2, inclusive. The temperature
  * parameter controls variance. Lower temperatures result in more predictable results. Higher temperatures allow each
  * run to vary more, creating voices that sound less like the baseline.
+ * @property {Emotion} [emotion] - An emotion to be applied to the speech. When using a stock voice or a cloned voice
+ * where gender was provided, genderless emotions can be used. For cloned voices with no gender set, use a gender
+ * prefixed emotion. Only supported when `voice_engine` is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [voiceGuidance] - A number between 1 and 6. Use lower numbers to reduce how unique your chosen
+ * voice will be compared to other voices. Higher numbers will maximize its individuality. Only supported when
+ * `voice_engine` is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [styleGuidance] - A number between 1 and 30. Use lower numbers to to reduce how strong your
+ * chosen emotion will be. Higher numbers will create a very emotional performance. Only supported when `voice_engine`
+ * is set to `PlayHT2.0`, and `voice` uses that engine.
  */
 export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat'> & {
   outputFormat?: OutputStreamFormat;

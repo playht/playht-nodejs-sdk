@@ -39,6 +39,10 @@ export function generateV2Speech(text: string, voice: string, options?: V2ApiOpt
     sample_rate: options?.sampleRate || 24000,
     seed: options?.seed,
     temperature: options?.temperature,
+    voice_engine: options?.voiceEngine,
+    emotion: options?.emotion,
+    voice_guidance: options?.voiceGuidance,
+    style_guidance: options?.styleGuidance,
   };
 
   return new Promise<V2SpeechResult>((resolve, reject) => {

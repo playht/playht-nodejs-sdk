@@ -1,4 +1,12 @@
-import type { OutputFormat, SpeechOptions, SpeechStreamOptions, SpeechOutput, OutputQuality } from '..';
+import type {
+  OutputFormat,
+  SpeechOptions,
+  SpeechStreamOptions,
+  SpeechOutput,
+  OutputQuality,
+  Emotion,
+  VoiceEngine,
+} from '..';
 import { PassThrough, pipeline } from 'node:stream';
 import { promisify } from 'node:util';
 import PQueue from 'p-queue';
@@ -18,12 +26,16 @@ export type V1ApiOptions = {
 };
 
 export type V2ApiOptions = {
+  voiceEngine: VoiceEngine;
   quality?: string;
   outputFormat?: OutputFormat;
   speed?: number;
   sampleRate?: number;
   seed?: number;
   temperature?: number;
+  emotion?: Emotion;
+  voiceGuidance?: number;
+  styleGuidance?: number;
 };
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
@@ -114,14 +126,24 @@ function toV2Options(options: SpeechOptionsWithVoiceID): V2ApiOptions {
   if (options.voiceEngine !== 'PlayHT1.0' && options.voiceEngine !== 'PlayHT2.0') {
     throw new Error("Invalid engine. Expected 'PlayHT1.0' or 'PlayHT2.0'");
   }
-  return {
+
+  const v2Options: V2ApiOptions = {
     quality: options.quality,
     outputFormat: options.outputFormat,
     speed: options.speed,
     sampleRate: options.sampleRate,
     seed: options.seed,
     temperature: options.temperature,
+    voiceEngine: options.voiceEngine,
   };
+
+  if (options.voiceEngine === 'PlayHT2.0') {
+    v2Options.emotion = options.emotion;
+    v2Options.voiceGuidance = options.voiceGuidance;
+    v2Options.styleGuidance = options.styleGuidance;
+  }
+
+  return v2Options;
 }
 
 function toV1Options(options: SpeechOptionsWithVoiceID): V1ApiOptions {

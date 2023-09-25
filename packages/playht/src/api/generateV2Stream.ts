@@ -32,6 +32,10 @@ export async function generateV2Stream(
       sample_rate: options?.sampleRate || 24000,
       seed: options?.seed,
       temperature: options?.temperature,
+      voice_engine: options?.voiceEngine,
+      emotion: options?.emotion,
+      voice_guidance: options?.voiceGuidance,
+      style_guidance: options?.styleGuidance,
     },
   };
 
