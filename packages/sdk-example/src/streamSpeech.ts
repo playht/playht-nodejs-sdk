@@ -23,7 +23,7 @@ export async function streamSpeech(req: Request, res: Response, next: NextFuncti
   try {
     // Call the API
     const stream = await PlayHT.streamSpeech(text, { voiceEngine: voiceEngine, voiceId: voice });
-    await stream.pipe(res);
+    stream.pipe(res);
   } catch (error: any) {
     res.statusMessage = error?.message;
     res.status(error?.status || 500).send();
