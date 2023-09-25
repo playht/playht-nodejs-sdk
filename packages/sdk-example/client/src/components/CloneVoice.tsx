@@ -50,7 +50,7 @@ export const CloneVoice: React.FC<CloneVoiceProps> = ({ setSelectedVoice }) => {
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-2xl mb-4">Clone a Voice</h2>
+      <h2 className="text-2xl font-semibold mb-4">Clone a voice</h2>
       {errorMessage && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
           {errorMessage}
