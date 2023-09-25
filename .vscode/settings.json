@@ -1,10 +1,6 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "eslint.packageManager": "yarn",
-  "eslint.workingDirectories": [
-    "packages/playht",
-    "packages/sdk-example"
-  ],
+  "eslint.workingDirectories": ["packages/playht", "packages/sdk-example"],
   "files.exclude": {
     "**/node_modules": true,
     "**/dist": true
@@ -12,5 +8,6 @@
   "search.exclude": {
     "**/node_modules": true,
     "**/dist": true
-  }
+  },
+  "jest.jestCommandLine": "node --experimental-vm-modules node_modules/.bin/jest --config packages/playht/jest.config.mjs"
 }
