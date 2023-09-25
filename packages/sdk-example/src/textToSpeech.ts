@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import * as PlayHTAPI from '@playht/playht';
+import * as PlayHTAPI from 'playht';
 
 export async function textToSpeech(req: Request, res: Response, next: NextFunction) {
   if (!req.body?.text) {

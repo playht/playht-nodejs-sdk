@@ -1,8 +1,12 @@
 {
   "private": true,
   "scripts": {
-    "build": "yarn workspace @playht/playht build && yarn workspace play-sdk-example build",
-    "start": "yarn build && yarn workspace play-sdk-example start"
+    "build:sdk": "yarn workspace playht build",
+    "build:gpt-example": "yarn workspace gpt-example build",
+    "build:sdk-example": "yarn workspace sdk-example build",
+    "build:all": "yarn build:sdk && yarn build:gpt-example && yarn build:sdk-example",
+    "start:sdk-example": "yarn build:sdk-example && yarn workspace sdk-example start",
+    "start:gpt-example": "yarn build:gpt-example && yarn workspace gpt-example start"
   },
   "workspaces": [
     "packages/*"

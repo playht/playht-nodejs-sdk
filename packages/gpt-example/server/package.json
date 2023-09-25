@@ -8,11 +8,11 @@
     "dev": "nodemon --ext ts,tsx --watch 'src/**/*.ts' --watch '../client/src/**/*.tsx' --exec \"yarn run build && cd ../client && yarn build && cd ../server && yarn run start\""
   },
   "dependencies": {
-    "@playht/playht": "0.0.4",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "openai": "^4.8.0",
-    "p-queue": "^7.4.1"
+    "p-queue": "^7.4.1",
+    "playht": "0.9.0-beta"
   },
   "devDependencies": {
     "@types/express": "^4.17.17",
@@ -25,6 +25,6 @@
     "typescript": "^5.2.2"
   },
   "resolutions": {
-    "@playht/playht": "portal:../../playht"
+    "playht": "portal:../../playht"
   }
 }

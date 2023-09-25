@@ -169,15 +169,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playht/playht@portal:../playht::locator=play-sdk-example%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@playht/playht@portal:../playht::locator=play-sdk-example%40workspace%3A."
-  dependencies:
-    axios: ^1.4.0
-    file-type: ^18.5.0
-  languageName: node
-  linkType: soft
-
 "@tokenizer/token@npm:^0.3.0":
   version: 0.3.0
   resolution: "@tokenizer/token@npm:0.3.0"
@@ -1488,6 +1479,13 @@ __metadata:
   version: 1.8.1
   resolution: "etag@npm:1.8.1"
   checksum: 571aeb3dbe0f2bbd4e4fadbdb44f325fc75335cd5f6f6b6a091e6a06a9f25ed5392f0863c5442acb0646787446e816f13cbfc6edce5b07658541dff573cab1ff
+  languageName: node
+  linkType: hard
+
+"eventemitter3@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "eventemitter3@npm:5.0.1"
+  checksum: 543d6c858ab699303c3c32e0f0f47fc64d360bf73c3daf0ac0b5079710e340d6fe9f15487f94e66c629f5f82cd1a8678d692f3dbb6f6fcd1190e1b97fcad36f8
   languageName: node
   linkType: hard
 
@@ -2948,6 +2946,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"p-queue@npm:^7.4.1":
+  version: 7.4.1
+  resolution: "p-queue@npm:7.4.1"
+  dependencies:
+    eventemitter3: ^5.0.1
+    p-timeout: ^5.0.2
+  checksum: 1c6888aa994d399262a9fbdd49c7066f8359732397f7a42ecf03f22875a1d65899797b46413f97e44acc18dddafbcc101eb135c284714c931dbbc83c3967f450
+  languageName: node
+  linkType: hard
+
+"p-timeout@npm:^5.0.2":
+  version: 5.1.0
+  resolution: "p-timeout@npm:5.1.0"
+  checksum: f5cd4e17301ff1ff1d8dbf2817df0ad88c6bba99349fc24d8d181827176ad4f8aca649190b8a5b1a428dfd6ddc091af4606835d3e0cb0656e04045da5c9e270c
+  languageName: node
+  linkType: hard
+
 "parent-module@npm:^1.0.0":
   version: 1.0.1
   resolution: "parent-module@npm:1.0.1"
@@ -3030,30 +3045,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"play-sdk-example@workspace:.":
+"playht@portal:../playht::locator=sdk-example%40workspace%3A.":
   version: 0.0.0-use.local
-  resolution: "play-sdk-example@workspace:."
+  resolution: "playht@portal:../playht::locator=sdk-example%40workspace%3A."
   dependencies:
-    "@playht/playht": 0.0.4
-    "@types/cors": ^2.8.14
-    "@types/express": ^4.17.17
-    "@types/multer": ^1.4.7
-    "@types/node": ^20.5.9
-    "@typescript-eslint/eslint-plugin": ^6.4.1
-    "@typescript-eslint/parser": ^6.4.1
-    cors: ^2.8.5
-    dotenv: ^16.3.1
-    eslint: ^8.47.0
-    eslint-config-prettier: ^9.0.0
-    eslint-plugin-import: ^2.28.1
-    express: ^4.18.2
-    multer: ^1.4.5-lts.1
-    node-fetch: ^2
-    nodemon: ^3.0.1
-    prettier: 3.0.2
-    ts-node: ^10.9.1
-    typescript: ^5.1.6
-  languageName: unknown
+    axios: ^1.4.0
+    file-type: ^18.5.0
+    p-queue: ^7.4.1
+  languageName: node
   linkType: soft
 
 "prelude-ls@npm:^1.2.1":
@@ -3320,6 +3319,32 @@ __metadata:
   checksum: cab8f25ae6f1434abee8d80023d7e72b598cf1327164ddab31003c51215526801e40b66c5e65d658a0af1e9d6478cadcb4c745f4bd6751f97d8644786c0978b0
   languageName: node
   linkType: hard
+
+"sdk-example@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "sdk-example@workspace:."
+  dependencies:
+    "@types/cors": ^2.8.14
+    "@types/express": ^4.17.17
+    "@types/multer": ^1.4.7
+    "@types/node": ^20.5.9
+    "@typescript-eslint/eslint-plugin": ^6.4.1
+    "@typescript-eslint/parser": ^6.4.1
+    cors: ^2.8.5
+    dotenv: ^16.3.1
+    eslint: ^8.47.0
+    eslint-config-prettier: ^9.0.0
+    eslint-plugin-import: ^2.28.1
+    express: ^4.18.2
+    multer: ^1.4.5-lts.1
+    node-fetch: ^2
+    nodemon: ^3.0.1
+    playht: 0.9.0-beta
+    prettier: 3.0.2
+    ts-node: ^10.9.1
+    typescript: ^5.1.6
+  languageName: unknown
+  linkType: soft
 
 "semver@npm:^6.3.1":
   version: 6.3.1

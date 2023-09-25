@@ -169,15 +169,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playht/playht@portal:../../playht::locator=server%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@playht/playht@portal:../../playht::locator=server%40workspace%3A."
-  dependencies:
-    axios: ^1.4.0
-    file-type: ^18.5.0
-  languageName: node
-  linkType: soft
-
 "@tokenizer/token@npm:^0.3.0":
   version: 0.3.0
   resolution: "@tokenizer/token@npm:0.3.0"
@@ -2519,6 +2510,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"playht@portal:../../playht::locator=server%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "playht@portal:../../playht::locator=server%40workspace%3A."
+  dependencies:
+    axios: ^1.4.0
+    file-type: ^18.5.0
+    p-queue: ^7.4.1
+  languageName: node
+  linkType: soft
+
 "prelude-ls@npm:^1.2.1":
   version: 1.2.1
   resolution: "prelude-ls@npm:1.2.1"
@@ -2734,7 +2735,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "server@workspace:."
   dependencies:
-    "@playht/playht": 0.0.4
     "@types/express": ^4.17.17
     "@types/node": ^20.6.2
     "@typescript-eslint/eslint-plugin": ^6.0.0
@@ -2745,6 +2745,7 @@ __metadata:
     nodemon: ^3.0.1
     openai: ^4.8.0
     p-queue: ^7.4.1
+    playht: 0.9.0-beta
     ts-node: ^10.9.1
     typescript: ^5.2.2
   languageName: unknown

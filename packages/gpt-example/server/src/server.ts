@@ -1,4 +1,4 @@
-import * as PlayHTAPI from '@playht/playht';
+import * as PlayHTAPI from 'playht';
 import express from 'express';
 import dotenv from 'dotenv';
 import { streamGptText } from './streamGptText.js';

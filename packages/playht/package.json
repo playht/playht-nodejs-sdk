@@ -1,10 +1,6 @@
 {
-  "name": "@playht/playht",
-  "version": "0.0.4",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/",
-    "access": "restricted"
-  },
+  "name": "playht",
+  "version": "0.9.0-beta",
   "description": "NodeJS SDK for PlayHT generative AI text-to-speech APIs",
   "files": [
     "dist/**/*"

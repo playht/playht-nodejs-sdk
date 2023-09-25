@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import multer, { memoryStorage } from 'multer';
-import * as PlayHTAPI from '@playht/playht';
+import * as PlayHTAPI from 'playht';
 import { textToSpeech } from './textToSpeech.js';
 import { streamSpeech } from './streamSpeech.js';
 import { listVoices } from './listVoices.js';
