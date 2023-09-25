@@ -1,5 +1,6 @@
 /* eslint-disable no-process-env */
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import multer, { memoryStorage } from 'multer';
 import * as PlayHTAPI from '@playht/playht';
@@ -24,6 +25,8 @@ PlayHTAPI.init({
 
 const app = express();
 
+app.use(cors());
+
 // Configure multer to store the uploaded file in memory
 const storage = memoryStorage();
 const upload = multer({ storage: storage });
@@ -34,7 +37,7 @@ app.post('/textToSpeech', textToSpeech);
 app.get('/listVoices', listVoices);
 app.get('/streamSpeech', streamSpeech);
 app.post('/uploadInstantClone', upload.single('audioFile'), uploadInstantClone);
-app.use('/', express.static('public'));
+app.use('/', express.static('client/dist'));
 
 app.listen(3000, () => {
   console.log('PlayHT-API-Example app is listening on port 3000.');

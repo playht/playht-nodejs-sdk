@@ -1,0 +1,8 @@
+.yarn/
+dist/
+.idea/
+
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
