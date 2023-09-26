@@ -443,7 +443,7 @@ export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInf
  * @param {string} [mimeType] - Optional MIME type for the source audio file.
  * @returns {Promise<VoiceInfo>} - A promise that resolves to a voice information object for the generated voice.
  */
-export async function instantCloneFromBuffer(
+export async function instantCloneFromFile(
   voiceName: string,
   fileBlob: Buffer,
   voiceGender?: VoiceGender,
