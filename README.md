@@ -13,7 +13,7 @@
 
 ---
 
-The PlayHT SDK provides easy to use methods that wrap the [PlayHT API](https://docs.play.ht/reference/api-getting-started).
+The PlayHT SDK provides easy to use methods to wrap the [PlayHT API](https://docs.play.ht/reference/api-getting-started).
 
 # Installation
 
@@ -32,7 +32,7 @@ yarn add playht
 
 # Usage
 
-Before using the API, you need to generate an API Secret Key and obtain your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/studio/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
+Before using the SDK, you need to generate an API Secret Key and obtain your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/studio/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
 
 Import methods from the library and call `init()` with your credentials to set up the SDK:
 
@@ -69,7 +69,7 @@ For more speech generation options, see [Generating Speech Options](#generating-
 
 ## Streaming Speech
 
-To stream audio from text using the default settings, call the `streamSpeech()` method with the text you wish to convert and a writable stream where you want the audio bytes to be piped to. For example to write it into a file:
+The `streamSpeech()` method streams audio from text. It returns a readable stream where the audio bytes will flow to as soon as they're ready. For example, to use the default settings to convert text into a audio stream and write it into a file:
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -82,21 +82,65 @@ const fileStream = fs.createWriteStream('hello-playht.mp3');
 const stream = await PlayHT.streamSpeech('This sounds very realistic.');
 
 // Pipe stream into file
-await stream.pipe(fileStream);
+stream.pipe(fileStream);
 ```
+
+For more speech generation options, see [Generating Speech Options](#generating-speech-options) below.
+
+**_Note: For lowest possible latency, use the streaming API with a PlayHT 2.0 voice._**
+
+## Streaming Speech From Input Stream
+
+The `streamSpeechFromInputStream()` method allows you to stream audio from a text stream input. It returns a readable stream where the audio bytes will flow to. For example, to convert a text stream into an audio file using the default settings:
+
+```javascript
+import * as PlayHT from 'playht';
+import { Readable } from 'stream';
+import fs from 'fs';
+
+// Create a test stream
+const textStream = new Readable({
+  read() {
+    this.push('You can stream');
+    this.push('text right into');
+    this.push('an audio stream!');
+    this.push(null); // End of data
+  },
+});
+
+// Stream audio from text
+const stream = await PlayHT.streamSpeechFromInputStream(textStream, {
+  voiceEngine: 'PlayHT1.0',
+  voiceId: 'larry',
+});
+
+// Create a file stream
+const fileStream = fs.createWriteStream('hello-playht.mp3');
+stream.pipe(fileStream);
+```
+
+For a full example of using the streaming speech from input stream API, see our [ChatGPT Integration Example](chatgpt-integration-example) below.
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options) below.
 
 ## Generating Speech Options
 
-Both `generateSpeech()` and `streamSpeech()` methods accept an optional `options` parameter. You can use it to generate audio with different voices, AI models, output file formats and much more. The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports 3 different types of models: 'PlayHT2.0', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](https://github.com/playht/playht-nodejs-sdk/blob/main/src/index.ts).
+All text-to-speech methods above accept an optional `options` parameter. You can use it to generate audio with different voices, AI models, output file formats and much more.
 
-To generate an audio file using a PlayHT 2.0 voice with options:
+The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports 3 different types of models: 'PlayHT2.0', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](packages/playht/src/index.ts).
+
+### PlayHT 2.0 Voices
+
+Our newest voice generation AI model enhanced from 1.0 with added emotion direction speech generation and instant cloning. English Only.
+
+The voice ids for these voices will look like urls.
+
+To generate an audio file using a PlayHT 2.0 voice with emotion and other options:
 
 ```javascript
 import * as PlayHT from 'playht';
 
-const text = "I'm a conversational voice with options.";
+const text = 'Am I a conversational voice with options?';
 
 // Generate audio from text
 const generated = await PlayHT.generateSpeech(text, {
@@ -106,6 +150,8 @@ const generated = await PlayHT.generateSpeech(text, {
   temperature: 1.5,
   quality: 'high',
   speed: 0.8,
+  emotion: 'fearful',
+  styleGuidance: 16,
 });
 
 // Grab the generated file URL
@@ -114,7 +160,11 @@ const { audioUrl } = generated;
 console.log('The url for the audio file is', audioUrl);
 ```
 
-If you want a PlayHT 1.0 voice instead:
+### PlayHT 1.0 Voices
+
+Lifelike voices ideal for expressive and conversational content. English Only.
+
+To generate audio with a PlayHT 1.0 voice:
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -136,6 +186,10 @@ const { audioUrl } = generated;
 
 console.log('The url for the audio file is', audioUrl);
 ```
+
+### Standard Voices
+
+For multi-lingual text-to speech generations, changing pitches, and adding pauses. Voices with reliable outputs and support for Speech Synthesis Markup Language (SSML). Supports 100+ Languages.
 
 And an example with standard voice in Spanish:
 
@@ -192,7 +246,7 @@ console.log(JSON.stringify(voices, null, 2));
 
 ## Instant Clone a Voice
 
-You can use the `instantCloneFromBuffer()` to create a cloned voice from audio data. The cloned voice is ready to be used straight away.
+You can use the `instantCloneFromFile()` to create a cloned voice from audio data. The cloned voice is ready to be used straight away.
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -202,7 +256,7 @@ import fs from 'fs';
 const fileBlob = fs.readFileSync('voice-to-clone.mp3');
 
 // Clone the voice
-const clonedVoice = await PlayHT.instantCloneFromBuffer('dolly', fileBlob, 'male');
+const clonedVoice = await PlayHT.instantCloneFromFile('dolly', fileBlob, 'male');
 
 // Display the cloned voice information in the console
 console.log('Cloned voice info\n', JSON.stringify(clonedVoice, null, 2));
@@ -213,7 +267,7 @@ const stream = await PlayHT.streamSpeech('Cloned voices sound realistic too.', {
   voiceEngine: clonedVoice.voiceEngine,
   voiceId: clonedVoice.id,
 });
-await stream.pipe(fileStream);
+stream.pipe(fileStream);
 ```
 
 # SDK Examples
@@ -245,7 +299,7 @@ yarn start
 
 Navigate to http://localhost:3000/ to see the example server.
 
-## ChatGPT integration example
+## ChatGPT Integration Example
 
 Create a new `.env` file in the `packages/gpt-example/server` folder by copying the `.env.example` file provided. Then edit the file with your credentials.
 This example requires your OpenAI credentials too, the the example `.env` file for details.
