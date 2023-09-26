@@ -3,7 +3,7 @@
     <img
       width="200"
       alt="playht logo"
-      src="https://github.com/playht/playht-nodejs-sdk/assets/3000200/f6385388-9f7d-4015-b900-f2340cc3fdff"
+      src="https://github.com/playht/playht-nodejs-sdk/assets/3000200/e1acecbe-efb9-4b06-8c32-eb25eee6f0f2"
     />
   </a>
 <p></p>
