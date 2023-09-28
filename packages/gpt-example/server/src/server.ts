@@ -35,7 +35,7 @@ app.get('/say-prompt', async (req, res, next) => {
     // Create a text stream from ChatGPT responses
     const gptStream = await streamGptText(prompt);
     // Generate a stream with PlayHT's API
-    const stream = await PlayHT.streamSpeechFromInputStream(gptStream);
+    const stream = await PlayHT.stream(gptStream);
     stream.pipe(res);
   } catch (error) {
     console.error('Error:', error);
