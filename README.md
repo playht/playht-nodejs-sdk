@@ -15,10 +15,31 @@
 
 The PlayHT SDK provides easy to use methods to wrap the [PlayHT API](https://docs.play.ht/reference/api-getting-started).
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+**Table of Contents**
+
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Generating Speech](#generating-speech)
+  - [Streaming Speech](#streaming-speech)
+  - [Streaming Speech From Input Stream](#streaming-speech-from-input-stream)
+  - [Generating Speech Options](#generating-speech-options)
+    - [PlayHT 2.0 Voices](#playht-20-voices)
+    - [PlayHT 1.0 Voices](#playht-10-voices)
+    - [Standard Voices](#standard-voices)
+  - [Listing Available Voices](#listing-available-voices)
+  - [Instant Clone a Voice](#instant-clone-a-voice)
+- [SDK Examples](#sdk-examples)
+  - [Example Server](#example-server)
+  - [ChatGPT Integration Example](#chatgpt-integration-example)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Installation
 
-This module is distributed via [npm](https://www.npmjs.com/) and
-should be installed as one of your project's dependencies:
+This module is distributed via [npm](https://www.npmjs.com/) and should be installed as one of your project's dependencies:
 
 ```shell
 npm install --save playht
