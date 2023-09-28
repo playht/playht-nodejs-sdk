@@ -5,6 +5,8 @@ describe('exists', () => {
   test('PlayHT', () => {
     expect(PlayHT).toBeDefined();
     expect(PlayHT.init).toBeDefined();
-    expect(typeof PlayHT.generateSpeech).toBe('function');
+    expect(typeof PlayHT.generate).toBe('function');
+    expect(typeof PlayHT.stream).toBe('function');
+    expect(typeof PlayHT.clone).toBe('function');
   });
 });

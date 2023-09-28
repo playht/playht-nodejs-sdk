@@ -6,24 +6,42 @@ import { convertResponseToVoiceInfo } from './availableClonedVoices';
 
 const API_URL = 'https://play.ht/api/v2/cloned-voices/instant';
 
-export async function instantCloneFromBufferInternal(
+export async function commonInstantClone(
   voiceName: string,
-  fileBlob: Buffer,
+  input: string | Buffer,
+  voiceGender?: VoiceGender,
+  mimeType?: string,
+): Promise<VoiceInfo> {
+  if (typeof input === 'string') {
+    return await internalInstantClone(voiceName, input, voiceGender, mimeType);
+  } else if (Buffer.isBuffer(input)) {
+    if (!mimeType) {
+      mimeType = (await fileTypeFromBuffer(input))?.mime;
+    }
+    if (!mimeType) {
+      throw new Error('Could not determine mime type of file. Please provide a mime type.');
+    }
+
+    return await internalInstantClone(voiceName, input, voiceGender, mimeType);
+  }
+
+  throw new Error('Invalid input type for cloning voice. Please provide a string or a buffer.');
+}
+
+async function internalInstantClone(
+  voiceName: string,
+  input: string | Buffer,
   voiceGender?: VoiceGender,
   mimeType?: string,
 ): Promise<VoiceInfo> {
   const { apiKey, userId } = APISettingsStore.getSettings();
 
-  if (!mimeType) {
-    mimeType = (await fileTypeFromBuffer(fileBlob))?.mime;
-  }
-
-  if (!mimeType) {
-    throw new Error('Could not determine mime type of file. Please provide a mime type.');
-  }
-
   const formData = new FormData();
-  formData.append('sample_file', new Blob([fileBlob], { type: mimeType }));
+  if (typeof input === 'string') {
+    formData.append('sample_file_url', input);
+  } else {
+    formData.append('sample_file', new Blob([input], { type: mimeType }));
+  }
   formData.append('voice_name', voiceName);
   if (voiceGender) {
     formData.append('gender', voiceGender);

@@ -1,7 +1,7 @@
 import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
-import { instantCloneFromBufferInternal } from './api/instantCloneInternal';
+import { commonInstantClone } from './api/instantCloneInternal';
 
 /**
  * Type representing the various voice engines that can be used for speech synthesis.
@@ -410,6 +410,28 @@ export async function stream(
 }
 
 /**
+ * Creates a new voice by cloning from audio file data.
+ *
+ * @async
+ * @param {string} voiceName - The name for the new voice.
+ * @param {string | Buffer} input - Either the audio file or an url to an audio file to use as the source for the new
+ * voice.
+ * @param {VoiceGender} [voiceGender] - The gender for the new voice. The AI model needs this information to
+ * support certain features.
+ * @param {string} [mimeType] - Optional MIME type for the source audio file. If not provided, the MIME type will be
+ * determined from the file data or url extension.
+ * @returns {Promise<VoiceInfo>} - A promise that resolves to a voice information object for the generated voice.
+ */
+export async function clone(
+  voiceName: string,
+  input: string | Buffer,
+  voiceGender?: VoiceGender,
+  mimeType?: string,
+): Promise<VoiceInfo> {
+  return await commonInstantClone(voiceName, input, voiceGender, mimeType);
+}
+
+/**
  * Lists all voices that match the given filters.
  *
  * @async
@@ -418,24 +440,4 @@ export async function stream(
  */
 export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
   return await commonGetAllVoices(filters);
-}
-
-/**
- * Creates a new voice by cloning from audio file data.
- *
- * @async
- * @param {string} voiceName - The name for the new voice.
- * @param {Buffer} fileBlob - The audio file to use as the source for the new voice.
- * @param {VoiceGender} [voiceGender] - The gender for the new voice. The AI model needs this information to
- * support certain features.
- * @param {string} [mimeType] - Optional MIME type for the source audio file.
- * @returns {Promise<VoiceInfo>} - A promise that resolves to a voice information object for the generated voice.
- */
-export async function instantCloneFromFile(
-  voiceName: string,
-  fileBlob: Buffer,
-  voiceGender?: VoiceGender,
-  mimeType?: string,
-): Promise<VoiceInfo> {
-  return await instantCloneFromBufferInternal(voiceName, fileBlob, voiceGender, mimeType);
 }
