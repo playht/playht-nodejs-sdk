@@ -40,7 +40,13 @@ export async function generateV2Stream(
   };
 
   const response = await axios(streamOptions).catch((error: any) => {
-    throw new Error(error);
+    if (error?.response?.data?.statusCode && error?.response?.data?.statusMessage) {
+      throw `Error ${error.response.data.statusCode}: ${error.response.data.statusMessage}`;
+    }
+    if (error?.message) {
+      throw `Error ${error.message}`;
+    }
+    throw 'Unknown failure when generating speech';
   });
 
   return response.data;
