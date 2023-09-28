@@ -35,6 +35,11 @@ export async function availableClonedVoices(): Promise<Array<VoiceInfo>> {
     .request(options)
     .then(({ data }: { data: Array<ClonedAPIVoiceInfo> }): Array<VoiceInfo> => data.map(convertResponseToVoiceInfo))
     .catch(function (error) {
-      throw new Error(error);
+      throw {
+        message: error.response?.data?.error_message || error.message,
+        code: error.code,
+        statusCode: error.response?.statusCode,
+        statusMessage: error.response?.statusMessage,
+      };
     });
 }

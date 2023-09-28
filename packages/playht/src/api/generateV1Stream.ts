@@ -14,7 +14,12 @@ export async function generateV1Stream(
     method: 'GET',
     responseType: 'stream',
   }).catch((error: any) => {
-    throw new Error(error);
+    throw {
+      message: error.response?.data?.error_message || error.message,
+      code: error.code,
+      statusCode: error.response?.statusCode,
+      statusMessage: error.response?.statusMessage,
+    };
   });
 
   return response.data;

@@ -135,7 +135,10 @@ function addDefaultOptions(options?: SpeechOptions): SpeechOptionsWithVoiceID {
 
 function toV2Options(options: SpeechOptionsWithVoiceID): V2ApiOptions {
   if (options.voiceEngine !== 'PlayHT1.0' && options.voiceEngine !== 'PlayHT2.0') {
-    throw new Error("Invalid engine. Expected 'PlayHT1.0' or 'PlayHT2.0'");
+    throw {
+      message: "Invalid engine. Expected 'PlayHT1.0' or 'PlayHT2.0'",
+      code: 'INVALID_ENGINE',
+    };
   }
 
   const v2Options: V2ApiOptions = {
@@ -159,7 +162,10 @@ function toV2Options(options: SpeechOptionsWithVoiceID): V2ApiOptions {
 
 function toV1Options(options: SpeechOptionsWithVoiceID): V1ApiOptions {
   if (options.voiceEngine !== 'Standard') {
-    throw new Error("Invalid engine. Expected 'Standard'");
+    throw {
+      message: "Invalid engine. Expected 'Standard'",
+      code: 'INVALID_ENGINE',
+    };
   }
   return {
     narrationStyle: options.narrationStyle,

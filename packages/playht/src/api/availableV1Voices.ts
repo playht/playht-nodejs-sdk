@@ -67,7 +67,12 @@ export async function availableV1Voices(): Promise<Array<VoiceInfo>> {
         })),
     )
     .catch(function (error) {
-      throw new Error(error);
+      throw {
+        message: error.response?.data?.error_message || error.message,
+        code: error.code,
+        statusCode: error.response?.statusCode,
+        statusMessage: error.response?.statusMessage,
+      };
     });
 
   _cacheUpdatedTime = Date.now();

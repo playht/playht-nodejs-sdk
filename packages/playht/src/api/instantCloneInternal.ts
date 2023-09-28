@@ -19,13 +19,19 @@ export async function commonInstantClone(
       mimeType = (await fileTypeFromBuffer(input))?.mime;
     }
     if (!mimeType) {
-      throw new Error('Could not determine mime type of file. Please provide a mime type.');
+      throw {
+        message: 'Could not determine mime type of file. Please provide a mime type.',
+        code: 'INVALID_MIME_TYPE',
+      };
     }
 
     return await internalInstantClone(voiceName, input, voiceGender, mimeType);
   }
 
-  throw new Error('Invalid input type for cloning voice. Please provide a string or a buffer.');
+  throw {
+    message: 'Invalid input type for cloning voice. Please provide a string or a buffer.',
+    code: 'INVALID_INPUT_TYPE_FOR_CLONING',
+  };
 }
 
 async function internalInstantClone(
@@ -61,8 +67,8 @@ async function internalInstantClone(
       throw {
         message: error.response?.data?.error_message || error.message,
         code: error.code,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
+        statusCode: error.response?.statusCode,
+        statusMessage: error.response?.statusMessage,
       };
     });
 }

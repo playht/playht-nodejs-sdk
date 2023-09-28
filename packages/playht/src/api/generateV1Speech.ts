@@ -54,7 +54,12 @@ export async function generateV1Speech(
     .request(convertOptions)
     .then(({ data }: { data: GenerationJobResponse }) => data)
     .catch((error: any) => {
-      throw new Error(error);
+      throw {
+        message: error.response?.data?.error_message || error.message,
+        code: error.code,
+        statusCode: error.response?.statusCode,
+        statusMessage: error.response?.statusMessage,
+      };
     });
 
   const transcriptionId = generationJobData.transcriptionId;
@@ -78,7 +83,12 @@ export async function generateV1Speech(
           return data;
         })
         .catch(function (error) {
-          throw new Error(error);
+          throw {
+            message: error.response?.data?.error_message || error.message,
+            code: error.code,
+            statusCode: error.response?.statusCode,
+            statusMessage: error.response?.statusMessage,
+          };
         });
       const { audioUrl, message, transcriped, converted } = generationStatus;
       if (transcriped || converted) {
@@ -92,6 +102,9 @@ export async function generateV1Speech(
       retries++;
       await new Promise((resolve) => setTimeout(resolve, WAIT_BETWEEN_STATUS_CHECKS_MS));
     } while (retries < MAX_STATUS_CHECKS_RETRIES);
-    throw new Error('Audio generation error. Max status check retries reached.');
+    throw {
+      message: 'Audio generation error. Max status check retries reached.',
+      code: 'MAX_STATUS_CHECK_RETRIES_REACHED',
+    };
   })();
 }
