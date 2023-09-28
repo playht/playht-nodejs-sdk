@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { VoiceData, uploadAndCloneVoice } from '../API/cloning.requests';
-import { Voice } from '../hooks/useVoices';
+import useVoices, { Voice } from '../hooks/useVoices';
 import { Spinner } from './Spinner';
 
 interface CloneVoiceProps {
@@ -11,6 +11,7 @@ export const CloneVoice: React.FC<CloneVoiceProps> = ({ setSelectedVoice }) => {
   const [voiceName, setVoiceName] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { refetch: refetchVoices } = useVoices();
 
   const [isLoading, setIsloading] = useState(false);
 
@@ -30,6 +31,8 @@ export const CloneVoice: React.FC<CloneVoiceProps> = ({ setSelectedVoice }) => {
       if (!data.id) {
         throw new Error('No voice ID returned.');
       }
+
+      await refetchVoices();
 
       setSelectedVoice({
         ...data,

@@ -15,7 +15,6 @@ export const SpeechGenerator: React.FC<{ selectedVoice: Voice }> = ({ selectedVo
   const handleGenerateSpeech = async () => {
     if (!audioElementRef.current) return;
     setLoading(true);
-    setAudioURL('');
     try {
       const apiResponse = await generateSpeech(text, selectedVoice);
       setAudioURL(apiResponse.audioUrl);
@@ -43,8 +42,7 @@ export const SpeechGenerator: React.FC<{ selectedVoice: Voice }> = ({ selectedVo
         audioElement.removeEventListener('error', onError);
       };
     } catch (error) {
-      console.log({ error });
-    } finally {
+      console.error(error);
       setLoading(false);
     }
   };

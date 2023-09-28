@@ -44,7 +44,8 @@ export const SpeechStreamer: React.FC<{ selectedVoice: Voice }> = ({ selectedVoi
         audioElement.removeEventListener('error', onError);
       };
     } catch (error) {
-      onError();
+      console.error(error);
+      setIsGeneratingStream(false);
     }
   };
 

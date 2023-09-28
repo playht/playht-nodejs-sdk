@@ -22,7 +22,7 @@ export async function streamSpeech(req: Request, res: Response, next: NextFuncti
   res.setHeader('Content-Type', 'audio/mpeg');
   try {
     // Call the API
-    const stream = await PlayHT.streamSpeech(text, { voiceEngine: voiceEngine, voiceId: voice });
+    const stream = await PlayHT.stream(text, { voiceEngine: voiceEngine, voiceId: voice });
     stream.pipe(res);
   } catch (error: any) {
     res.statusMessage = error?.message;

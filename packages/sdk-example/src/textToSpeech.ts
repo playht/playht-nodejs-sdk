@@ -14,7 +14,7 @@ export async function textToSpeech(req: Request, res: Response, next: NextFuncti
   res.set('Content-Type', 'application/json');
   try {
     // Call the API
-    const generated = await PlayHT.generateSpeech(text, {
+    const generated = await PlayHT.generate(text, {
       voiceEngine: voiceEngine,
       voiceId: voice,
     });
