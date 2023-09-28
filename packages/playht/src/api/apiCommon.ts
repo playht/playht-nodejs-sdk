@@ -64,6 +64,17 @@ export async function commonGenerateSpeech(input: string, optionsInput?: SpeechO
 }
 
 export async function commonGenerateStream(
+  input: string | NodeJS.ReadableStream,
+  optionsInput?: SpeechStreamOptions,
+): Promise<NodeJS.ReadableStream> {
+  if (typeof input === 'string') {
+    return await internalGenerateStreamFromString(input, optionsInput);
+  } else {
+    return await internalGenerateStreamFromInputStream(input, optionsInput);
+  }
+}
+
+export async function internalGenerateStreamFromString(
   input: string,
   optionsInput?: SpeechStreamOptions,
 ): Promise<NodeJS.ReadableStream> {
@@ -78,7 +89,7 @@ export async function commonGenerateStream(
   }
 }
 
-export async function commonGenerateStreamFromInputStream(
+export async function internalGenerateStreamFromInputStream(
   inputStream: NodeJS.ReadableStream,
   options?: SpeechStreamOptions,
 ): Promise<NodeJS.ReadableStream> {

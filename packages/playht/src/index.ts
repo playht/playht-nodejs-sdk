@@ -1,5 +1,5 @@
 import { APISettingsStore } from './api/APISettingsStore';
-import { commonGenerateSpeech, commonGenerateStream, commonGenerateStreamFromInputStream } from './api/apiCommon';
+import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { instantCloneFromBufferInternal } from './api/instantCloneInternal';
 
@@ -390,7 +390,7 @@ export function init(settings: APISettingsInput) {
  * @param {SpeechOptions} [options] - Optional parameters to customize speech generation.
  * @returns {Promise<SpeechOutput>} - A promise that resolves to the speech output.
  */
-export async function generateSpeech(input: string, options?: SpeechOptions): Promise<SpeechOutput> {
+export async function generate(input: string, options?: SpeechOptions): Promise<SpeechOutput> {
   return await commonGenerateSpeech(input, options);
 }
 
@@ -398,27 +398,15 @@ export async function generateSpeech(input: string, options?: SpeechOptions): Pr
  * Streams generated speech to the provided writable stream.
  *
  * @async
- * @param {string} input - The input text to generate speech from.
+ * @param {string | NodeJS.ReadableStream} input - Either the text string or a text stream to be used to generate speech.
  * @param {SpeechStreamOptions} [options] - Optional parameters to customize speech stream generation.
  * @returns {Promise<NodeJS.ReadableStream>} - A promise that resolves to a ReadableStream object that streams audio data.
  */
-export async function streamSpeech(input: string, options?: SpeechStreamOptions): Promise<NodeJS.ReadableStream> {
-  return await commonGenerateStream(input, options);
-}
-
-/**
- * Streams generated speech to the provided writable stream from an input text stream.
- *
- * @async
- * @param {NodeJS.ReadableStream} inputStream - The input stream of text to generate speech from.
- * @param {SpeechStreamOptions} [options] - Optional parameters to customize speech stream generation.
- * @returns {Promise<NodeJS.ReadableStream>} - A promise that resolves to a ReadableStream object that streams audio data.
- */
-export async function streamSpeechFromInputStream(
-  inputStream: NodeJS.ReadableStream,
+export async function stream(
+  input: string | NodeJS.ReadableStream,
   options?: SpeechStreamOptions,
 ): Promise<NodeJS.ReadableStream> {
-  return await commonGenerateStreamFromInputStream(inputStream, options);
+  return await commonGenerateStream(input, options);
 }
 
 /**
