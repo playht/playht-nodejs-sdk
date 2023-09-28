@@ -17,6 +17,7 @@ The PlayHT SDK provides easy to use methods to wrap the [PlayHT API](https://doc
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [Installation](#installation)
@@ -137,10 +138,7 @@ const textStream = new Readable({
 });
 
 // Stream audio from text
-const stream = await PlayHT.stream(textStream, {
-  voiceEngine: 'PlayHT1.0',
-  voiceId: 'larry',
-});
+const stream = await PlayHT.stream(textStream);
 
 // Create a file stream
 const fileStream = fs.createWriteStream('hello-playht.mp3');
@@ -352,7 +350,7 @@ Navigate to http://localhost:3000/ to see the example server.
 ## ChatGPT Integration Example
 
 Create a new `.env` file in the `packages/gpt-example/server` folder by copying the `.env.example` file provided. Then edit the file with your credentials.
-This example requires your OpenAI credentials too, the the example `.env` file for details.
+This example requires your [OpenAI credentials](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key) too, the the example `.env` file for details.
 
 To run it locally:
 

@@ -2,6 +2,8 @@
 
 This folder contains an express.js server implementation example for the PlayHT SDK.
 
+## Setup
+
 To authenticate requests, you need to generate an API Secret Key and obtain your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/studio/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
 
 Before running the examples, build the SDK:
