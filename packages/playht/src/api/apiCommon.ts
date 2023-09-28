@@ -195,8 +195,14 @@ async function audioStreamFromSentences(
     // Use an async immediately invoked function expression to enqueue a promise without blocking execution.
     orderedPromises.push(
       (async () => {
-        const currentStreamPromise = commonGenerateStream(sentence, options);
-        return await concurrencyQueue.add(() => currentStreamPromise);
+        try {
+          const currentStreamPromise = commonGenerateStream(sentence, options);
+          return await concurrencyQueue.add(() => currentStreamPromise);
+        } catch (error: any) {
+          // This is happenning asynchronously. Throwing will crash the process. Log the error and stop the
+          // loop later instead.
+          console.error(error);
+        }
       })(),
     );
   }
@@ -207,7 +213,10 @@ async function audioStreamFromSentences(
     const resultStream = await nextStreamPromise;
 
     if (!resultStream) {
-      throw new Error('Stream is undefined');
+      concurrencyQueue.pause();
+      concurrencyQueue.clear();
+      writableStream.end('Error generating audio stream.');
+      return;
     }
 
     // Pipe the result of the API call to the writable stream, keeping the writable stream open
