@@ -16,6 +16,7 @@ import { generateV1Stream } from './generateV1Stream';
 import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
+import { generateGRpcStream } from './generateGRpcStream';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -27,7 +28,7 @@ export type V1ApiOptions = {
 
 export type V2ApiOptions = {
   voiceEngine: VoiceEngine;
-  quality?: string;
+  quality?: OutputQuality;
   outputFormat?: OutputFormat;
   speed?: number;
   sampleRate?: number;
@@ -83,6 +84,9 @@ export async function internalGenerateStreamFromString(
   if (options.voiceEngine === 'Standard') {
     const v1Options = toV1Options(options);
     return await generateV1Stream(input, options.voiceId, v1Options);
+  } else if (options.voiceEngine === 'PlayHT2.0') {
+    const v2Options = toV2Options(options);
+    return await generateGRpcStream(input, options.voiceId, v2Options);
   } else {
     const v2Options = toV2Options(options, options.voiceEngine !== 'PlayHT1.0');
     return await generateV2Stream(input, options.voiceId, v2Options);
