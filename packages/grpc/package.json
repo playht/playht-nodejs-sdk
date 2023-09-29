@@ -2,8 +2,6 @@
     "name": "playht-grpc",
     "description": "The official Node.js / TypeScript library for the PlayHT API",
     "version": "0.1.0",
-    "homepage": "https://github.com/playht/playht-node",
-    "license": "BSD-3-Clause",
     "main": "lib/playht.js",
     "module": "lib/playht.m.js",
     "types": "lib/playht.d.ts",
