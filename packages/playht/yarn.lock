@@ -5071,13 +5071,13 @@ __metadata:
 
 "playht-grpc@file:../grpc::locator=playht%40workspace%3A.":
   version: 0.1.0
-  resolution: "playht-grpc@file:../grpc#../grpc::hash=82c7dc&locator=playht%40workspace%3A."
+  resolution: "playht-grpc@file:../grpc#../grpc::hash=6dbd7a&locator=playht%40workspace%3A."
   dependencies:
     "@grpc/grpc-js": ^1.9.2
     cross-fetch: ^4.0.0
     protobufjs: ^7.2.5
     tslib: ^2.1.0
-  checksum: a5cb5daa2093636f690657da9dee404b2028e2d3892b82a345a117e99a36637e0d136438317ceca9bd7aae293026702a741e94308ab358d08d2acb759d3c7395
+  checksum: 5bb2ded03a15ad73d4c8f3c3eeb38806a9137361bc7290d2d80b73a6dc19ad2282112e307fcbe786de8b54eddc8e3479b928688558f202a7715f7c18cfd92d51
   languageName: node
   linkType: hard
 
