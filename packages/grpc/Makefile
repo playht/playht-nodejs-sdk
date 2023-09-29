@@ -80,7 +80,7 @@ browser-test: test/browser.html
 	@open test/browser.html
 
 node_modules:
-	yarn install --non-interactive --frozen-lockfile --ignore-scripts
+	yarn install
 
 .PHONY: clean
 clean:
