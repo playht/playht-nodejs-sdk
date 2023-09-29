@@ -1,5 +1,5 @@
 {
-    "name": "playht",
+    "name": "playht-grpc",
     "description": "The official Node.js / TypeScript library for the PlayHT API",
     "version": "0.1.0",
     "homepage": "https://github.com/playht/playht-node",
