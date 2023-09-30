@@ -1,8 +1,8 @@
 import type { OutputQuality, OutputFormat } from '..';
 import type { V2ApiOptions } from './apiCommon';
 import { Readable } from 'stream';
-import { Format, Quality } from 'playht-grpc';
-import { playht } from 'playht-grpc/src/protos/api';
+import { Format, Quality } from '../grpc-client/client';
+import { playht } from '../grpc-client/protos/api';
 import { APISettingsStore } from './APISettingsStore';
 
 export async function generateGRpcStream(
