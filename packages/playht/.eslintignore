@@ -3,3 +3,4 @@ dist
 .eslintrc.cjs
 **/*.config.js
 **/*.config.mjs
+src/grpc-client/protos

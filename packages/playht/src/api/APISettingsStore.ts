@@ -1,5 +1,5 @@
 import type { APISettingsInput, VoiceEngine } from '..';
-import { Client } from 'playht-grpc';
+import { Client } from '../grpc-client/client';
 
 const DEFAULT_VOICE_ID = 's3://peregrine-voices/larry_ads3_parrot_saad/manifest.json';
 const DEFAULT_VOICE_ENGINE: VoiceEngine = 'PlayHT2.0';
