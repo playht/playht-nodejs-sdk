@@ -1,4 +1,4 @@
-import type { OutputQuality, OutputFormat } from '..';
+import type { OutputQuality, OutputFormat, Emotion } from '..';
 import type { V2ApiOptions } from './apiCommon';
 import { Readable } from 'stream';
 import { Format, Quality } from '../grpc-client/client';
@@ -12,6 +12,14 @@ export async function generateGRpcStream(
 ): Promise<NodeJS.ReadableStream> {
   const gRpcClient = APISettingsStore.getGRpcClient();
 
+  let emotionCode = null;
+  if (options.emotion) {
+    emotionCode = emotionStringToNumber[options.emotion];
+    if (!emotionCode) {
+      throw 'Invalid emotion. Please use a gendered emotion.';
+    }
+  }
+
   return convertToNodeReadable(
     await gRpcClient.tts({
       text: [input],
@@ -22,6 +30,9 @@ export async function generateGRpcStream(
       speed: options.speed,
       seed: options.seed,
       temperature: options.temperature,
+      styleGuidance: options.styleGuidance,
+      voiceGuidance: options.voiceGuidance,
+      speechAttributes: emotionCode,
     }),
   );
 }
@@ -63,16 +74,33 @@ const convertOutputFormat = (outputFormat?: OutputFormat): playht.v1.Format => {
 const convertQuality = (quality?: OutputQuality): playht.v1.Quality => {
   switch (quality) {
     case 'draft':
-      return Quality.QUALITY_DRAFT;
-    case 'high':
-      return Quality.QUALITY_HIGH;
-    case 'low':
-      return Quality.QUALITY_LOW;
-    case 'medium':
-      return Quality.QUALITY_MEDIUM;
-    case 'premium':
-      return Quality.QUALITY_PREMIUM;
     case undefined:
       return Quality.QUALITY_DRAFT;
+    case 'high':
+    case 'low':
+    case 'medium':
+    case 'premium':
+      return Quality.QUALITY_HIGH;
   }
 };
+
+export const emotionStringToNumber: Record<Emotion, number | undefined> = {
+  female_happy: 3,
+  female_sad: 5,
+  female_angry: 0,
+  female_fearful: 2,
+  female_disgust: 1,
+  female_surprised: 6,
+  male_happy: 10,
+  male_sad: 12,
+  male_angry: 7,
+  male_fearful: 9,
+  male_disgust: 8,
+  male_surprised: 13,
+  happy: undefined,
+  sad: undefined,
+  angry: undefined,
+  fearful: undefined,
+  disgust: undefined,
+  surprised: undefined,
+} as const;
