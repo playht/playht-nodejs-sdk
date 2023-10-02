@@ -176,7 +176,7 @@ const generated = await PlayHT.generate(text, {
   temperature: 1.5,
   quality: 'high',
   speed: 0.8,
-  emotion: 'fearful',
+  emotion: 'male_fearful',
   styleGuidance: 16,
 });
 

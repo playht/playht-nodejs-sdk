@@ -53,14 +53,8 @@ export type VoiceGender = 'male' | 'female';
 export type VoiceAgeGroup = 'youth' | 'adult' | 'senior';
 
 /**
- * Potential values for emotions to be applied to speech. This includes generic emotions and gender-specific emotions.
+ * Potential values for emotions to be applied to speech.
  * @typedef {(
- *   'happy' |
- *   'sad' |
- *   'angry' |
- *   'fearful' |
- *   'disgust' |
- *   'surprised' |
  *   'female_happy' |
  *   'female_sad' |
  *   'female_angry' |
@@ -76,12 +70,6 @@ export type VoiceAgeGroup = 'youth' | 'adult' | 'senior';
  * )} Emotion
  */
 export type Emotion =
-  | 'happy'
-  | 'sad'
-  | 'angry'
-  | 'fearful'
-  | 'disgust'
-  | 'surprised'
   | 'female_happy'
   | 'female_sad'
   | 'female_angry'
