@@ -318,6 +318,22 @@ const stream = await PlayHT.stream('Cloned voices are pure science.', {
 stream.pipe(fileStream);
 ```
 
+### Deleting a Cloned Voice
+
+Use the `deleteClone()` method to delete cloned voices.
+
+```javascript
+import * as PlayHT from 'playht';
+
+const cloneId = 's3://voice-cloning-zero-shot/abcdefgh-01d3-4613-asdf-9a8b7774dbc2/my-clone/manifest.json';
+
+const message = await PlayHT.deleteClone(cloneId);
+
+console.log('deleteClone result message is', message);
+```
+
+Keep in mind, this action cannot be undone.
+
 # SDK Examples
 
 This repository contains an implementation example for the API and an example of integrating with ChatGPT API.
