@@ -152,7 +152,10 @@ function getLastEvent(data: string): { eventName: string; eventData: any } {
   }
 
   const eventName = eventLine?.slice(EVENT_PREFIX.length);
-  const eventData = JSON.parse(dataLine?.slice(DATA_PREFIX.length));
+  let eventData = {}
+  if (eventName !== 'ping') {
+    eventData = JSON.parse(dataLine?.slice(DATA_PREFIX.length));
+  }
 
   return { eventName, eventData };
 }
