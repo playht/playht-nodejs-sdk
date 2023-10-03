@@ -4,7 +4,8 @@ import { fileTypeFromBuffer } from 'file-type';
 import { APISettingsStore } from './APISettingsStore';
 import { convertResponseToVoiceInfo } from './availableClonedVoices';
 
-const API_URL = 'https://play.ht/api/v2/cloned-voices/instant';
+const CLONE_API_URL = 'https://play.ht/api/v2/cloned-voices/instant';
+const DELETE_API_URL = 'https://play.ht/api/v2/cloned-voices';
 
 export async function commonInstantClone(
   voiceName: string,
@@ -54,7 +55,7 @@ async function internalInstantClone(
   }
 
   return await axios
-    .post(API_URL, formData, {
+    .post(CLONE_API_URL, formData, {
       headers: {
         accept: 'application/json',
         AUTHORIZATION: apiKey,
@@ -63,6 +64,34 @@ async function internalInstantClone(
       },
     })
     .then(({ data }) => convertResponseToVoiceInfo(data))
+    .catch(function (error) {
+      throw {
+        message: error.response?.data?.error_message || error.message,
+        code: error.code,
+        statusCode: error.response?.statusCode,
+        statusMessage: error.response?.statusMessage,
+      };
+    });
+}
+
+export async function internalDeleteClone(voiceId: string): Promise<string> {
+  const { apiKey, userId } = APISettingsStore.getSettings();
+
+  return await axios
+    .delete(DELETE_API_URL, {
+      headers: {
+        accept: 'application/json',
+        AUTHORIZATION: apiKey,
+        'X-USER-ID': userId,
+        'content-type': 'application/json',
+      },
+      data: {
+        voice_id: voiceId,
+      },
+    })
+    .then(({ data }) => {
+      return data.message;
+    })
     .catch(function (error) {
       throw {
         message: error.response?.data?.error_message || error.message,

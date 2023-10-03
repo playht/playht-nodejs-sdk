@@ -1,7 +1,7 @@
 import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
-import { commonInstantClone } from './api/instantCloneInternal';
+import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
 
 /**
  * Type representing the various voice engines that can be used for speech synthesis.
@@ -417,6 +417,17 @@ export async function clone(
   mimeType?: string,
 ): Promise<VoiceInfo> {
   return await commonInstantClone(voiceName, input, voiceGender, mimeType);
+}
+
+/**
+ * Deletes a cloned voice.
+ *
+ * @async
+ * @param {string} voiceId - The id of the voice to delete.
+ * @returns {Promise<string>} - A promise that resolves to a string indicating the status of the deletion.
+ */
+export async function deleteClone(voiceId: string): Promise<string> {
+  return await internalDeleteClone(voiceId);
 }
 
 /**
