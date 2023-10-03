@@ -1,11 +1,13 @@
 import type {
-  OutputFormat,
   SpeechOptions,
   SpeechStreamOptions,
   SpeechOutput,
   OutputQuality,
   Emotion,
   VoiceEngine,
+  PlayHT10OutputStreamFormat,
+  PlayHT20OutputStreamFormat,
+  OutputFormat,
 } from '..';
 import { PassThrough, pipeline } from 'node:stream';
 import { promisify } from 'node:util';
@@ -29,7 +31,7 @@ export type V1ApiOptions = {
 export type V2ApiOptions = {
   voiceEngine: VoiceEngine;
   quality?: OutputQuality;
-  outputFormat?: OutputFormat;
+  outputFormat?: OutputFormat | PlayHT10OutputStreamFormat | PlayHT20OutputStreamFormat;
   speed?: number;
   sampleRate?: number;
   seed?: number;

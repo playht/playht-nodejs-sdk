@@ -1,4 +1,3 @@
 # Ignore artifacts:
-dist
-example
+**/dist
 .yarn

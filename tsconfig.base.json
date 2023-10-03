@@ -15,5 +15,16 @@
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true
-  }
+  },
+  "references": [
+    {
+      "path": "./packages/playht"
+    },
+    {
+      "path": "./packages/gpt-example"
+    },
+    {
+      "path": "./packages/sdk-example"
+    }
+  ]
 }
