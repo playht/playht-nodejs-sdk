@@ -32,11 +32,18 @@ export type OutputQuality = 'draft' | 'low' | 'medium' | 'high' | 'premium';
 export type OutputFormat = 'mp3' | 'ogg' | 'wav' | 'flac' | 'mulaw';
 
 /**
- * Type representing the various formats that the output audio stream can have.
+ * Type representing the various formats that the PlayHT 1.0 model output audio stream can have.
  *
- * @typedef {'mp3' | 'mulaw'} OutputStreamFormat
+ * @typedef {'mp3' | 'mulaw'} PlayHT10OutputStreamFormat
  */
-export type OutputStreamFormat = 'mp3' | 'mulaw';
+export type PlayHT10OutputStreamFormat = 'mp3' | 'mulaw';
+
+/**
+ * Type representing the various formats that the PlayHT 2.0 model output audio stream can have.
+ *
+ * @typedef {'mp3' | 'mulaw'} PlayHT20OutputStreamFormat
+ */
+export type PlayHT20OutputStreamFormat = 'raw' | 'mp3' | 'wav' | 'ogg' | 'flac' | 'mulaw';
 
 /**
  * Type representing the different gender options available for voice selection.
@@ -229,7 +236,7 @@ export type PlayHT10EngineOptions = {
  * run to vary more, creating voices that sound less like the baseline.
  */
 export type PlayHT10EngineStreamOptions = Omit<PlayHT10EngineOptions, 'outputFormat'> & {
-  outputFormat?: OutputStreamFormat;
+  outputFormat?: PlayHT10OutputStreamFormat;
 };
 
 /**
@@ -299,7 +306,7 @@ export type PlayHT20EngineOptions = {
  * is set to `PlayHT2.0`, and `voice` uses that engine.
  */
 export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat'> & {
-  outputFormat?: OutputStreamFormat;
+  outputFormat?: PlayHT20OutputStreamFormat;
 };
 
 /**

@@ -1,4 +1,4 @@
-import type { OutputQuality, OutputFormat, Emotion } from '..';
+import type { OutputQuality, Emotion, PlayHT20OutputStreamFormat } from '..';
 import type { V2ApiOptions } from './apiCommon';
 import { Readable } from 'stream';
 import { Format, Quality } from '../grpc-client/client';
@@ -54,18 +54,20 @@ function convertToNodeReadable(stream: ReadableStream<Uint8Array>): NodeJS.Reada
   });
 }
 
-const convertOutputFormat = (outputFormat?: OutputFormat): playht.v1.Format => {
+const convertOutputFormat = (outputFormat?: PlayHT20OutputStreamFormat): playht.v1.Format => {
   switch (outputFormat) {
+    case 'raw':
+      return Format.FORMAT_RAW;
     case 'mp3':
       return Format.FORMAT_MP3;
-    case 'mulaw':
-      return Format.FORMAT_MULAW;
     case 'wav':
       return Format.FORMAT_WAV;
     case 'ogg':
       return Format.FORMAT_OGG;
     case 'flac':
       return Format.FORMAT_FLAC;
+    case 'mulaw':
+      return Format.FORMAT_MULAW;
     case undefined:
       return Format.FORMAT_MP3;
   }

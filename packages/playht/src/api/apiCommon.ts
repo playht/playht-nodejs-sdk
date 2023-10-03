@@ -1,11 +1,13 @@
 import type {
-  OutputFormat,
   SpeechOptions,
   SpeechStreamOptions,
   SpeechOutput,
   OutputQuality,
   Emotion,
   VoiceEngine,
+  PlayHT10OutputStreamFormat,
+  PlayHT20OutputStreamFormat,
+  OutputFormat,
 } from '..';
 import { PassThrough, pipeline } from 'node:stream';
 import { promisify } from 'node:util';
@@ -29,7 +31,7 @@ export type V1ApiOptions = {
 export type V2ApiOptions = {
   voiceEngine: VoiceEngine;
   quality?: OutputQuality;
-  outputFormat?: OutputFormat;
+  outputFormat?: OutputFormat | PlayHT10OutputStreamFormat | PlayHT20OutputStreamFormat;
   speed?: number;
   sampleRate?: number;
   seed?: number;
@@ -41,7 +43,7 @@ export type V2ApiOptions = {
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
 
-type SpeechOptionsWithVoiceID = SpeechOptions & { voiceId: string };
+type SpeechOptionsWithVoiceID = { voiceId: string } & (SpeechOptions | SpeechStreamOptions);
 
 export async function commonGenerateSpeech(input: string, optionsInput?: SpeechOptions): Promise<SpeechOutput> {
   const options = addDefaultOptions(optionsInput);
@@ -128,7 +130,7 @@ export function qualityToPreset(quality?: OutputQuality): Preset {
   return preset;
 }
 
-function addDefaultOptions(options?: SpeechOptions): SpeechOptionsWithVoiceID {
+function addDefaultOptions(options?: SpeechOptions | SpeechStreamOptions): SpeechOptionsWithVoiceID {
   const { defaultVoiceEngine, defaultVoiceId } = APISettingsStore.getSettings();
   return {
     voiceEngine: defaultVoiceEngine,
