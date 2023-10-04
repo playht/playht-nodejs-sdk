@@ -94,7 +94,7 @@ export class Client {
     this.lease = await this.leasePromise;
     this.leasePromise = undefined;
 
-    const address = this.inferenceAddress ?? this.lease.metadata.pigeon_url;
+    const address = this.inferenceAddress ?? this.lease.metadata.inference_address;
     if (!address) {
       throw new Error('Service address not found');
     }

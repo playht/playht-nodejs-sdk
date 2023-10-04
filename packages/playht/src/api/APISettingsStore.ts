@@ -18,7 +18,6 @@ export class APISettingsStore {
     this.gRpcClient = new Client({
       userId: settings.userId,
       apiKey: settings.apiKey,
-      _inferenceAddress: 'prod.turbo.play.ht:443',
     });
 
     APISettingsStore._instance = this;
