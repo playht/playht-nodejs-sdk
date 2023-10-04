@@ -86,8 +86,8 @@ export async function internalGenerateStreamFromString(
   if (options.voiceEngine === 'Standard') {
     const v1Options = toV1Options(options);
     return await generateV1Stream(input, options.voiceId, v1Options);
-  } else if (options.voiceEngine === 'PlayHT2.0') {
-    const v2Options = toV2Options(options);
+  } else if (options.voiceEngine === 'PlayHT2.0' || options.voiceEngine === 'PlayHT2.0-turbo') {
+    const v2Options = toV2Options(options, true);
     return await generateGRpcStream(input, options.voiceId, v2Options);
   } else {
     const v2Options = toV2Options(options, options.voiceEngine !== 'PlayHT1.0');
