@@ -99,10 +99,4 @@ export const emotionStringToNumber: Record<Emotion, number | undefined> = {
   male_fearful: 9,
   male_disgust: 8,
   male_surprised: 13,
-  happy: undefined,
-  sad: undefined,
-  angry: undefined,
-  fearful: undefined,
-  disgust: undefined,
-  surprised: undefined,
 } as const;
