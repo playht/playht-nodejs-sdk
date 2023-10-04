@@ -17,9 +17,9 @@
     "clean": "rm -rf ./dist && rm -f src/grpc-client/protos/*.js src/grpc-client/protos/*.d.ts",
     "build": "yarn build:protobufs && tsc --emitDeclarationOnly --outdir dist && yarn build:cjs && yarn build:esm",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
-    "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit",
+    "lint": "prettier --write . && eslint --ext .ts ./src --fix",
     "verify": "yarn check && yarn test",
-    "check": "tsc --noEmit && prettier --check . && eslint --ext .ts ./src",
+    "check": "yarn build:protobufs && tsc --noEmit && prettier --check . && eslint --ext .ts ./src",
     "release": "yarn && yarn verify && yarn build && npm publish",
     "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push --tags"
   },
