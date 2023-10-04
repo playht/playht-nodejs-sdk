@@ -6,9 +6,9 @@ import { commonInstantClone, internalDeleteClone } from './api/instantCloneInter
 /**
  * Type representing the various voice engines that can be used for speech synthesis.
  *
- * @typedef {'PlayHT2.0' | 'PlayHT1.0' | 'Standard'} VoiceEngine
+ * @typedef {'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard'} VoiceEngine
  */
-export type VoiceEngine = 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
+export type VoiceEngine = 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
 
 /**
  * Type representing the different input types that can be used to define the format of the input text.
@@ -298,7 +298,8 @@ export type PlayHT20EngineOptions = {
  * chosen emotion will be. Higher numbers will create a very emotional performance. Only supported when `voice_engine`
  * is set to `PlayHT2.0`, and `voice` uses that engine.
  */
-export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat'> & {
+export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
+  voiceEngine: 'PlayHT2.0' | 'PlayHT2.0-turbo';
   outputFormat?: OutputStreamFormat;
 };
 

@@ -40,7 +40,7 @@ export type V2ApiOptions = {
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
 
-type SpeechOptionsWithVoiceID = SpeechOptions & { voiceId: string };
+type SpeechOptionsWithVoiceID = (SpeechStreamOptions | SpeechOptions) & { voiceId: string };
 
 export async function commonGenerateSpeech(input: string, optionsInput?: SpeechOptions): Promise<SpeechOutput> {
   const options = addDefaultOptions(optionsInput);
@@ -84,7 +84,7 @@ export async function internalGenerateStreamFromString(
     const v1Options = toV1Options(options);
     return await generateV1Stream(input, options.voiceId, v1Options);
   } else {
-    const v2Options = toV2Options(options);
+    const v2Options = toV2Options(options, options.voiceEngine !== 'PlayHT1.0');
     return await generateV2Stream(input, options.voiceId, v2Options);
   }
 }
@@ -124,7 +124,7 @@ export function qualityToPreset(quality?: OutputQuality): Preset {
   return preset;
 }
 
-function addDefaultOptions(options?: SpeechOptions): SpeechOptionsWithVoiceID {
+function addDefaultOptions(options?: SpeechOptions | SpeechStreamOptions): SpeechOptionsWithVoiceID {
   const { defaultVoiceEngine, defaultVoiceId } = APISettingsStore.getSettings();
   return {
     voiceEngine: defaultVoiceEngine,
@@ -133,16 +133,31 @@ function addDefaultOptions(options?: SpeechOptions): SpeechOptionsWithVoiceID {
   };
 }
 
-function toV2Options(options: SpeechOptionsWithVoiceID): V2ApiOptions {
-  if (options.voiceEngine !== 'PlayHT1.0' && options.voiceEngine !== 'PlayHT2.0') {
+function toV2Options(options: SpeechOptionsWithVoiceID, isPlay20Streaming = false): V2ApiOptions {
+  if (options.voiceEngine === 'PlayHT2.0-turbo' && !isPlay20Streaming) {
     throw {
-      message: "Invalid engine. Expected 'PlayHT1.0' or 'PlayHT2.0'",
+      message: "Invalid engine. The 'PlayHT2.0-turbo' engine is only supported for streaming.",
       code: 'INVALID_ENGINE',
     };
   }
 
+  if (
+    options.voiceEngine !== 'PlayHT1.0' &&
+    options.voiceEngine !== 'PlayHT2.0' &&
+    options.voiceEngine !== 'PlayHT2.0-turbo'
+  ) {
+    throw {
+      message: "Invalid engine. Expected 'PlayHT2.0', 'PlayHT2.0-turbo' or 'PlayHT1.0'",
+      code: 'INVALID_ENGINE',
+    };
+  }
+
+  const quality =
+    options.quality ??
+    (options.voiceEngine === 'PlayHT2.0' ? 'high' : options.voiceEngine === 'PlayHT2.0-turbo' ? 'draft' : undefined);
+
   const v2Options: V2ApiOptions = {
-    quality: options.quality,
+    quality,
     outputFormat: options.outputFormat,
     speed: options.speed,
     sampleRate: options.sampleRate,
@@ -151,7 +166,7 @@ function toV2Options(options: SpeechOptionsWithVoiceID): V2ApiOptions {
     voiceEngine: options.voiceEngine,
   };
 
-  if (options.voiceEngine === 'PlayHT2.0') {
+  if (options.voiceEngine === 'PlayHT2.0' || options.voiceEngine === 'PlayHT2.0-turbo') {
     v2Options.emotion = options.emotion;
     v2Options.voiceGuidance = options.voiceGuidance;
     v2Options.styleGuidance = options.styleGuidance;
