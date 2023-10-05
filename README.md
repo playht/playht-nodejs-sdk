@@ -20,7 +20,7 @@ The PlayHT SDK provides easy to use methods to wrap the [PlayHT API](https://doc
 
 **Table of Contents**
 
-- [Installation](#installation)
+- [Usage](#usage)
   - [Initialising the library](#initialising-the-library)
   - [Generating Speech](#generating-speech)
   - [Streaming Speech](#streaming-speech)
@@ -37,7 +37,7 @@ The PlayHT SDK provides easy to use methods to wrap the [PlayHT API](https://doc
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Installation
+# Usage
 
 This module is distributed via [npm](https://www.npmjs.com/) and should be installed as one of your project's dependencies:
 
