@@ -30,6 +30,7 @@ The PlayHT SDK provides easy to use methods to wrap the [PlayHT API](https://doc
     - [Standard Voices](#standard-voices)
   - [Listing Available Voices](#listing-available-voices)
   - [Instant Clone a Voice](#instant-clone-a-voice)
+    - [Deleting a Cloned Voice](#deleting-a-cloned-voice)
 - [SDK Examples](#sdk-examples)
   - [Example Server](#example-server)
   - [ChatGPT Integration Example](#chatgpt-integration-example)
@@ -155,11 +156,11 @@ For more speech generation options, see [Generating Speech Options](#generating-
 
 All text-to-speech methods above accept an optional `options` parameter. You can use it to generate audio with different voices, AI models, output file formats and much more.
 
-The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports 3 different types of models: 'PlayHT2.0', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](packages/playht/src/index.ts).
+The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports different types of models: 'PlayHT2.0', 'PlayHT2.0-turbo', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](packages/playht/src/index.ts).
 
 ### PlayHT 2.0 Voices
 
-Our newest conversational voice generation AI model with added emotion direction and instant cloning. Our fastest model for streaming. Supports english only.
+Our newest conversational voice AI model with added emotion direction and instant cloning. Compatible with `PlayHT2.0-turbo`, our fastest model for streaming. Supports english only.
 
 To generate an audio file using a PlayHT 2.0 voice with emotion and other options:
 
@@ -177,13 +178,35 @@ const generated = await PlayHT.generate(text, {
   quality: 'high',
   speed: 0.8,
   emotion: 'male_fearful',
-  styleGuidance: 16,
+  styleGuidance: 20,
 });
 
 // Grab the generated file URL
 const { audioUrl } = generated;
 
 console.log('The url for the audio file is', audioUrl);
+```
+
+To stream using the `PlayHT2.0-turbo` model:
+
+```javascript
+import * as PlayHT from 'playht';
+import fs from 'fs';
+
+// Create a file stream
+const fileStream = fs.createWriteStream('turbo-playht.mp3');
+
+// Stream audio from text
+const stream = await PlayHT.stream('Stream realistic voices that say what you want!', {
+  voiceEngine: 'PlayHT2.0-turbo',
+  voiceId: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
+  outputFormat: 'mp3',
+  emotion: 'female_happy',
+  styleGuidance: 10,
+});
+
+// Pipe stream into file
+stream.pipe(fileStream);
 ```
 
 ### PlayHT 1.0 Voices
