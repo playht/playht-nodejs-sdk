@@ -16,7 +16,7 @@ export async function streamSpeech(req: Request, res: Response, next: NextFuncti
     (voiceEngine !== 'PlayHT2.0' && voiceEngine !== 'PlayHT1.0' && voiceEngine !== 'Standard')
   ) {
     res.status(400).send('Invalid voice params');
-    return next();
+    return;
   }
 
   res.setHeader('Content-Type', 'audio/mpeg');
@@ -28,5 +28,4 @@ export async function streamSpeech(req: Request, res: Response, next: NextFuncti
     res.statusMessage = error?.message;
     res.status(error?.status || 500).send();
   }
-  next();
 }
