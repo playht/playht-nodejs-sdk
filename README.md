@@ -395,6 +395,7 @@ To run it locally:
 
 ```shell
 cd packages/gpt-example
+yarn
 yarn install:all
 yarn start
 ```
