@@ -7,15 +7,14 @@ import { CloneVoice } from './components/CloneVoice';
 import { PlayhtLogo } from './components/PlayhtLogo';
 
 export const DEFAULT_VOICE = {
-  voiceEngine: 'PlayHT1.0',
-  id: 'larry',
-  name: 'Larry',
-  sampleUrl: 'https://peregrine-samples.s3.amazonaws.com/editor-samples/larry.wav',
+  voiceEngine: 'PlayHT2.0',
+  id: 's3://voice-cloning-zero-shot/09b5c0cc-a8f4-4450-aaab-3657b9965d0b/podcaster/manifest.json',
+  name: 'Matt',
+  sampleUrl: 'https://peregrine-samples.s3.amazonaws.com/parrot-samples/matt.wav',
   language: 'English (US)',
   languageCode: 'en-US',
   gender: 'male',
   ageGroup: 'adult',
-  styles: ['narrative'],
   isCloned: false,
 };
 
