@@ -9,9 +9,7 @@ import type {
   PlayHT20OutputStreamFormat,
   OutputFormat,
 } from '..';
-import { PassThrough, pipeline } from 'node:stream';
-import { promisify } from 'node:util';
-import PQueue from 'p-queue';
+import { PassThrough, Readable, Writable } from 'node:stream';
 import { APISettingsStore } from './APISettingsStore';
 import { generateV1Speech } from './generateV1Speech';
 import { generateV1Stream } from './generateV1Stream';
@@ -197,53 +195,73 @@ function toV1Options(options: SpeechOptionsWithVoiceID): V1ApiOptions {
   };
 }
 
-const pipelineAsync = promisify(pipeline);
-const CONCURRENCY = 5;
-
 async function audioStreamFromSentences(
-  sentencesStream: AsyncGenerator<string>,
+  sentencesStream: NodeJS.ReadableStream,
   writableStream: NodeJS.WritableStream,
   options?: SpeechStreamOptions,
 ) {
-  // Create a concurrency queue to call the streaming API
-  const concurrencyQueue = new PQueue({ concurrency: CONCURRENCY });
+  // Create a stream for promises
+  const promiseStream = new Readable({
+    objectMode: true,
+    read() {},
+  });
 
-  // Create an array to keep track of the order of the API calls
-  const orderedPromises = [];
+  function onError() {
+    writableStream.end('Error generating audio stream.');
+    console.error('Error generating audio stream');
+  }
 
   // For each sentence in the stream, add a task to the queue
-  for await (const sentence of sentencesStream) {
-    // Use an async immediately invoked function expression to enqueue a promise without blocking execution.
-    orderedPromises.push(
-      (async () => {
-        try {
-          const currentStreamPromise = commonGenerateStream(sentence, options);
-          return await concurrencyQueue.add(() => currentStreamPromise);
-        } catch (error: any) {
-          // This is happenning asynchronously. Throwing will crash the process. Log the error and stop the
-          // loop later instead.
-          console.error(error);
-        }
-      })(),
+  sentencesStream.on('data', async (data) => {
+    const sentence = data.toString();
+    const generatePromise = (async () => {
+      return await internalGenerateStreamFromString(sentence, options);
+    })();
+
+    promiseStream.push(generatePromise);
+  });
+
+  sentencesStream.on('end', async () => {
+    promiseStream.push(null);
+  });
+
+  sentencesStream.on('error', onError);
+
+  // Read from the promiseStream and await for each promise in order
+  const writeAudio = new Writable({
+    objectMode: true,
+    write: async (generatePromise, _, callback) => {
+      const resultStream = await generatePromise;
+      if (!resultStream) {
+        onError();
+        return;
+      }
+      await new Promise<void>((resolve) => {
+        resultStream.on('data', (chunk: Buffer) => {
+          writableStream.write(chunk);
+        });
+
+        resultStream.on('end', () => {
+          resolve();
+        });
+
+        resultStream.on('error', onError);
+      });
+      callback();
+    },
+  });
+
+  promiseStream.pipe(writeAudio);
+
+  writeAudio.on('error', onError);
+
+  promiseStream.on('end', () => {
+    setTimeout(
+      () =>
+        writeAudio.on('finish', () => {
+          writableStream.end();
+        }),
+      0,
     );
-  }
-
-  // Wait for each API call to finish in order
-  while (orderedPromises.length > 0) {
-    const nextStreamPromise = orderedPromises.shift();
-    const resultStream = await nextStreamPromise;
-
-    if (!resultStream) {
-      concurrencyQueue.pause();
-      concurrencyQueue.clear();
-      writableStream.end('Error generating audio stream.');
-      return;
-    }
-
-    // Pipe the result of the API call to the writable stream, keeping the writable stream open
-    await pipelineAsync(resultStream, writableStream, { end: false });
-  }
-
-  // Close the writable stream
-  writableStream.end();
+  });
 }
