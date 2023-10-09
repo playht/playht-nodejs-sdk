@@ -70,7 +70,8 @@ export class Client {
       headers: this.apiHeaders,
     });
     if (!response.ok) {
-      throw new Error(`Failed to get lease: ${response.status} ${response.statusText}`);
+      const responseJson = await response.json();
+      throw new Error(`Failed to get lease: ${response.status} ${response.statusText} - ${responseJson.error_message}`);
     }
     const data = new Uint8Array(await response.arrayBuffer());
     const lease = new Lease(data);
