@@ -21,7 +21,7 @@ export interface ClientOptions {
    */
   apiKey: string;
   /**
-   * URL to the PlayHT API, defaults to `https://play.ht/api`.
+   * URL to the PlayHT API, defaults to `https://api.play.ht/api`.
    * @internal
    */
   _apiUrl?: string;
@@ -53,7 +53,7 @@ export class Client {
     if (!options.userId || !options.apiKey) {
       throw new Error('userId and apiKey are required');
     }
-    this.apiUrl = options._apiUrl ?? 'https://play.ht/api';
+    this.apiUrl = options._apiUrl ?? 'https://api.play.ht/api';
     const authHeader = options.apiKey.startsWith('Bearer ') ? options.apiKey : `Bearer ${options.apiKey}`;
     this.apiHeaders = {
       'X-User-Id': options.userId,

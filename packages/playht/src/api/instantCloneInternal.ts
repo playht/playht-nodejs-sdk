@@ -4,8 +4,8 @@ import { fileTypeFromBuffer } from 'file-type';
 import { APISettingsStore } from './APISettingsStore';
 import { convertResponseToVoiceInfo } from './availableClonedVoices';
 
-const CLONE_API_URL = 'https://play.ht/api/v2/cloned-voices/instant';
-const DELETE_API_URL = 'https://play.ht/api/v2/cloned-voices';
+const CLONE_API_URL = 'https://api.play.ht/api/v2/cloned-voices/instant';
+const DELETE_API_URL = 'https://api.play.ht/api/v2/cloned-voices';
 
 export async function commonInstantClone(
   voiceName: string,

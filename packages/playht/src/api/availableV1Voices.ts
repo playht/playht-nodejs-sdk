@@ -25,7 +25,7 @@ export async function availableV1Voices(): Promise<Array<VoiceInfo>> {
   const { apiKey, userId } = APISettingsStore.getSettings();
   const options = {
     method: 'GET',
-    url: 'https://play.ht/api/v1/getVoices',
+    url: 'https://api.play.ht/api/v1/getVoices',
     headers: {
       accept: 'application/json',
       AUTHORIZATION: apiKey,

@@ -15,7 +15,7 @@ export async function generateV2Stream(
 
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
-    url: 'https://play.ht/api/v2/tts/stream',
+    url: 'https://api.play.ht/api/v2/tts/stream',
     headers: {
       accept,
       'content-type': 'application/json',

@@ -29,7 +29,7 @@ export async function availableV2Voices(): Promise<Array<VoiceInfo>> {
   const { apiKey, userId } = APISettingsStore.getSettings();
   const options = {
     method: 'GET',
-    url: 'https://play.ht/api/v2/voices',
+    url: 'https://api.play.ht/api/v2/voices',
     headers: {
       accept: 'application/json',
       AUTHORIZATION: apiKey,

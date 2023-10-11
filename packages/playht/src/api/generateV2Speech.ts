@@ -13,7 +13,7 @@ export type V2SpeechResult = {
 };
 
 export function generateV2Speech(text: string, voice: string, options?: V2ApiOptions): Promise<V2SpeechResult> {
-  const apiUrl = new URL('https://play.ht/api/v2/tts');
+  const apiUrl = new URL('https://api.play.ht/api/v2/tts');
   const { apiKey, userId } = APISettingsStore.getSettings();
 
   const requestOptions: https.RequestOptions = {

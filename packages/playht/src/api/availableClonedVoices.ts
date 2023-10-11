@@ -23,7 +23,7 @@ export async function availableClonedVoices(): Promise<Array<VoiceInfo>> {
   const { apiKey, userId } = APISettingsStore.getSettings();
   const options = {
     method: 'GET',
-    url: 'https://play.ht/api/v2/cloned-voices',
+    url: 'https://api.play.ht/api/v2/cloned-voices',
     headers: {
       accept: 'application/json',
       AUTHORIZATION: apiKey,

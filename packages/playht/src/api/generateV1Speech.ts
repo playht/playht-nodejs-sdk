@@ -33,7 +33,7 @@ export async function generateV1Speech(
   const { apiKey, userId } = APISettingsStore.getSettings();
   const convertOptions = {
     method: 'POST',
-    url: 'https://play.ht/api/v1/convert',
+    url: 'https://api.play.ht/api/v1/convert',
     headers: {
       accept: 'application/json',
       'content-type': 'application/json',
@@ -66,7 +66,7 @@ export async function generateV1Speech(
 
   const statusOptions = {
     method: 'GET',
-    url: `https://play.ht/api/v1/articleStatus?transcriptionId=${transcriptionId}`,
+    url: `https://api.play.ht/api/v1/articleStatus?transcriptionId=${transcriptionId}`,
     headers: {
       accept: 'application/json',
       AUTHORIZATION: apiKey,
