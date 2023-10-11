@@ -25,6 +25,10 @@ export function textStreamToSentences(inputStream: NodeJS.ReadableStream): NodeJ
     }
   });
 
+  inputStream.on('error', (err) => {
+    readableStream.emit('error', err);
+  });
+
   // Send the last sentence in the response
   inputStream.on('end', () => {
     if (textInput) {

@@ -206,9 +206,26 @@ async function audioStreamFromSentences(
     read() {},
   });
 
-  function onError() {
-    writableStream.end('Error generating audio stream.');
-    console.error('Error generating audio stream');
+  function onError(error?: any) {
+    let errorMessage = 'Error generating audio stream.';
+    if (error != null) {
+      const message = error.response?.data?.error_message || error.message;
+      const code = error.code;
+      const statusCode = error.response?.statusCode;
+      const statusMessage = error.response?.statusMessage;
+
+      errorMessage = `Error ${code || ''}`;
+      if (statusCode || statusMessage) {
+        errorMessage += ` - ${statusCode || ''} ${statusMessage || ''}`;
+      }
+      if (message) {
+        errorMessage += ` - ${message}`;
+      }
+    }
+
+    console.error(errorMessage);
+    writableStream.emit('error', new Error(errorMessage));
+    writableStream.end();
   }
 
   // For each sentence in the stream, add a task to the queue
@@ -231,29 +248,33 @@ async function audioStreamFromSentences(
   const writeAudio = new Writable({
     objectMode: true,
     write: async (generatePromise, _, callback) => {
-      const resultStream = await generatePromise;
-      if (!resultStream) {
-        onError();
-        return;
+      try {
+        const resultStream = await generatePromise;
+        if (!resultStream) {
+          onError();
+          return;
+        }
+        await new Promise<void>((resolve) => {
+          resultStream.on('data', (chunk: Buffer) => {
+            writableStream.write(chunk);
+          });
+
+          resultStream.on('end', () => {
+            resolve();
+          });
+
+          resultStream.on('error', onError);
+        });
+        callback();
+      } catch (error) {
+        onError(error);
       }
-      await new Promise<void>((resolve) => {
-        resultStream.on('data', (chunk: Buffer) => {
-          writableStream.write(chunk);
-        });
-
-        resultStream.on('end', () => {
-          resolve();
-        });
-
-        resultStream.on('error', onError);
-      });
-      callback();
     },
   });
 
-  promiseStream.pipe(writeAudio);
-
   writeAudio.on('error', onError);
+
+  promiseStream.on('error', onError);
 
   promiseStream.on('end', () => {
     setTimeout(
@@ -264,4 +285,6 @@ async function audioStreamFromSentences(
       0,
     );
   });
+
+  promiseStream.pipe(writeAudio);
 }
