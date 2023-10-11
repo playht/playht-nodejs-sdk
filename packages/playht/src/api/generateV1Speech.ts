@@ -22,8 +22,8 @@ type GenerationJobResponse = {
   wordCount: number;
 };
 
-const WAIT_BETWEEN_STATUS_CHECKS_MS = 150;
-const MAX_STATUS_CHECKS_RETRIES = 10;
+const WAIT_BETWEEN_STATUS_CHECKS_MS = 300;
+const MAX_STATUS_CHECKS_RETRIES = 20;
 
 export async function generateV1Speech(
   content: string,
