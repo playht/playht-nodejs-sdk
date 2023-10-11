@@ -3,7 +3,8 @@
   "version": "0.9.1",
   "description": "NodeJS SDK for PlayHT generative AI text-to-speech APIs",
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "README.md"
   ],
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
