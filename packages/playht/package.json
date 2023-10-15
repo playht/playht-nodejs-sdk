@@ -21,7 +21,7 @@
     "lint": "prettier --write . && eslint --ext .ts ./src --fix",
     "verify": "yarn check && yarn test",
     "check": "yarn build:protobufs && tsc --noEmit && prettier --check . && eslint --ext .ts ./src",
-    "release": "yarn && yarn verify && yarn build && npm publish",
+    "release": "yarn && yarn verify && yarn build && cp ../../README.md . && npm publish || true && rm README.md",
     "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push --tags"
   },
   "devDependencies": {
