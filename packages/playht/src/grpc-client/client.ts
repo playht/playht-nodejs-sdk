@@ -1,6 +1,6 @@
 import { credentials, Client as GrpcClient } from '@grpc/grpc-js';
 import fetch from 'cross-fetch';
-import * as apiProto from './protos/api';
+import apiProto from './protos/api';
 import { Lease } from './lease';
 import { ReadableStream } from './readable-stream';
 import { TTSStreamSource } from './tts-stream-source';
