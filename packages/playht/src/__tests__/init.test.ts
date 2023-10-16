@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import * as PlayHT from './index';
+import * as PlayHT from '../index';
 
 describe('exists', () => {
   test('PlayHT', () => {
