@@ -16,11 +16,11 @@
     "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outdir=dist/esm",
     "build:protobufs": "pbjs -t static-module -w commonjs -o src/grpc-client/protos/api.js src/grpc-client/protoFiles/api.proto && pbts -o src/grpc-client/protos/api.d.ts src/grpc-client/protos/api.js",
     "clean": "rm -rf ./dist && rm -f src/grpc-client/protos/*.js src/grpc-client/protos/*.d.ts",
-    "build": "yarn build:protobufs && tsc --emitDeclarationOnly --outdir dist && yarn build:cjs && yarn build:esm",
+    "build": "yarn build:protobufs && tsc -p tsconfig.json --emitDeclarationOnly --outdir dist && yarn build:cjs && yarn build:esm",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "lint": "prettier --write . && eslint --ext .ts ./src --fix",
     "verify": "yarn check && yarn test",
-    "check": "yarn build:protobufs && tsc --noEmit && prettier --check . && eslint --ext .ts ./src",
+    "check": "yarn build:protobufs && tsc -p tsconfig.json --noEmit && prettier --check . && eslint --ext .ts ./src",
     "release": "yarn && yarn verify && yarn build && cp ../../README.md . && npm publish || true && rm README.md",
     "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push --tags"
   },
