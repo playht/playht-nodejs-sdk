@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "name": "console-example",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Example usage for PlayHT SDK in the command line.",
+  "main": "build/sdkSamples.js",
+  "scripts": {
+    "build": "rm -rf ./build && tsc -b",
+    "start": "yarn build && node --no-warnings build/sdkSamples.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "playht": "latest"
+  },
+  "resolutions": {
+    "playht": "portal:../playht"
+  }
+}
