@@ -81,16 +81,17 @@ const convertOutputFormat = (outputFormat?: PlayHT20OutputStreamFormat): playht.
   }
 };
 
-const convertQuality = (quality?: OutputQuality): playht.v1.Quality => {
+const convertQuality = (quality?: OutputQuality): playht.v1.Quality | undefined => {
   switch (quality) {
     case 'draft':
-    case undefined:
       return Quality.QUALITY_DRAFT;
     case 'high':
     case 'low':
     case 'medium':
     case 'premium':
       return Quality.QUALITY_HIGH;
+    case undefined:
+      return undefined;
   }
 };
 

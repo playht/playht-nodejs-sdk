@@ -156,12 +156,8 @@ function toV2Options(options: SpeechOptionsWithVoiceID, isPlay20Streaming = fals
     };
   }
 
-  const quality =
-    options.quality ??
-    (options.voiceEngine === 'PlayHT2.0' ? 'high' : options.voiceEngine === 'PlayHT2.0-turbo' ? 'draft' : undefined);
-
   const v2Options: V2ApiOptions = {
-    quality,
+    quality: options.quality,
     outputFormat: options.outputFormat,
     speed: options.speed,
     sampleRate: options.sampleRate,
