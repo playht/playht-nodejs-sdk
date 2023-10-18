@@ -4,6 +4,8 @@ import { Readable } from 'stream';
 import { Format, Quality } from '../grpc-client/client';
 import { playht } from '../grpc-client/protos/api';
 import { APISettingsStore } from './APISettingsStore';
+import { splitSentences } from './sentenceSplit';
+import { GRPC_STREAMING_LIMITS } from './constants';
 
 export async function generateGRpcStream(
   input: string,
@@ -20,9 +22,15 @@ export async function generateGRpcStream(
     }
   }
 
+  const grpcInput = splitSentences(input);
+
+  if (grpcInput.length > GRPC_STREAMING_LIMITS.MAX_NUMBER_OF_LINES) {
+    throw 'Input too long. Please try with a shorter string.';
+  }
+
   return convertToNodeReadable(
     await gRpcClient.tts({
-      text: [input],
+      text: grpcInput,
       voice,
       quality: convertQuality(options.quality),
       format: convertOutputFormat(options.outputFormat),

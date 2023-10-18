@@ -1,6 +1,5 @@
 import { Readable } from 'stream';
-
-const PUNCTUATION_REGEX = /[.!?:…]/;
+import { PUNCTUATION_REGEX } from './constants';
 
 export function textStreamToSentences(inputStream: NodeJS.ReadableStream): NodeJS.ReadableStream {
   let textInput = '';
