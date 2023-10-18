@@ -18,14 +18,16 @@ export async function generateGRpcStream(
   if (options.emotion) {
     emotionCode = emotionStringToNumber[options.emotion];
     if (!emotionCode) {
-      throw 'Invalid emotion. Please use a gendered emotion.';
+      throw new Error(
+        `Invalid emotion "${options.emotion}". Valid values are: ${Object.keys(emotionStringToNumber).join(', ')}.`,
+      );
     }
   }
 
   const grpcInput = splitSentences(input);
 
   if (grpcInput.length > GRPC_STREAMING_LIMITS.MAX_NUMBER_OF_LINES) {
-    throw 'Input too long. Please try with a shorter string.';
+    throw new Error('Input too long. Please try with a shorter string.');
   }
 
   return convertToNodeReadable(
