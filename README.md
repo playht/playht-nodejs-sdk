@@ -131,8 +131,8 @@ import fs from 'fs';
 // Create a test stream
 const textStream = new Readable({
   read() {
-    this.push('You can stream');
-    this.push('text right into');
+    this.push('You can stream ');
+    this.push('text right into ');
     this.push('an audio stream!');
     this.push(null); // End of data
   },
