@@ -64,6 +64,4 @@ export const standardExamples = async () => {
   const { audioUrl } = generated;
 
   console.log('The url for the audio file is', audioUrl);
-
-  process.exit();
 };

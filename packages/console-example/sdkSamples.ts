@@ -27,3 +27,5 @@ process.on('unhandledRejection', (error) => {
 await playHT20Examples();
 await playHT10Examples();
 await standardExamples();
+
+process.exit();
