@@ -5,11 +5,13 @@ export const SHORT_SENTENCE_COUNT = 1;
 export function splitSentences(input: string): Array<string> {
   const sentences: Array<string> = [];
 
+  // Clean up the input
   let textInput = input
     .replace(/[\r\n]+/g, ' ')
     .replace(/\s+/g, ' ')
     .replace(/[“”]/g, '"')
     .replace(/…/g, '.');
+
   let punctuationMatch = textInput.match(PUNCTUATION_REGEX);
   while (punctuationMatch && punctuationMatch.index !== undefined) {
     const sentence = textInput.substring(0, punctuationMatch.index + 1);
@@ -42,8 +44,8 @@ export function splitSentences(input: string): Array<string> {
       }
 
       // Sentence too large. Try last comma, then last space.
-      const lastComma = sentence.lastIndexOf(',');
-      if (lastComma > 0 && lastComma < GRPC_STREAMING_LIMITS.LINE_MAX_LENGTH) {
+      const lastComma = sentence.lastIndexOf(',', GRPC_STREAMING_LIMITS.LINE_MAX_LENGTH - 1);
+      if (lastComma > 0) {
         const beforeComma = sentence.substring(0, lastComma + 1).trim();
         const afterComma = sentence.substring(lastComma + 1).trim();
         lines.push(beforeComma);
@@ -51,8 +53,8 @@ export function splitSentences(input: string): Array<string> {
         continue;
       }
 
-      const lastSpace = sentence.lastIndexOf(' ');
-      if (lastSpace > 0 && lastSpace < GRPC_STREAMING_LIMITS.LINE_MAX_LENGTH) {
+      const lastSpace = sentence.lastIndexOf(' ', GRPC_STREAMING_LIMITS.LINE_MAX_LENGTH - 1);
+      if (lastSpace > 0) {
         const beforeComma = sentence.substring(0, lastSpace + 1).trim();
         const afterComma = sentence.substring(lastSpace + 1).trim();
         lines.push(beforeComma);
