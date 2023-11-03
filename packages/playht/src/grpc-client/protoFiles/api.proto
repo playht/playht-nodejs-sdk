@@ -38,7 +38,6 @@ message Credentials {
 
 message Status {
   Code code = 1;
-  // TODO(nfc): We can either shove JSON in here or expand the proto def later.
   repeated string message = 2;
 }
 
@@ -75,11 +74,10 @@ message TtsParams {
   optional int32 speech_attributes = 14;
   // Default is -1
   optional int32 language_identifier = 15;
+  // Default is 1.0
+  optional float text_guidance = 16;
   
-  // TODO(nfc): Add this once streaming FT can handle multiple samples
-  // Default is 1, this will override `quality` if set.
-  // optional int32 num_autoregressive_samples = 16;
-  reserved 16;
+  reserved 17;
 
   // JSON string with other various parameters.
   optional string other = 99;
@@ -100,5 +98,4 @@ message TtsResponse {
   string id = 2;
   bytes data = 3;
   Status status = 4;
-  // TODO(nfc): Add whatever metadata we may need here.
 }
