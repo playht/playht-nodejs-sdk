@@ -97,9 +97,9 @@ export async function internalGenerateStreamFromInputStream(
   inputStream: NodeJS.ReadableStream,
   options?: SpeechStreamOptions,
 ): Promise<NodeJS.ReadableStream> {
-  const stentencesStream = textStreamToSentences(inputStream);
+  const sentencesStream = textStreamToSentences(inputStream);
   const passThrough = new PassThrough();
-  audioStreamFromSentences(stentencesStream, passThrough, options);
+  audioStreamFromSentences(sentencesStream, passThrough, options);
   return passThrough;
 }
 
