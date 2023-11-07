@@ -37,6 +37,7 @@ export type V2ApiOptions = {
   emotion?: Emotion;
   voiceGuidance?: number;
   styleGuidance?: number;
+  textGuidance?: number;
 };
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
@@ -170,6 +171,7 @@ function toV2Options(options: SpeechOptionsWithVoiceID, isPlay20Streaming = fals
     v2Options.emotion = options.emotion;
     v2Options.voiceGuidance = options.voiceGuidance;
     v2Options.styleGuidance = options.styleGuidance;
+    v2Options.textGuidance = options.textGuidance;
   }
 
   return v2Options;

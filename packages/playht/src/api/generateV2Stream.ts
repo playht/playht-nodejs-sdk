@@ -35,6 +35,7 @@ export async function generateV2Stream(
       voice_engine: options?.voiceEngine,
       emotion: options?.emotion,
       voice_guidance: options?.voiceGuidance,
+      text_guidance: options?.textGuidance,
       style_guidance: options?.styleGuidance,
     },
   };

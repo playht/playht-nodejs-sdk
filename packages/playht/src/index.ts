@@ -265,6 +265,11 @@ export type PlayHT10EngineStreamOptions = Omit<PlayHT10EngineOptions, 'outputFor
  * @property {number} [styleGuidance] - A number between 1 and 30. Use lower numbers to to reduce how strong your
  * chosen emotion will be. Higher numbers will create a very emotional performance. Only supported when `voice_engine`
  * is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [textGuidance] - A number between 1 and 2. This number influences how closely the generated
+ * speech adheres to the input text. Use lower values to create more fluid speech, but with a higher chance of
+ * deviating from the input text. Higher numbers will make the generated speech more accurate to the input text,
+ * ensuring that the words spoken align closely with the provided text. Only supported when `voice_engine` is set
+ * to `PlayHT2.0`, and `voice` uses that engine.
  */
 export type PlayHT20EngineOptions = {
   voiceEngine: 'PlayHT2.0';
@@ -276,6 +281,7 @@ export type PlayHT20EngineOptions = {
   emotion?: Emotion;
   voiceGuidance?: number;
   styleGuidance?: number;
+  textGuidance?: number;
 };
 
 /**
@@ -304,6 +310,11 @@ export type PlayHT20EngineOptions = {
  * @property {number} [styleGuidance] - A number between 1 and 30. Use lower numbers to to reduce how strong your
  * chosen emotion will be. Higher numbers will create a very emotional performance. Only supported when `voice_engine`
  * is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [textGuidance] - A number between 1 and 2. This number influences how closely the generated
+ * speech adheres to the input text. Use lower values to create more fluid speech, but with a higher chance of
+ * deviating from the input text. Higher numbers will make the generated speech more accurate to the input text,
+ * ensuring that the words spoken align closely with the provided text. Only supported when `voice_engine` is set
+ * to `PlayHT2.0`, and `voice` uses that engine.
  */
 export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
   voiceEngine: 'PlayHT2.0' | 'PlayHT2.0-turbo';

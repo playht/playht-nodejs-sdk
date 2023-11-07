@@ -42,6 +42,7 @@ export async function generateGRpcStream(
       temperature: options.temperature,
       styleGuidance: options.styleGuidance,
       voiceGuidance: options.voiceGuidance,
+      textGuidance: options.textGuidance,
       speechAttributes: emotionCode,
     }),
   );
