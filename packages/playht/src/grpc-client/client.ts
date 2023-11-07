@@ -20,47 +20,31 @@ export interface ClientOptions {
    * See https://docs.play.ht/reference/api-authentication
    */
   apiKey: string;
-  /**
-   * URL to the PlayHT API, defaults to `https://api.play.ht/api`.
-   * @internal
-   */
-  _apiUrl?: string;
-  /**
-   * Address to the inference service, overrides address returned by API.
-   * @internal
-   */
-  _inferenceAddress?: string;
-  /**
-   * Whether to use a insecure connection to the inference service, defaults to `false`.
-   * @internal
-   */
-  _insecure?: boolean;
 }
+
+const USE_INSECURE_CONNECTION = false;
 
 /** PlayHT Streaming TTS Client. */
 export class Client {
   private rpc?: { client: GrpcClient; address: string };
+  private premiumRpc?: { client: GrpcClient; address: string };
   private lease!: Lease;
   private leaseTimer?: NodeJS.Timeout;
   private leasePromise?: Promise<Lease>;
 
   private readonly apiUrl: string;
   private readonly apiHeaders: Record<string, string>;
-  private readonly inferenceAddress?: string;
-  private readonly insecure: boolean;
 
   constructor(options: ClientOptions) {
     if (!options.userId || !options.apiKey) {
       throw new Error('userId and apiKey are required');
     }
-    this.apiUrl = options._apiUrl ?? 'https://api.play.ht/api';
+    this.apiUrl = 'https://api.play.ht/api';
     const authHeader = options.apiKey.startsWith('Bearer ') ? options.apiKey : `Bearer ${options.apiKey}`;
     this.apiHeaders = {
       'X-User-Id': options.userId,
       Authorization: authHeader,
     };
-    this.inferenceAddress = options._inferenceAddress;
-    this.insecure = options._insecure ?? false;
     this.refreshLease();
   }
 
@@ -95,7 +79,7 @@ export class Client {
     this.lease = await this.leasePromise;
     this.leasePromise = undefined;
 
-    const address = this.inferenceAddress ?? this.lease.metadata.inference_address;
+    const address = this.lease.metadata.inference_address;
     if (!address) {
       throw new Error('Service address not found');
     }
@@ -106,8 +90,30 @@ export class Client {
 
     if (!this.rpc) {
       this.rpc = {
-        client: new GrpcClient(address, this.insecure ? credentials.createInsecure() : credentials.createSsl()),
-        address: address,
+        client: new GrpcClient(
+          address,
+          USE_INSECURE_CONNECTION ? credentials.createInsecure() : credentials.createSsl(),
+        ),
+        address,
+      };
+    }
+
+    const premiumAddress = this.lease.metadata.premium_inference_address;
+    if (!premiumAddress) {
+      throw new Error('Premium service address not found');
+    }
+    if (this.premiumRpc && this.premiumRpc.address !== premiumAddress) {
+      this.premiumRpc.client.close();
+      this.premiumRpc = undefined;
+    }
+
+    if (!this.premiumRpc) {
+      this.premiumRpc = {
+        client: new GrpcClient(
+          premiumAddress,
+          USE_INSECURE_CONNECTION ? credentials.createInsecure() : credentials.createSsl(),
+        ),
+        address: premiumAddress,
       };
     }
     const expiresIn = this.lease.expires.getTime() - Date.now();
@@ -116,13 +122,14 @@ export class Client {
   }
 
   /** Create a new TTS stream. */
-  async tts(params: TTSParams) {
+  async tts(isPremium: boolean, params: TTSParams) {
     await this.refreshLease();
     const request: apiProto.playht.v1.ITtsRequest = {
       params: params,
       lease: this.lease.data,
     };
-    const stream = new ReadableStream(new TTSStreamSource(request, this.rpc!.client));
+    const rpcClient = isPremium ? this.premiumRpc!.client : this.rpc!.client;
+    const stream = new ReadableStream(new TTSStreamSource(request, rpcClient));
     // fix for TypeScript not DOM types not including Symbol.asyncIterator in ReadableStream
     return stream as unknown as AsyncIterable<Uint8Array> & ReadableStream<Uint8Array>;
   }

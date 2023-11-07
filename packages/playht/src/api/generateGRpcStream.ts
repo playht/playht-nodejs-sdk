@@ -30,11 +30,14 @@ export async function generateGRpcStream(
     throw new Error('Input too long. Please try with a shorter string.');
   }
 
+  const quality = convertQuality(options.quality);
+  const isPremium = options.voiceEngine === 'PlayHT2.0' || (quality !== undefined && quality !== Quality.QUALITY_DRAFT);
+
   return convertToNodeReadable(
-    await gRpcClient.tts({
+    await gRpcClient.tts(isPremium, {
       text: grpcInput,
       voice,
-      quality: convertQuality(options.quality),
+      quality,
       format: convertOutputFormat(options.outputFormat),
       sampleRate: options.sampleRate,
       speed: options.speed,
