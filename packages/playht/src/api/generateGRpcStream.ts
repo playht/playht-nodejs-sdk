@@ -56,12 +56,16 @@ function convertToNodeReadable(stream: ReadableStream<Uint8Array>): NodeJS.Reada
 
   return new Readable({
     async read() {
-      const { done, value } = await reader.read();
+      try {
+        const { done, value } = await reader.read();
 
-      if (done) {
-        this.push(null);
-      } else {
-        this.push(Buffer.from(value));
+        if (done) {
+          this.push(null);
+        } else {
+          this.push(Buffer.from(value));
+        }
+      } catch (err) {
+        this.emit('error', err);
       }
     },
     objectMode: false,
