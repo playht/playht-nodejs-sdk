@@ -212,7 +212,7 @@ async function audioStreamFromSentences(
       const statusCode = error.response?.statusCode;
       const statusMessage = error.response?.statusMessage;
 
-      errorMessage = `Error ${code || ''}`;
+      errorMessage = `[PlayHT SDK] Error ${code || ''}`;
       if (statusCode || statusMessage) {
         errorMessage += ` - ${statusCode || ''} ${statusMessage || ''}`;
       }

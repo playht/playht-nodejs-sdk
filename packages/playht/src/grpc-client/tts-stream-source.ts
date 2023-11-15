@@ -11,15 +11,24 @@ export class TTSStreamSource implements UnderlyingByteSource {
   ) {}
 
   start(controller: ReadableByteStreamController) {
-    if (controller.byobRequest) {
-      throw new Error("Don't know how to handle byobRequest");
+    try {
+      if (controller.byobRequest) {
+        throw new Error("Don't know how to handle byobRequest");
+      }
+      this.stream = this.rpcClient.makeServerStreamRequest(
+        '/playht.v1.Tts/Tts',
+        (arg) => apiProto.playht.v1.TtsRequest.encode(arg).finish() as any,
+        (arg) => apiProto.playht.v1.TtsResponse.decode(arg),
+        this.request,
+      );
+    } catch (error: any) {
+      const errorDetail = error?.errorMessage || error?.details || error?.message || 'Unknown error';
+      const errorMessage = `[PlayHT SDK] Error creating stream: ${errorDetail}`;
+      console.error(errorMessage);
+      controller.error(errorMessage);
+      return;
     }
-    this.stream = this.rpcClient.makeServerStreamRequest(
-      '/playht.v1.Tts/Tts',
-      (arg) => apiProto.playht.v1.TtsRequest.encode(arg).finish() as any,
-      (arg) => apiProto.playht.v1.TtsResponse.decode(arg),
-      this.request,
-    );
+
     this.stream.on('data', (data: apiProto.playht.v1.TtsResponse) => {
       if (data.status) {
         switch (data.status.code) {
