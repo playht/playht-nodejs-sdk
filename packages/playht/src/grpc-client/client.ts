@@ -70,13 +70,28 @@ export class Client {
   }
 
   private async getLease() {
-    const response = await fetch(`${this.apiUrl}/v2/leases`, {
+    let response = await fetch(`${this.apiUrl}/v2/leases`, {
       method: 'POST',
       headers: this.apiHeaders,
     });
+    // Retry once with 5 second wait.
     if (!response.ok) {
-      const responseJson = await response.json();
-      throw new Error(`Failed to get lease: ${response.status} ${response.statusText} - ${responseJson.error_message}`);
+      await new Promise(r => setTimeout(r, 5000));
+      response = await fetch(`${this.apiUrl}/v2/leases`, {
+        method: 'POST',
+        headers: this.apiHeaders,
+      });
+    }
+    if (!response.ok) {
+      // LB errors are HTML, not json, so account for that here.
+      const responseJson = async () => {
+        try {
+          return await response.json();
+        } catch (e) {
+          throw new Error(`Failed to get lease: ${response}`)
+        }
+      };
+      throw new Error(`Failed to get lease: ${response.status} ${response.statusText} - ${(await responseJson()).error_message}`);
     }
     const data = new Uint8Array(await response.arrayBuffer());
     const lease = new Lease(data);
@@ -88,7 +103,10 @@ export class Client {
 
   private async refreshLease() {
     if (this.leasePromise) {
-      await this.leasePromise;
+      // Don't let a failed lease fetch kill us here.
+      try {
+        await this.leasePromise;
+      } catch (e) {}
       return;
     }
 
@@ -97,8 +115,19 @@ export class Client {
     }
 
     this.leasePromise = this.getLease();
-    this.lease = await this.leasePromise;
-    this.leasePromise = undefined;
+    try {
+      this.lease = await this.leasePromise;
+    } catch (e) {
+      // If this lease fails and we have more than 2.5 minutes to the deadline, reschedule.
+      const expiresIn = this.lease.expires.getTime() - Date.now();
+      if (expiresIn > 1000 * 60 * 2.5) {
+        clearTimeout(this.leaseTimer);
+        this.leaseTimer = setTimeout(() => this.refreshLease(), expiresIn - 1000 * 60 * 2);
+      }
+      return;
+    } finally {
+      this.leasePromise = undefined;
+    }
 
     const address = this.options.customAddr ?? this.lease.metadata.inference_address;
     if (!address) {
