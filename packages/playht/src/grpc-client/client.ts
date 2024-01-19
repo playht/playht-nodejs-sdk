@@ -70,18 +70,10 @@ export class Client {
   }
 
   private async getLease() {
-    let response = await fetch(`${this.apiUrl}/v2/leases`, {
+    const response = await fetch(`${this.apiUrl}/v2/leases`, {
       method: 'POST',
       headers: this.apiHeaders,
     });
-    // Retry once with 5 second wait.
-    if (!response.ok) {
-      await new Promise(r => setTimeout(r, 5000));
-      response = await fetch(`${this.apiUrl}/v2/leases`, {
-        method: 'POST',
-        headers: this.apiHeaders,
-      });
-    }
     if (!response.ok) {
       // LB errors are HTML, not json, so account for that here.
       const responseJson = async () => {
@@ -118,11 +110,12 @@ export class Client {
     try {
       this.lease = await this.leasePromise;
     } catch (e) {
-      // If this lease fails and we have more than 2.5 minutes to the deadline, reschedule.
+      // If this lease fails and we have time left before the deadline, reschedule.
       const expiresIn = this.lease.expires.getTime() - Date.now();
-      if (expiresIn > 1000 * 60 * 2.5) {
+      if (expiresIn > 1000 * 15) {
         clearTimeout(this.leaseTimer);
-        this.leaseTimer = setTimeout(() => this.refreshLease(), expiresIn - 1000 * 60 * 2);
+        // Try again every 30 seconds until it works or we run out of time.
+        this.leaseTimer = setTimeout(() => this.refreshLease(), Math.min(1000 * 30, expiresIn - 1000 * 10));
       }
       return;
     } finally {
