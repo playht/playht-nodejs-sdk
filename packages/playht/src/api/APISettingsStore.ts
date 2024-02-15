@@ -18,6 +18,7 @@ export class APISettingsStore {
     this.gRpcClient = new Client({
       userId: settings.userId,
       apiKey: settings.apiKey,
+      onPremEndpoint: settings.onPremEndpoint,
     });
 
     APISettingsStore._instance = this;

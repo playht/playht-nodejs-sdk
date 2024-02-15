@@ -20,6 +20,14 @@ export interface ClientOptions {
    * See https://docs.play.ht/reference/api-authentication
    */
   apiKey: string;
+
+  /**
+   * [Optional] The endpoint (host and port) of your PlayHT On-Prem appliance.  e.g. my-company-000001.on-prem.play.ht:11045
+   * Only set this if you are using PlayHT On-Prem: https://docs.play.ht/reference/on-prem.
+   *
+   * Keep in mind that your PlayHT On-Prem appliance will only be used if you are using the PlayHT2.0-Turbo voice engine for streaming.
+   */
+  onPremEndpoint: string | undefined;
 }
 
 const USE_INSECURE_CONNECTION = false;
@@ -34,6 +42,7 @@ export class Client {
 
   private readonly apiUrl: string;
   private readonly apiHeaders: Record<string, string>;
+  private readonly options: ClientOptions;
 
   constructor(options: ClientOptions) {
     if (!options.userId || !options.apiKey) {
@@ -45,6 +54,7 @@ export class Client {
       'X-User-Id': options.userId,
       Authorization: authHeader,
     };
+    this.options = options;
     this.refreshLease();
   }
 
@@ -79,7 +89,8 @@ export class Client {
     this.lease = await this.leasePromise;
     this.leasePromise = undefined;
 
-    const address = this.lease.metadata.inference_address;
+    let address = this.lease.metadata.inference_address;
+    if (this.options.onPremEndpoint) address = this.options.onPremEndpoint
     if (!address) {
       throw new Error('Service address not found');
     }
@@ -89,16 +100,18 @@ export class Client {
     }
 
     if (!this.rpc) {
+      const insecure = USE_INSECURE_CONNECTION || this.options.onPremEndpoint
       this.rpc = {
         client: new GrpcClient(
           address,
-          USE_INSECURE_CONNECTION ? credentials.createInsecure() : credentials.createSsl(),
+          insecure ? credentials.createInsecure() : credentials.createSsl(),
         ),
         address,
       };
     }
 
-    const premiumAddress = this.lease.metadata.premium_inference_address;
+    let premiumAddress = this.lease.metadata.premium_inference_address;
+    if (this.options.onPremEndpoint) premiumAddress = this.options.onPremEndpoint
     if (!premiumAddress) {
       throw new Error('Premium service address not found');
     }
@@ -108,10 +121,11 @@ export class Client {
     }
 
     if (!this.premiumRpc) {
+      const insecure = USE_INSECURE_CONNECTION || this.options.onPremEndpoint
       this.premiumRpc = {
         client: new GrpcClient(
           premiumAddress,
-          USE_INSECURE_CONNECTION ? credentials.createInsecure() : credentials.createSsl(),
+          insecure ? credentials.createInsecure() : credentials.createSsl(),
         ),
         address: premiumAddress,
       };
