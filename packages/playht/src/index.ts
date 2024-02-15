@@ -379,6 +379,7 @@ export type APISettingsInput = {
   defaultVoiceId?: string;
   defaultVoiceEngine?: VoiceEngine;
   onPremEndpoint?: string;
+  onPremFallback?: boolean;
 };
 
 /**

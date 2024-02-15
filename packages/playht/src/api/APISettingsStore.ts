@@ -19,6 +19,7 @@ export class APISettingsStore {
       userId: settings.userId,
       apiKey: settings.apiKey,
       onPremEndpoint: settings.onPremEndpoint,
+      onPremFallback: settings.onPremFallback,
     });
 
     APISettingsStore._instance = this;
@@ -47,9 +48,11 @@ export class APISettingsStore {
         'Please enter a valid api key and user ID. Please refer to https://docs.play.ht/reference/api-authentication for more info.',
       );
     }
+    console.info(settings)
     new APISettingsStore({
       defaultVoiceEngine: DEFAULT_VOICE_ENGINE,
       defaultVoiceId: DEFAULT_VOICE_ID,
+      onPremFallback: true,
       ...settings,
     });
   }

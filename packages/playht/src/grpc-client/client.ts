@@ -27,7 +27,9 @@ export interface ClientOptions {
    *
    * Keep in mind that your PlayHT On-Prem appliance will only be used if you are using the PlayHT2.0-Turbo voice engine for streaming.
    */
-  onPremEndpoint: string | undefined;
+  onPremEndpoint?: string;
+
+  onPremFallback?: boolean;
 }
 
 const USE_INSECURE_CONNECTION = false;
@@ -36,6 +38,7 @@ const USE_INSECURE_CONNECTION = false;
 export class Client {
   private rpc?: { client: GrpcClient; address: string };
   private premiumRpc?: { client: GrpcClient; address: string };
+  private onPremRpc?: { client: GrpcClient; address: string };
   private lease!: Lease;
   private leaseTimer?: NodeJS.Timeout;
   private leasePromise?: Promise<Lease>;
@@ -47,6 +50,9 @@ export class Client {
   constructor(options: ClientOptions) {
     if (!options.userId || !options.apiKey) {
       throw new Error('userId and apiKey are required');
+    }
+    if (options.onPremFallback == undefined) {
+      options.onPremFallback = true
     }
     this.apiUrl = 'https://api.play.ht/api';
     const authHeader = options.apiKey.startsWith('Bearer ') ? options.apiKey : `Bearer ${options.apiKey}`;
@@ -100,18 +106,16 @@ export class Client {
     }
 
     if (!this.rpc) {
-      const insecure = USE_INSECURE_CONNECTION || this.options.onPremEndpoint
       this.rpc = {
         client: new GrpcClient(
           address,
-          insecure ? credentials.createInsecure() : credentials.createSsl(),
+            USE_INSECURE_CONNECTION ? credentials.createInsecure() : credentials.createSsl(),
         ),
         address,
       };
     }
 
     let premiumAddress = this.lease.metadata.premium_inference_address;
-    if (this.options.onPremEndpoint) premiumAddress = this.options.onPremEndpoint
     if (!premiumAddress) {
       throw new Error('Premium service address not found');
     }
@@ -121,14 +125,31 @@ export class Client {
     }
 
     if (!this.premiumRpc) {
-      const insecure = USE_INSECURE_CONNECTION || this.options.onPremEndpoint
       this.premiumRpc = {
         client: new GrpcClient(
           premiumAddress,
-          insecure ? credentials.createInsecure() : credentials.createSsl(),
+            USE_INSECURE_CONNECTION ? credentials.createInsecure() : credentials.createSsl(),
         ),
         address: premiumAddress,
       };
+    }
+
+    if (this.options.onPremEndpoint) {
+      const onPremAddress: string = this.options.onPremEndpoint!
+      if (this.onPremRpc && this.onPremRpc!.address !== onPremAddress) {
+        this.onPremRpc!.client.close();
+        this.onPremRpc = undefined;
+      }
+
+      if (!this.onPremRpc) {
+        this.onPremRpc = {
+          client: new GrpcClient(
+              onPremAddress!,
+              credentials.createInsecure(),
+          ),
+          address: onPremAddress!,
+        };
+      }
     }
     const expiresIn = this.lease.expires.getTime() - Date.now();
     clearTimeout(this.leaseTimer);
@@ -142,8 +163,20 @@ export class Client {
       params: params,
       lease: this.lease.data,
     };
-    const rpcClient = isPremium ? this.premiumRpc!.client : this.rpc!.client;
-    const stream = new ReadableStream(new TTSStreamSource(request, rpcClient));
+    let rpcClient: GrpcClient;
+    let fallbackClient: GrpcClient | undefined;
+    if (this.onPremRpc) {
+      rpcClient = this.onPremRpc.client;
+      if (this.options.onPremFallback) {
+        fallbackClient = isPremium ? this.premiumRpc!.client : this.rpc!.client;
+      } else {
+        fallbackClient = undefined;
+      }
+    } else {
+      rpcClient = isPremium ? this.premiumRpc!.client : this.rpc!.client;
+      fallbackClient = undefined;
+    }
+    const stream = new ReadableStream(new TTSStreamSource(request, rpcClient, fallbackClient));
     // fix for TypeScript not DOM types not including Symbol.asyncIterator in ReadableStream
     return stream as unknown as AsyncIterable<Uint8Array> & ReadableStream<Uint8Array>;
   }
