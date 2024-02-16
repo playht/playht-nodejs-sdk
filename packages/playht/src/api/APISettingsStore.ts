@@ -48,7 +48,6 @@ export class APISettingsStore {
         'Please enter a valid api key and user ID. Please refer to https://docs.play.ht/reference/api-authentication for more info.',
       );
     }
-    console.info(settings)
     new APISettingsStore({
       defaultVoiceEngine: DEFAULT_VOICE_ENGINE,
       defaultVoiceId: DEFAULT_VOICE_ID,
