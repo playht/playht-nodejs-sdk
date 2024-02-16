@@ -51,7 +51,7 @@ export class APISettingsStore {
     new APISettingsStore({
       defaultVoiceEngine: DEFAULT_VOICE_ENGINE,
       defaultVoiceId: DEFAULT_VOICE_ID,
-      fallbackEnabled: true,
+      fallbackEnabled: false,
       ...settings,
     });
   }
