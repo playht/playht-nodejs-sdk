@@ -22,14 +22,19 @@ export interface ClientOptions {
   apiKey: string;
 
   /**
-   * [Optional] The endpoint (host and port) of your PlayHT On-Prem appliance.  e.g. my-company-000001.on-prem.play.ht:11045
-   * Only set this if you are using PlayHT On-Prem: https://docs.play.ht/reference/on-prem.
+   * An optional custom address (host:port) to send requests to.
    *
-   * Keep in mind that your PlayHT On-Prem appliance will only be used if you are using the PlayHT2.0-Turbo voice engine for streaming.
+   * If you're using PlayHT On-Prem (https://docs.play.ht/reference/on-prem), then you should set
+   * customAddr to be the address of your PlayHT On-Prem appliance (e.g. my-company-000001.on-prem.play.ht:11045).
+   * Keep in mind that your PlayHT On-Prem appliance can only be used with the PlayHT2.0-Turbo voice engine for streaming.
    */
-  onPremEndpoint?: string;
+  customAddr?: string;
 
-  onPremFallback?: boolean;
+  /**
+   * If true, the client may choose to, under high load scenarios, fallback from a custom address
+   * (configured with "customAddr" above) to the standard PlayHT address.
+   */
+  fallbackEnabled?: boolean;
 }
 
 const USE_INSECURE_CONNECTION = false;
@@ -38,7 +43,7 @@ const USE_INSECURE_CONNECTION = false;
 export class Client {
   private rpc?: { client: GrpcClient; address: string };
   private premiumRpc?: { client: GrpcClient; address: string };
-  private onPremRpc?: { client: GrpcClient; address: string };
+  private customRpc?: { client: GrpcClient; address: string };
   private lease!: Lease;
   private leaseTimer?: NodeJS.Timeout;
   private leasePromise?: Promise<Lease>;
@@ -51,8 +56,8 @@ export class Client {
     if (!options.userId || !options.apiKey) {
       throw new Error('userId and apiKey are required');
     }
-    if (options.onPremFallback == undefined) {
-      options.onPremFallback = true
+    if (options.fallbackEnabled == undefined) {
+      options.fallbackEnabled = true
     }
     this.apiUrl = 'https://api.play.ht/api';
     const authHeader = options.apiKey.startsWith('Bearer ') ? options.apiKey : `Bearer ${options.apiKey}`;
@@ -96,7 +101,7 @@ export class Client {
     this.leasePromise = undefined;
 
     let address = this.lease.metadata.inference_address;
-    if (this.options.onPremEndpoint) address = this.options.onPremEndpoint
+    if (this.options.customAddr) address = this.options.customAddr
     if (!address) {
       throw new Error('Service address not found');
     }
@@ -134,20 +139,21 @@ export class Client {
       };
     }
 
-    if (this.options.onPremEndpoint) {
-      const onPremAddress: string = this.options.onPremEndpoint!
-      if (this.onPremRpc && this.onPremRpc!.address !== onPremAddress) {
-        this.onPremRpc!.client.close();
-        this.onPremRpc = undefined;
+    if (this.options.customAddr) {
+      const customAddress: string = this.options.customAddr!
+      if (this.customRpc && this.customRpc!.address !== customAddress) {
+        this.customRpc!.client.close();
+        this.customRpc = undefined;
       }
 
-      if (!this.onPremRpc) {
-        this.onPremRpc = {
+      if (!this.customRpc) {
+        const insecure = customAddress.includes("on-prem.play.ht") || USE_INSECURE_CONNECTION
+        this.customRpc = {
           client: new GrpcClient(
-              onPremAddress!,
-              credentials.createInsecure(),
+              customAddress!,
+              insecure ? credentials.createInsecure() : credentials.createSsl(),
           ),
-          address: onPremAddress!,
+          address: customAddress!,
         };
       }
     }
@@ -165,9 +171,9 @@ export class Client {
     };
     let rpcClient: GrpcClient;
     let fallbackClient: GrpcClient | undefined;
-    if (this.onPremRpc) {
-      rpcClient = this.onPremRpc.client;
-      if (this.options.onPremFallback) {
+    if (this.customRpc) {
+      rpcClient = this.customRpc.client;
+      if (this.options.fallbackEnabled) {
         fallbackClient = isPremium ? this.premiumRpc!.client : this.rpc!.client;
       } else {
         fallbackClient = undefined;
