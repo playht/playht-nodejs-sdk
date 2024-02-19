@@ -57,7 +57,7 @@ export class Client {
       throw new Error('userId and apiKey are required');
     }
     if (options.fallbackEnabled == undefined) {
-      options.fallbackEnabled = true
+      options.fallbackEnabled = false
     }
     this.apiUrl = 'https://api.play.ht/api';
     const authHeader = options.apiKey.startsWith('Bearer ') ? options.apiKey : `Bearer ${options.apiKey}`;
@@ -100,8 +100,7 @@ export class Client {
     this.lease = await this.leasePromise;
     this.leasePromise = undefined;
 
-    let address = this.lease.metadata.inference_address;
-    if (this.options.customAddr) address = this.options.customAddr
+    let address = this.options.customAddr ?? this.lease.metadata.inference_address;
     if (!address) {
       throw new Error('Service address not found');
     }
@@ -140,9 +139,9 @@ export class Client {
     }
 
     if (this.options.customAddr) {
-      const customAddress: string = this.options.customAddr!
-      if (this.customRpc && this.customRpc!.address !== customAddress) {
-        this.customRpc!.client.close();
+      const customAddress: string = this.options.customAddr
+      if (this.customRpc && this.customRpc.address !== customAddress) {
+        this.customRpc.client.close();
         this.customRpc = undefined;
       }
 
@@ -150,10 +149,10 @@ export class Client {
         const insecure = customAddress.includes("on-prem.play.ht") || USE_INSECURE_CONNECTION
         this.customRpc = {
           client: new GrpcClient(
-              customAddress!,
+              customAddress,
               insecure ? credentials.createInsecure() : credentials.createSsl(),
           ),
-          address: customAddress!,
+          address: customAddress,
         };
       }
     }

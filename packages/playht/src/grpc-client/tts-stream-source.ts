@@ -1,19 +1,10 @@
 import type * as grpc from '@grpc/grpc-js';
 import * as apiProto from './protos/api';
 
-enum State {
-  CREATED,
-  STARTING,
-  STARTED,
-  STREAMING,
-  ERR,
-  DONE
-}
-
 export class TTSStreamSource implements UnderlyingByteSource {
   private stream?: grpc.ClientReadableStream<apiProto.playht.v1.TtsResponse>;
   readonly type = 'bytes';
-  private state: State = State.CREATED;
+  private retryable: boolean = true;
 
   constructor(
     private readonly request: apiProto.playht.v1.ITtsRequest,
@@ -26,7 +17,6 @@ export class TTSStreamSource implements UnderlyingByteSource {
   }
 
   startAndMaybeFallback(controller: ReadableByteStreamController, client: grpc.Client, fallbackClient?: grpc.Client) {
-    this.state = State.STARTING;
     try {
       if (controller.byobRequest) {
         throw new Error("Don't know how to handle byobRequest");
@@ -37,9 +27,7 @@ export class TTSStreamSource implements UnderlyingByteSource {
           (arg) => apiProto.playht.v1.TtsResponse.decode(arg),
           this.request,
       );
-      this.state = State.STARTED;
     } catch (error: any) {
-      this.state = State.ERR;
       const errorDetail = error?.errorMessage || error?.details || error?.message || 'Unknown error';
       const errorMessage = `[PlayHT SDK] Error creating stream: ${errorDetail}`;
       console.error(errorMessage);
@@ -48,7 +36,7 @@ export class TTSStreamSource implements UnderlyingByteSource {
     }
 
     this.stream.on('data', (data: apiProto.playht.v1.TtsResponse) => {
-      if(this.state == State.STARTED) this.state = State.STREAMING;
+      this.retryable = false
       if (data.status) {
         switch (data.status.code) {
           case apiProto.playht.v1.Code.CODE_COMPLETE:
@@ -65,7 +53,6 @@ export class TTSStreamSource implements UnderlyingByteSource {
           }
           default: {
             if (this.end()) {
-              this.state = State.ERR;
               controller.error(new Error(`Unknown status code: ${data.status.code}`));
             }
             return;
@@ -79,8 +66,8 @@ export class TTSStreamSource implements UnderlyingByteSource {
       }
     });
     this.stream.on('error', (err) => {
-      if (this.state == State.STARTED) {
-        // if we get an error before we've actually started streaming data
+      if (this.retryable) {
+        // if we get an error while this stream source is still retryable (i.e. we haven't started streaming data back and haven't canceled)
         // then we can fallback if there is a fallback rpc client
         if (fallbackClient) {
           this.end();
@@ -94,19 +81,18 @@ export class TTSStreamSource implements UnderlyingByteSource {
 
       // if we reach here - we couldn't fallback and therefore this stream has failed
       if (this.end()) {
-        this.state = State.ERR;
         controller.error(err);
       }
     });
     this.stream.on('end', () => {
       if (this.end()) {
-        this.state = State.DONE;
         controller.close();
       }
     });
   }
 
   cancel() {
+    this.retryable = false
     if (this.stream) {
       this.stream.cancel();
     }
