@@ -100,7 +100,7 @@ export class Client {
     this.lease = await this.leasePromise;
     this.leasePromise = undefined;
 
-    let address = this.options.customAddr ?? this.lease.metadata.inference_address;
+    const address = this.options.customAddr ?? this.lease.metadata.inference_address;
     if (!address) {
       throw new Error('Service address not found');
     }
@@ -119,7 +119,7 @@ export class Client {
       };
     }
 
-    let premiumAddress = this.lease.metadata.premium_inference_address;
+    const premiumAddress = this.lease.metadata.premium_inference_address;
     if (!premiumAddress) {
       throw new Error('Premium service address not found');
     }
