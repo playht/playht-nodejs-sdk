@@ -18,7 +18,8 @@ export class APISettingsStore {
     this.gRpcClient = new Client({
       userId: settings.userId,
       apiKey: settings.apiKey,
-      onPremEndpoint: settings.onPremEndpoint,
+      customAddr: settings.customAddr,
+      fallbackEnabled: settings.fallbackEnabled,
     });
 
     APISettingsStore._instance = this;
@@ -50,6 +51,7 @@ export class APISettingsStore {
     new APISettingsStore({
       defaultVoiceEngine: DEFAULT_VOICE_ENGINE,
       defaultVoiceId: DEFAULT_VOICE_ID,
+      fallbackEnabled: false,
       ...settings,
     });
   }

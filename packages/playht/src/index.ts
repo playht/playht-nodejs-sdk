@@ -372,13 +372,31 @@ export type SpeechOutput = {
  * not defined.
  * @property {VoiceEngine} [defaultVoiceEngine] - An optional default voice engine to be used in speech synthesis when
  * a voice engine is not defined.
+ * @property {string} [customAddr] - An optional custom address (host:port) to send requests to.
+ * @property {string} [fallbackEnabled] - If true, the client may choose to, under high load scenarios, fallback
+ * from a custom address (configured with "customAddr" above) to the standard PlayHT address.
  */
 export type APISettingsInput = {
   apiKey: string;
   userId: string;
   defaultVoiceId?: string;
   defaultVoiceEngine?: VoiceEngine;
-  onPremEndpoint?: string;
+
+  /**
+   * An optional custom address (host:port) to send requests to.
+   *
+   * If you're using PlayHT On-Prem (https://docs.play.ht/reference/on-prem), then you should set
+   * customAddr to be the address of your PlayHT On-Prem appliance (e.g. my-company-000001.on-prem.play.ht:11045).
+   *
+   * Keep in mind that your PlayHT On-Prem appliance can only be used with the PlayHT2.0-Turbo voice engine for streaming.
+   */
+  customAddr?: string;
+
+  /**
+   * If true, the client may choose to, under high load scenarios, fallback from a custom address
+   * (configured with "customAddr" above) to the standard PlayHT address.
+   */
+  fallbackEnabled?: boolean;
 };
 
 /**
