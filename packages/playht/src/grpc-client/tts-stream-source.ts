@@ -4,7 +4,7 @@ import * as apiProto from './protos/api';
 export class TTSStreamSource implements UnderlyingByteSource {
   private stream?: grpc.ClientReadableStream<apiProto.playht.v1.TtsResponse>;
   readonly type = 'bytes';
-  private retryable: boolean = true;
+  private retryable = true;
 
   constructor(
     private readonly request: apiProto.playht.v1.ITtsRequest,
@@ -22,10 +22,10 @@ export class TTSStreamSource implements UnderlyingByteSource {
         throw new Error("Don't know how to handle byobRequest");
       }
       this.stream = client.makeServerStreamRequest(
-          '/playht.v1.Tts/Tts',
-          (arg) => apiProto.playht.v1.TtsRequest.encode(arg).finish() as any,
-          (arg) => apiProto.playht.v1.TtsResponse.decode(arg),
-          this.request,
+        '/playht.v1.Tts/Tts',
+        (arg) => apiProto.playht.v1.TtsRequest.encode(arg).finish() as any,
+        (arg) => apiProto.playht.v1.TtsResponse.decode(arg),
+        this.request,
       );
     } catch (error: any) {
       const errorDetail = error?.errorMessage || error?.details || error?.message || 'Unknown error';
@@ -36,7 +36,7 @@ export class TTSStreamSource implements UnderlyingByteSource {
     }
 
     this.stream.on('data', (data: apiProto.playht.v1.TtsResponse) => {
-      this.retryable = false
+      this.retryable = false;
       if (data.status) {
         switch (data.status.code) {
           case apiProto.playht.v1.Code.CODE_COMPLETE:
@@ -74,7 +74,6 @@ export class TTSStreamSource implements UnderlyingByteSource {
         // we won't specify a second order fallback client - so if this client fails, this stream will fail
         this.startAndMaybeFallback(controller, fallbackClient, undefined);
         return;
-
       }
 
       // if we reach here - we couldn't fallback and therefore this stream has failed
@@ -90,7 +89,7 @@ export class TTSStreamSource implements UnderlyingByteSource {
   }
 
   cancel() {
-    this.retryable = false
+    this.retryable = false;
     if (this.stream) {
       this.stream.cancel();
     }

@@ -39,12 +39,19 @@ export interface ClientOptions {
 
 const USE_INSECURE_CONNECTION = false;
 
+class RetryableError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = 'RetryableError';
+  }
+}
+
 /** PlayHT Streaming TTS Client. */
 export class Client {
   private rpc?: { client: GrpcClient; address: string };
   private premiumRpc?: { client: GrpcClient; address: string };
   private customRpc?: { client: GrpcClient; address: string };
-  private lease!: Lease;
+  private lease: Lease | undefined;
   private leaseTimer?: NodeJS.Timeout;
   private leasePromise?: Promise<Lease>;
 
@@ -57,7 +64,7 @@ export class Client {
       throw new Error('userId and apiKey are required');
     }
     if (options.fallbackEnabled == undefined) {
-      options.fallbackEnabled = false
+      options.fallbackEnabled = false;
     }
     this.apiUrl = 'https://api.play.ht/api';
     const authHeader = options.apiKey.startsWith('Bearer ') ? options.apiKey : `Bearer ${options.apiKey}`;
@@ -75,7 +82,15 @@ export class Client {
       headers: this.apiHeaders,
     });
     if (!response.ok) {
-      const responseJson = await response.json();
+      const responseJson = await (async () => {
+        try {
+          // LB errors are HTML, not json, so account for that here and allow retry.
+          return await response.json();
+        } catch (e) {
+          throw new RetryableError(`Failed to get lease.`);
+        }
+      })();
+
       throw new Error(`Failed to get lease: ${response.status} ${response.statusText} - ${responseJson.error_message}`);
     }
     const data = new Uint8Array(await response.arrayBuffer());
@@ -88,7 +103,14 @@ export class Client {
 
   private async refreshLease() {
     if (this.leasePromise) {
-      await this.leasePromise;
+      // Don't let a failed lease fetch kill us here, we may have a valid lease.
+      try {
+        await this.leasePromise;
+      } catch (e) {
+        if (!this.lease) {
+          throw e;
+        }
+      }
       return;
     }
 
@@ -97,8 +119,24 @@ export class Client {
     }
 
     this.leasePromise = this.getLease();
-    this.lease = await this.leasePromise;
-    this.leasePromise = undefined;
+    try {
+      this.lease = await this.leasePromise;
+    } catch (e) {
+      if (!this.lease || !(e instanceof RetryableError)) {
+        throw e;
+      }
+
+      // If this lease fails and we have time left before the deadline, reschedule.
+      const expiresIn = this.lease.expires.getTime() - Date.now();
+      if (expiresIn > 1000 * 15) {
+        clearTimeout(this.leaseTimer);
+        // Try again every 30 seconds until it works or we run out of time.
+        this.leaseTimer = setTimeout(() => this.refreshLease(), Math.min(1000 * 30, expiresIn - 1000 * 10));
+      }
+      return;
+    } finally {
+      this.leasePromise = undefined;
+    }
 
     const address = this.options.customAddr ?? this.lease.metadata.inference_address;
     if (!address) {
@@ -113,7 +151,7 @@ export class Client {
       this.rpc = {
         client: new GrpcClient(
           address,
-            USE_INSECURE_CONNECTION ? credentials.createInsecure() : credentials.createSsl(),
+          USE_INSECURE_CONNECTION ? credentials.createInsecure() : credentials.createSsl(),
         ),
         address,
       };
@@ -132,26 +170,23 @@ export class Client {
       this.premiumRpc = {
         client: new GrpcClient(
           premiumAddress,
-            USE_INSECURE_CONNECTION ? credentials.createInsecure() : credentials.createSsl(),
+          USE_INSECURE_CONNECTION ? credentials.createInsecure() : credentials.createSsl(),
         ),
         address: premiumAddress,
       };
     }
 
     if (this.options.customAddr) {
-      const customAddress: string = this.options.customAddr
+      const customAddress: string = this.options.customAddr;
       if (this.customRpc && this.customRpc.address !== customAddress) {
         this.customRpc.client.close();
         this.customRpc = undefined;
       }
 
       if (!this.customRpc) {
-        const insecure = customAddress.includes("on-prem.play.ht") || USE_INSECURE_CONNECTION
+        const insecure = customAddress.includes('on-prem.play.ht') || USE_INSECURE_CONNECTION;
         this.customRpc = {
-          client: new GrpcClient(
-              customAddress,
-              insecure ? credentials.createInsecure() : credentials.createSsl(),
-          ),
+          client: new GrpcClient(customAddress, insecure ? credentials.createInsecure() : credentials.createSsl()),
           address: customAddress,
         };
       }
@@ -164,6 +199,9 @@ export class Client {
   /** Create a new TTS stream. */
   async tts(isPremium: boolean, params: TTSParams) {
     await this.refreshLease();
+    if (!this.lease) {
+      throw new Error('No lease available.');
+    }
     const request: apiProto.playht.v1.ITtsRequest = {
       params: params,
       lease: this.lease.data,
