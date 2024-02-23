@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import { Readable } from 'node:stream';
+import { PassThrough } from 'node:stream';
 dotenv.config();
 
 const openai = new OpenAI({
@@ -17,13 +17,13 @@ export async function streamGptText(prompt: string): Promise<NodeJS.ReadableStre
     stream: true,
   });
 
-  return new Readable({
-    async read() {
-      for await (const part of chatGptResponseStream) {
-        // Add only the text to the stream
-        this.push(part.choices[0]?.delta?.content || '');
-      }
-      this.push(null);
-    },
-  });
+  const result = new PassThrough();
+
+  for await (const part of chatGptResponseStream) {
+    // Add only the text to the stream
+    result.push(part.choices[0]?.delta?.content || '');
+  }
+  result.push(null);
+
+  return result;
 }

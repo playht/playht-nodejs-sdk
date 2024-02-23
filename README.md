@@ -146,7 +146,7 @@ const fileStream = fs.createWriteStream('hello-playht.mp3');
 stream.pipe(fileStream);
 ```
 
-For a full example of using the streaming speech from input stream API, see our [ChatGPT Integration Example](chatgpt-integration-example).
+For a full example of using the streaming speech from input stream API, see our [ChatGPT Integration Example](packages/gpt-example/README.md).
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options).
 
@@ -399,3 +399,5 @@ yarn
 yarn install:all
 yarn start
 ```
+
+See the [full ChatGPT Integration Example documentation](packages/gpt-example/README.md).
