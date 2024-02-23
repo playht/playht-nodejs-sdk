@@ -10,7 +10,7 @@
   "dependencies": {
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "openai": "^4.8.0",
+    "openai": "^4.28.0",
     "p-queue": "^7.4.1",
     "playht": "0.9.0-beta"
   },

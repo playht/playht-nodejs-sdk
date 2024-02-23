@@ -9,16 +9,17 @@ This example requires your [OpenAI credentials](https://help.openai.com/en/artic
 
 ## Installation
 
-To install dependencies run:
+To install dependencies run from this folder:
 
 ```shell
-yarn run install
+yarn
+yarn install:all
 ```
 
 To start the sample server, run
 
 ```shell
-yarn dev
+yarn start
 ```
 
 Navigate to [localhost:5040](http://localhost:5040/).

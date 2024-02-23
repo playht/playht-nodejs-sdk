@@ -3,7 +3,7 @@ import './App.css';
 import { PlayhtLogo } from './components/PlayhtLogo';
 import { Spinner } from './components/Spinner';
 
-const DEFAULT_TEXT = 'In a few sentences, what is the meaning of life?';
+const DEFAULT_TEXT = 'Tell me a joke about AI.';
 
 function App() {
   const [audioSrc, setAudioSrc] = useState<string>('');
