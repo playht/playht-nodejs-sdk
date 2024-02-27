@@ -100,7 +100,7 @@ export class Client {
     this.lease = await this.leasePromise;
     this.leasePromise = undefined;
 
-    const address = this.options.customAddr ?? this.lease.metadata.inference_address;
+    const address = this.lease.metadata.inference_address;
     if (!address) {
       throw new Error('Service address not found');
     }

@@ -70,6 +70,7 @@ export class TTSStreamSource implements UnderlyingByteSource {
       // then we can fallback if there is a fallback rpc client
       if (this.retryable && fallbackClient) {
         this.end();
+        console.warn(`Falling back...`, fallbackClient.getChannel().getTarget());
         // start again with the fallback client and the primary client
         // we won't specify a second order fallback client - so if this client fails, this stream will fail
         this.startAndMaybeFallback(controller, fallbackClient, undefined);
