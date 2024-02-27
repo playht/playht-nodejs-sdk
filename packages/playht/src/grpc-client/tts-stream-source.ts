@@ -69,7 +69,7 @@ export class TTSStreamSource implements UnderlyingByteSource {
       // if we get an error while this stream source is still retryable (i.e. we haven't started streaming data back and haven't canceled)
       // then we can fallback if there is a fallback rpc client
       if (this.retryable && fallbackClient) {
-        console.warn(`Falling back...`, fallbackClient.getChannel().getTarget());
+        console.warn(`[PlayHT SDK] Falling back...`, fallbackClient.getChannel().getTarget(), err.message);
         this.end();
         // start again with the fallback client and the primary client
         // we won't specify a second order fallback client - so if this client fails, this stream will fail
