@@ -18,12 +18,13 @@ export async function streamGptText(prompt: string): Promise<NodeJS.ReadableStre
   });
 
   const result = new PassThrough();
-
-  for await (const part of chatGptResponseStream) {
-    // Add only the text to the stream
-    result.push(part.choices[0]?.delta?.content || '');
-  }
-  result.push(null);
+  (async () => {
+    for await (const part of chatGptResponseStream) {
+      // Add only the text to the stream
+      result.push(part.choices[0]?.delta?.content || '');
+    }
+    result.push(null);
+  })();
 
   return result;
 }
