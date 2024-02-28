@@ -73,7 +73,13 @@ export class Client {
       Authorization: authHeader,
     };
     this.options = options;
-    this.refreshLease();
+    (async () => {
+      try {
+        await this.refreshLease();
+      } catch (e) {
+        // Ignore errors here, we'll retry on the first call.
+      }
+    })();
   }
 
   private async getLease() {
@@ -131,7 +137,17 @@ export class Client {
       if (expiresIn > 1000 * 15) {
         clearTimeout(this.leaseTimer);
         // Try again every 30 seconds until it works or we run out of time.
-        this.leaseTimer = setTimeout(() => this.refreshLease(), Math.min(1000 * 30, expiresIn - 1000 * 10));
+        this.leaseTimer = setTimeout(
+          () =>
+            (async () => {
+              try {
+                await this.refreshLease();
+              } catch (e) {
+                console.error('Failed to refresh lease:', e);
+              }
+            })(),
+          Math.min(1000 * 30, expiresIn - 1000 * 10),
+        );
       }
       return;
     } finally {
@@ -193,15 +209,39 @@ export class Client {
     }
     const expiresIn = this.lease.expires.getTime() - Date.now();
     clearTimeout(this.leaseTimer);
-    this.leaseTimer = setTimeout(() => this.refreshLease(), expiresIn - 1000 * 60 * 5);
+    this.leaseTimer = setTimeout(
+      () =>
+        (async () => {
+          try {
+            await this.refreshLease();
+          } catch (e) {
+            console.error('Failed to refresh lease:', e);
+          }
+        })(),
+      expiresIn - 1000 * 60 * 5,
+    );
   }
 
   /** Create a new TTS stream. */
-  async tts(isPremium: boolean, params: TTSParams) {
-    await this.refreshLease();
-    if (!this.lease) {
-      throw new Error('No lease available.');
+  public async tts(isPremium: boolean, params: TTSParams) {
+    try {
+      await this.refreshLease();
+    } catch (e) {
+      return new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.error(e);
+        },
+      });
     }
+
+    if (!this.lease) {
+      return new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.error(new Error('No lease available.'));
+        },
+      });
+    }
+
     const request: apiProto.playht.v1.ITtsRequest = {
       params: params,
       lease: this.lease.data,
