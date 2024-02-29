@@ -20,6 +20,7 @@ export class APISettingsStore {
       apiKey: settings.apiKey,
       customAddr: settings.customAddr,
       fallbackEnabled: settings.fallbackEnabled,
+      congestionCtrl: settings.congestionCtrl,
     });
 
     APISettingsStore._instance = this;
