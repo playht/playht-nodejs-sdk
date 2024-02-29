@@ -103,7 +103,7 @@ export class TTSStreamSource implements UnderlyingByteSource {
         if (this.retries < this.maxRetries) {
           this.end();
           this.retries++;
-          // NOTE: It's a poor customer experience to show internal details about retries -- so we don't log here.  TCP has the same policy.
+          // NOTE: It's a poor customer experience to show internal details about retries -- so we don't log here.
           //console.debug(`[PlayHT SDK] Retrying in ${this.backoff} ms ... (${this.retries} attempts so far)`, err.message);
           // retry with the same primary and fallback client
           setTimeout(() => {
