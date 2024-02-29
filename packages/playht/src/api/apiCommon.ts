@@ -291,7 +291,7 @@ async function audioStreamFromSentences(
           });
 
           resultStream.on('end', () => {
-            if(!completion.gotEnd) {
+            if (!completion.gotEnd) {
               completion.gotEnd = true
               congestionController.audioDone()
             }
