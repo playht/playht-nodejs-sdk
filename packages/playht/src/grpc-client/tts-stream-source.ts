@@ -114,9 +114,9 @@ export class TTSStreamSource implements UnderlyingByteSource {
           // NOTE: We log fallbacks to give customers a signal that they should scale up their on-prem appliance (e.g. by paying for more GPU quota)
           console.warn(`[PlayHT SDK] Falling back to ${fallbackClient.getChannel().getTarget()} ...`, err.message);
           this.end();
-          this.retries = 0;
           // start again with the fallback client and the primary client
           // we won't specify a second order fallback client - so if this client fails, this stream will fail
+          // we also won't reset the number of retries - so we'll try at most once with the fallback client
           this.startAndMaybeFallback(controller, fallbackClient, undefined);
           return;
         }
