@@ -340,7 +340,7 @@ class Task {
  * that throttles the parallelism of, and delay between, task execution.
  *
  * The primary motivation for this (as of 2024/02/28) is to protect PlayHT On-Prem appliances
- * from being inundated with a burst text-to-speech requests that it can't satisfy.  Prior to the introduction
+ * from being inundated with a burst of text-to-speech requests that it can't satisfy.  Prior to the introduction
  * of {@link CongestionController} (and more generally {@link CongestionCtrl}), the client would split
  * a text stream into two text chunks (referred to as "sentences") and send them to the API client (i.e. gRPC client)
  * simultaneously.  This would routinely overload on-prem appliances that operate without a lot of GPU capacity headroom[1].
