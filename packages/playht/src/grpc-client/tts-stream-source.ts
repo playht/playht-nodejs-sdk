@@ -1,5 +1,4 @@
 import type * as grpc from '@grpc/grpc-js';
-import { CongestionCtrl } from '../index';
 import * as apiProto from './protos/api';
 
 export class TTSStreamSource implements UnderlyingByteSource {
@@ -147,4 +146,21 @@ export class TTSStreamSource implements UnderlyingByteSource {
     }
     return false;
   }
+}
+
+/**
+ * Enumerates a streaming congestion control algorithms, used to optimize the rate at which text is sent to PlayHT.
+ */
+export enum CongestionCtrl {
+  /**
+   * The client will not do any congestion control.  Text will be sent to PlayHT as fast as possible.
+   */
+  Off,
+
+  /**
+   * The client will optimize for minimizing the number of physical resources required to handle a single stream.
+   *
+   * If you're using PlayHT On-Prem, you should use this {@link CongestionCtrl} algorithm.
+   */
+  StaticMar2024,
 }
