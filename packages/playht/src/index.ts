@@ -2,6 +2,7 @@ import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
+import { CongestionCtrl } from './api/congestionCtrl';
 
 /**
  * Type representing the various voice engines that can be used for speech synthesis.
@@ -408,23 +409,6 @@ export type APISettingsInput = {
    */
   congestionCtrl?: CongestionCtrl;
 };
-
-/**
- * Enumerates a streaming congestion control algorithms, used to optimize the rate at which text is sent to PlayHT.
- */
-export enum CongestionCtrl {
-  /**
-   * The client will not do any congestion control.  Text will be sent to PlayHT as fast as possible.
-   */
-  Off,
-
-  /**
-   * The client will optimize for minimizing the number of physical resources required to handle a single stream.
-   *
-   * If you're using PlayHT On-Prem, you should use this {@link CongestionCtrl} algorithm.
-   */
-  StaticMar2024,
-}
 
 /**
  * Initializes the library with API credentials.

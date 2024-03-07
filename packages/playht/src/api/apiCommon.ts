@@ -10,7 +10,6 @@ import type {
   VoiceEngine,
 } from '..';
 import { PassThrough, Readable, Writable } from 'node:stream';
-import { CongestionCtrl, PlayHT20EngineStreamOptions } from '..';
 import { APISettingsStore } from './APISettingsStore';
 import { generateV1Speech } from './generateV1Speech';
 import { generateV1Stream } from './generateV1Stream';
@@ -18,7 +17,7 @@ import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
-import { CongestionController } from './CongestionController';
+import { CongestionController, CongestionCtrl } from './congestionCtrl';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -282,7 +281,8 @@ async function audioStreamFromSentences(
           headersRemaining: 0,
           gotAudio: false,
         };
-        switch ((<PlayHT20EngineStreamOptions>options).outputFormat) {
+        // NOTE: The cast below is to avoid a cyclic dependency warning from "yarn verify"
+        switch ((<{ outputFormat: string }>options).outputFormat) {
           case 'wav':
             completion.headersRemaining = 1;
             break;
