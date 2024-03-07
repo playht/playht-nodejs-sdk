@@ -65,9 +65,7 @@ export class CongestionController {
     // if congestion control is turned off - there's nothing to do here because all tasks were executed immediately
     if (this.algo == CongestionCtrl.Off) return;
 
-    for (;;) {
-      if (this.inflight >= this.parallelism) return;
-      if (this.taskQ.length == 0) return;
+    while (this.inflight < this.parallelism && this.taskQ.length > 0) {
       const task = this.taskQ.shift()!;
       this.inflight++;
       //console.debug(`[PlayHT SDK] Started congestion control task: ${task.name}.  inflight=${this.inflight}`);
