@@ -1,15 +1,16 @@
 import type {
-  SpeechOptions,
-  SpeechStreamOptions,
-  SpeechOutput,
-  OutputQuality,
   Emotion,
-  VoiceEngine,
+  OutputFormat,
+  OutputQuality,
   PlayHT10OutputStreamFormat,
   PlayHT20OutputStreamFormat,
-  OutputFormat,
+  SpeechOptions,
+  SpeechOutput,
+  SpeechStreamOptions,
+  VoiceEngine,
 } from '..';
 import { PassThrough, Readable, Writable } from 'node:stream';
+import { CongestionCtrl, PlayHT20EngineStreamOptions } from '..';
 import { APISettingsStore } from './APISettingsStore';
 import { generateV1Speech } from './generateV1Speech';
 import { generateV1Stream } from './generateV1Stream';
@@ -17,7 +18,7 @@ import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
-import {CongestionCtrl} from "..";
+import { CongestionController } from './CongestionController';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -227,10 +228,12 @@ async function audioStreamFromSentences(
     writableStream.end();
   }
 
-  let congestionController = new CongestionController(APISettingsStore.getSettings().congestionCtrl ?? CongestionCtrl.Off);
+  const congestionController = new CongestionController(
+    APISettingsStore.getSettings().congestionCtrl ?? CongestionCtrl.Off,
+  );
 
   // For each sentence in the stream, add a task to the queue
-  let sentenceIdx = 0
+  let sentenceIdx = 0;
   sentencesStream.on('data', async (data) => {
     const sentence = data.toString();
 
@@ -240,25 +243,27 @@ async function audioStreamFromSentences(
      * If the congestion control algorithm is set to {@link CongestionCtrl.Off},
      * then this {@link CongestionController#enqueue} method will invoke the task immediately;
      * thereby generating the audio chunk for this sentence immediately.
+     *
+     * @see CongestionController
+     * @see CongestionCtrl
      */
     congestionController.enqueue(() => {
       const nextAudioChunk = (async () => {
         return await internalGenerateStreamFromString(sentence, options);
       })();
       audioChunkStream.push(nextAudioChunk);
-    }, `createAudioChunk#${sentenceIdx}`)
+    }, `createAudioChunk#${sentenceIdx}`);
 
-    sentenceIdx++
+    sentenceIdx++;
   });
 
   sentencesStream.on('end', async () => {
-
     /**
      * NOTE: if the congestion control algorithm is set to {@link CongestionCtrl.Off}, then this enqueue method will simply invoke the task immediately.
      */
     congestionController.enqueue(() => {
       audioChunkStream.push(null);
-    }, "endAudioChunks")
+    }, 'endAudioChunks');
   });
 
   sentencesStream.on('error', onError);
@@ -273,28 +278,32 @@ async function audioStreamFromSentences(
           onError();
           return;
         }
-        let completion = {
-          gotHeaders: false,
+        const completion = {
+          headersRemaining: 0,
           gotAudio: false,
-          gotEnd: false
+        };
+        switch ((<PlayHT20EngineStreamOptions>options).outputFormat) {
+          case 'wav':
+            completion.headersRemaining = 1;
+            break;
+          case 'mp3':
+            completion.headersRemaining = 1;
+            break;
+          default:
+            break;
         }
         await new Promise<void>((resolve) => {
-
           resultStream.on('data', (chunk: Buffer) => {
-            if (completion.gotHeaders && !completion.gotAudio) {
-              completion.gotAudio = true
+            if (completion.headersRemaining > 0) {
+              completion.headersRemaining -= 1;
+            } else if (!completion.gotAudio) {
+              completion.gotAudio = true;
               congestionController.audioRecvd();
-            } else if (!completion.gotHeaders) {
-              completion.gotHeaders = true
             }
             writableStream.write(chunk);
           });
 
           resultStream.on('end', () => {
-            if (!completion.gotEnd) {
-              completion.gotEnd = true
-              congestionController.audioDone()
-            }
             resolve();
           });
 
@@ -322,112 +331,4 @@ async function audioStreamFromSentences(
   });
 
   audioChunkStream.pipe(writeAudio);
-}
-
-class Task {
-  fn: Function
-  name: string
-
-  constructor(fn: Function, name: string) {
-    this.fn = fn;
-    this.name = name
-  }
-}
-
-/**
- * Responsible for optimizing the rate at which text is sent to the underlying API endpoint, according to the
- * specified {@link CongestionCtrl} algorithm.  {@link CongestionController} is essentially a task queue
- * that throttles the parallelism of, and delay between, task execution.
- *
- * The primary motivation for this (as of 2024/02/28) is to protect PlayHT On-Prem appliances
- * from being inundated with a burst of text-to-speech requests that it can't satisfy.  Prior to the introduction
- * of {@link CongestionController} (and more generally {@link CongestionCtrl}), the client would split
- * a text stream into two text chunks (referred to as "sentences") and send them to the API client (i.e. gRPC client)
- * simultaneously.  This would routinely overload on-prem appliances that operate without a lot of GPU capacity headroom[1].
- *
- * The result would be that most requests that clients sent would immediately result in a gRPC error 8: RESOURCE_EXHAUSTED;
- * and therefore, a bad customer experience.  {@link CongestionController}, if configured with {@link CongestionCtrl#StaticMar2024},
- * will now delay sending subsequent text chunks (i.e. sentences) to the gRPC client until audio for the preceding text
- * chunk has started streaming.
- *
- * The current {@link CongestionCtrl} algorithm ({@link CongestionCtrl#StaticMar2024}) is very simple and leaves a lot to
- * be desired.  We should iterate on these algorithms.  The {@link CongestionCtrl} enum was added so that algorithms
- * can be added without requiring customers to change their code much.
- *
- * [1] Customers tend to be very cost sensitive regarding expensive GPU capacity, and therefore want to keep their appliances
- * running near 100% utilization.
- *
- * --mtp@2024/02/28
- *
- * This class is largely inert if the specified {@link CongestionCtrl} is {@link CongestionCtrl#Off}.
- */
-class CongestionController {
-
-  algo: CongestionCtrl;
-  taskQ: Task[] = [];
-  inflight: number = 0;
-  parallelism: number;
-  postChunkBackoff: number;
-
-  constructor(algo: CongestionCtrl) {
-    this.algo = algo;
-    switch (algo) {
-      case CongestionCtrl.Off:
-        this.parallelism = Infinity;
-        this.postChunkBackoff = 0;
-        break;
-      case CongestionCtrl.StaticMar2024:
-        this.parallelism = 1;
-        this.postChunkBackoff = 50;
-        break;
-      default:
-        throw new Error(`Unrecognized congestion control algorithm: ${algo}`)
-    }
-  }
-
-  enqueue(task: Function, name: string) {
-
-    // if congestion control is turned off - just execute the task immediately
-    if (this.algo == CongestionCtrl.Off) {
-      task();
-      return;
-    }
-
-    this.taskQ.push(new Task(task, name));
-    this.maybeDoMore();
-  }
-
-  maybeDoMore() {
-
-    // if congestion control is turned off - there's nothing to do here because all tasks were executed immediately
-    if (this.algo == CongestionCtrl.Off) return
-
-    for (; ;) {
-      if (this.inflight >= this.parallelism) return
-      if (this.taskQ.length == 0) return
-      let task = this.taskQ.shift()!
-      this.inflight++;
-      task.fn();
-    }
-  }
-
-  audioRecvd() {
-
-    // if congestion control is turned off - there's nothing to do here because all tasks were executed immediately
-    if (this.algo == CongestionCtrl.Off) return
-
-    this.inflight = Math.max(this.inflight - 1, 0);
-    setTimeout(() => {
-      this.maybeDoMore();
-    }, this.postChunkBackoff);
-  }
-
-  audioDone() {
-
-    if (this.algo == CongestionCtrl.Off) return
-
-    this.inflight = Math.max(this.inflight - 1, 0);
-    this.maybeDoMore();
-  }
-
 }

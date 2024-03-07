@@ -1,10 +1,10 @@
 import { credentials, Client as GrpcClient } from '@grpc/grpc-js';
 import fetch from 'cross-fetch';
+import { CongestionCtrl } from '../index';
 import apiProto from './protos/api';
 import { Lease } from './lease';
 import { ReadableStream } from './readable-stream';
 import { TTSStreamSource } from './tts-stream-source';
-import {CongestionCtrl} from "../index";
 
 export type TTSParams = apiProto.playht.v1.ITtsParams;
 export const Quality = apiProto.playht.v1.Quality;

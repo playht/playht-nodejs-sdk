@@ -413,7 +413,6 @@ export type APISettingsInput = {
  * Enumerates a streaming congestion control algorithms, used to optimize the rate at which text is sent to PlayHT.
  */
 export enum CongestionCtrl {
-
   /**
    * The client will not do any congestion control.  Text will be sent to PlayHT as fast as possible.
    */
@@ -424,7 +423,7 @@ export enum CongestionCtrl {
    *
    * If you're using PlayHT On-Prem, you should use this {@link CongestionCtrl} algorithm.
    */
-  StaticMar2024
+  StaticMar2024,
 }
 
 /**

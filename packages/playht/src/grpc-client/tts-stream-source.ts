@@ -1,6 +1,6 @@
 import type * as grpc from '@grpc/grpc-js';
+import { CongestionCtrl } from '../index';
 import * as apiProto from './protos/api';
-import {CongestionCtrl} from "../index";
 
 export class TTSStreamSource implements UnderlyingByteSource {
   private stream?: grpc.ClientReadableStream<apiProto.playht.v1.TtsResponse>;
@@ -14,7 +14,7 @@ export class TTSStreamSource implements UnderlyingByteSource {
     private readonly request: apiProto.playht.v1.ITtsRequest,
     private readonly rpcClient: grpc.Client,
     private readonly fallbackClient?: grpc.Client,
-    private readonly congestionCtrl?: CongestionCtrl
+    private readonly congestionCtrl?: CongestionCtrl,
   ) {
     if (congestionCtrl != undefined) {
       switch (congestionCtrl) {
@@ -96,7 +96,6 @@ export class TTSStreamSource implements UnderlyingByteSource {
       }
     });
     this.stream.on('error', (err) => {
-
       // if we get an error while this stream source is still retryable (i.e. we haven't started streaming data back and haven't canceled)
       // then we can retry or fall back (if there is a fallback rpc client)
       if (this.retryable) {
@@ -108,8 +107,7 @@ export class TTSStreamSource implements UnderlyingByteSource {
           // retry with the same primary and fallback client
           setTimeout(() => {
             this.startAndMaybeFallback(controller, client, fallbackClient);
-          }, this.backoff)
-
+          }, this.backoff);
         } else if (fallbackClient) {
           // NOTE: We log fallbacks to give customers a signal that they should scale up their on-prem appliance (e.g. by paying for more GPU quota)
           console.warn(`[PlayHT SDK] Falling back to ${fallbackClient.getChannel().getTarget()} ...`, err.message);
