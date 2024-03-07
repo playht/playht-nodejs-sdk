@@ -65,7 +65,7 @@ export class CongestionController {
     // if congestion control is turned off - there's nothing to do here because all tasks were executed immediately
     if (this.algo == CongestionCtrl.Off) return;
 
-    while (true) {
+    for (;;) {
       if (this.inflight >= this.parallelism) return;
       if (this.taskQ.length == 0) return;
       const task = this.taskQ.shift()!;
