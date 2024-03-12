@@ -1,19 +1,18 @@
 /**
  * Enumerates a streaming congestion control algorithms, used to optimize the rate at which text is sent to PlayHT.
  */
-export enum CongestionCtrl {
+export type CongestionCtrl =
   /**
    * The client will not do any congestion control.  Text will be sent to PlayHT as fast as possible.
    */
-  Off = 0,
+  | 'Off'
 
   /**
    * The client will optimize for minimizing the number of physical resources required to handle a single stream.
    *
    * If you're using PlayHT On-Prem, you should use this {@link CongestionCtrl} algorithm.
    */
-  StaticMar2024 = 1,
-}
+  | 'StaticMar2024';
 
 /**
  * Responsible for optimizing the rate at which text is sent to the underlying API endpoint, according to the
@@ -27,11 +26,11 @@ export enum CongestionCtrl {
  * simultaneously.  This would routinely overload on-prem appliances that operate without a lot of GPU capacity headroom[1].
  *
  * The result would be that most requests that clients sent would immediately result in a gRPC error 8: RESOURCE_EXHAUSTED;
- * and therefore, a bad customer experience.  {@link CongestionController}, if configured with {@link CongestionCtrl#StaticMar2024},
+ * and therefore, a bad customer experience.  {@link CongestionController}, if configured with "StaticMar2024",
  * will now delay sending subsequent text chunks (i.e. sentences) to the gRPC client until audio for the preceding text
  * chunk has started streaming.
  *
- * The current {@link CongestionCtrl} algorithm ({@link CongestionCtrl#StaticMar2024}) is very simple and leaves a lot to
+ * The current {@link CongestionCtrl} algorithm ("StaticMar2024") is very simple and leaves a lot to
  * be desired.  We should iterate on these algorithms.  The {@link CongestionCtrl} enum was added so that algorithms
  * can be added without requiring customers to change their code much.
  *
@@ -40,7 +39,7 @@ export enum CongestionCtrl {
  *
  * --mtp@2024/02/28
  *
- * This class is largely inert if the specified {@link CongestionCtrl} is {@link CongestionCtrl#Off}.
+ * This class is largely inert if the specified {@link CongestionCtrl} is "Off".
  */
 export class CongestionController {
   algo: CongestionCtrl;
@@ -52,11 +51,11 @@ export class CongestionController {
   constructor(algo: CongestionCtrl) {
     this.algo = algo;
     switch (algo) {
-      case CongestionCtrl.Off:
+      case 'Off':
         this.parallelism = Infinity;
         this.postChunkBackoff = 0;
         break;
-      case CongestionCtrl.StaticMar2024:
+      case 'StaticMar2024':
         this.parallelism = 1;
         this.postChunkBackoff = 50;
         break;
@@ -67,7 +66,7 @@ export class CongestionController {
 
   enqueue(task: () => void, name: string) {
     // if congestion control is turned off - just execute the task immediately
-    if (this.algo == CongestionCtrl.Off) {
+    if (this.algo == 'Off') {
       task();
       return;
     }
@@ -78,7 +77,7 @@ export class CongestionController {
 
   private maybeDoMore() {
     // if congestion control is turned off - there's nothing to do here because all tasks were executed immediately
-    if (this.algo == CongestionCtrl.Off) return;
+    if (this.algo == 'Off') return;
 
     while (this.inflight < this.parallelism && this.taskQ.length > 0) {
       const task = this.taskQ.shift()!;
@@ -90,7 +89,7 @@ export class CongestionController {
 
   audioRecvd() {
     // if congestion control is turned off - there's nothing to do here because all tasks were executed immediately
-    if (this.algo == CongestionCtrl.Off) return;
+    if (this.algo == 'Off') return;
 
     this.inflight = Math.max(this.inflight - 1, 0);
     //console.debug('[PlayHT SDK] Congestion control received audio');

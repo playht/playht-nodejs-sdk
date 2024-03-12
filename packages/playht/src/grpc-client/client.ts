@@ -3,7 +3,8 @@ import fetch from 'cross-fetch';
 import apiProto from './protos/api';
 import { Lease } from './lease';
 import { ReadableStream } from './readable-stream';
-import { CongestionCtrl, TTSStreamSource } from './tts-stream-source';
+import { TTSStreamSource } from './tts-stream-source';
+import { CongestionCtrl } from './congestion-ctrl';
 
 export type TTSParams = apiProto.playht.v1.ITtsParams;
 export const Quality = apiProto.playht.v1.Quality;
@@ -264,7 +265,7 @@ export class Client {
       rpcClient = isPremium ? this.premiumRpc!.client : this.rpc!.client;
       fallbackClient = undefined;
     }
-    const congestionCtrl = this.options.congestionCtrl ?? CongestionCtrl.Off;
+    const congestionCtrl = this.options.congestionCtrl ?? 'Off';
     const stream = new ReadableStream(new TTSStreamSource(request, rpcClient, fallbackClient, congestionCtrl));
     // fix for TypeScript not DOM types not including Symbol.asyncIterator in ReadableStream
     return stream as unknown as AsyncIterable<Uint8Array> & ReadableStream<Uint8Array>;

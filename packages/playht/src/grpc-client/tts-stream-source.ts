@@ -1,5 +1,6 @@
 import type * as grpc from '@grpc/grpc-js';
 import * as apiProto from './protos/api';
+import { CongestionCtrl } from './congestion-ctrl';
 
 export class TTSStreamSource implements UnderlyingByteSource {
   private stream?: grpc.ClientReadableStream<apiProto.playht.v1.TtsResponse>;
@@ -17,11 +18,11 @@ export class TTSStreamSource implements UnderlyingByteSource {
   ) {
     if (congestionCtrl != undefined) {
       switch (congestionCtrl) {
-        case CongestionCtrl.Off:
+        case 'Off':
           this.maxRetries = 0;
           this.backoff = 0;
           break;
-        case CongestionCtrl.StaticMar2024:
+        case 'StaticMar2024':
           /**
            * NOTE:
            *
@@ -146,21 +147,4 @@ export class TTSStreamSource implements UnderlyingByteSource {
     }
     return false;
   }
-}
-
-/**
- * Enumerates a streaming congestion control algorithms, used to optimize the rate at which text is sent to PlayHT.
- */
-export enum CongestionCtrl {
-  /**
-   * The client will not do any congestion control.  Text will be sent to PlayHT as fast as possible.
-   */
-  Off = 0,
-
-  /**
-   * The client will optimize for minimizing the number of physical resources required to handle a single stream.
-   *
-   * If you're using PlayHT On-Prem, you should use this {@link CongestionCtrl} algorithm.
-   */
-  StaticMar2024 = 1,
 }

@@ -403,7 +403,7 @@ export type APISettingsInput = {
    * If specified, the client will use the specified {@link CongestionCtrl} algorithm to optimize
    * the rate at which it sends text to PlayHT.
    *
-   * If you're using PlayHT On-Prem, you should set this to {@link CongestionCtrl#StaticMar2024}.
+   * If you're using PlayHT On-Prem, you should set this to "StaticMar2024".
    *
    * @see CongestionCtrl
    */

@@ -17,7 +17,7 @@ import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
-import { CongestionController, CongestionCtrl } from './congestionCtrl';
+import { CongestionController } from './congestionCtrl';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -227,9 +227,7 @@ async function audioStreamFromSentences(
     writableStream.end();
   }
 
-  const congestionController = new CongestionController(
-    APISettingsStore.getSettings().congestionCtrl ?? CongestionCtrl.Off,
-  );
+  const congestionController = new CongestionController(APISettingsStore.getSettings().congestionCtrl ?? 'Off');
 
   // For each sentence in the stream, add a task to the queue
   let sentenceIdx = 0;
@@ -239,7 +237,7 @@ async function audioStreamFromSentences(
     /**
      * NOTE:
      *
-     * If the congestion control algorithm is set to {@link CongestionCtrl.Off},
+     * If the congestion control algorithm is set to "Off",
      * then this {@link CongestionController#enqueue} method will invoke the task immediately;
      * thereby generating the audio chunk for this sentence immediately.
      *
@@ -258,7 +256,7 @@ async function audioStreamFromSentences(
 
   sentencesStream.on('end', async () => {
     /**
-     * NOTE: if the congestion control algorithm is set to {@link CongestionCtrl.Off}, then this enqueue method will simply invoke the task immediately.
+     * NOTE: if the congestion control algorithm is set to "Off", then this enqueue method will simply invoke the task immediately.
      */
     congestionController.enqueue(() => {
       audioChunkStream.push(null);
