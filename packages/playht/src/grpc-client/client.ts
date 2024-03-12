@@ -1,9 +1,10 @@
-import { credentials, Client as GrpcClient } from '@grpc/grpc-js';
+import { Client as GrpcClient, credentials } from '@grpc/grpc-js';
 import fetch from 'cross-fetch';
 import apiProto from './protos/api';
 import { Lease } from './lease';
 import { ReadableStream } from './readable-stream';
 import { TTSStreamSource } from './tts-stream-source';
+import { CongestionCtrl } from './congestion-ctrl';
 
 export type TTSParams = apiProto.playht.v1.ITtsParams;
 export const Quality = apiProto.playht.v1.Quality;
@@ -35,6 +36,11 @@ export interface ClientOptions {
    * (configured with "customAddr" above) to the standard PlayHT address.
    */
   fallbackEnabled?: boolean;
+
+  /**
+   * @see CongestionCtrl
+   */
+  congestionCtrl?: CongestionCtrl;
 }
 
 const USE_INSECURE_CONNECTION = false;
@@ -259,7 +265,8 @@ export class Client {
       rpcClient = isPremium ? this.premiumRpc!.client : this.rpc!.client;
       fallbackClient = undefined;
     }
-    const stream = new ReadableStream(new TTSStreamSource(request, rpcClient, fallbackClient));
+    const congestionCtrl = this.options.congestionCtrl ?? 'Off';
+    const stream = new ReadableStream(new TTSStreamSource(request, rpcClient, fallbackClient, congestionCtrl));
     // fix for TypeScript not DOM types not including Symbol.asyncIterator in ReadableStream
     return stream as unknown as AsyncIterable<Uint8Array> & ReadableStream<Uint8Array>;
   }

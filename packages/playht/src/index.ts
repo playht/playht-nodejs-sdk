@@ -2,6 +2,7 @@ import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
+import { CongestionCtrl } from './api/congestionCtrl';
 
 /**
  * Type representing the various voice engines that can be used for speech synthesis.
@@ -397,6 +398,16 @@ export type APISettingsInput = {
    * (configured with "customAddr" above) to the standard PlayHT address.
    */
   fallbackEnabled?: boolean;
+
+  /**
+   * If specified, the client will use the specified {@link CongestionCtrl} algorithm to optimize
+   * the rate at which it sends text to PlayHT.
+   *
+   * If you're using PlayHT On-Prem, you should set this to "StaticMar2024".
+   *
+   * @see CongestionCtrl
+   */
+  congestionCtrl?: CongestionCtrl;
 };
 
 /**

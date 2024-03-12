@@ -1,13 +1,13 @@
 import type {
-  SpeechOptions,
-  SpeechStreamOptions,
-  SpeechOutput,
-  OutputQuality,
   Emotion,
-  VoiceEngine,
+  OutputFormat,
+  OutputQuality,
   PlayHT10OutputStreamFormat,
   PlayHT20OutputStreamFormat,
-  OutputFormat,
+  SpeechOptions,
+  SpeechOutput,
+  SpeechStreamOptions,
+  VoiceEngine,
 } from '..';
 import { PassThrough, Readable, Writable } from 'node:stream';
 import { APISettingsStore } from './APISettingsStore';
@@ -17,6 +17,7 @@ import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
+import { CongestionController } from './congestionCtrl';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -198,8 +199,8 @@ async function audioStreamFromSentences(
   writableStream: NodeJS.WritableStream,
   options?: SpeechStreamOptions,
 ) {
-  // Create a stream for promises
-  const promiseStream = new Readable({
+  // Create a stream of audio chunk promises -- each corresponding to a sentence
+  const audioChunkStream = new Readable({
     objectMode: true,
     read() {},
   });
@@ -226,23 +227,45 @@ async function audioStreamFromSentences(
     writableStream.end();
   }
 
+  const congestionController = new CongestionController(APISettingsStore.getSettings().congestionCtrl ?? 'Off');
+
   // For each sentence in the stream, add a task to the queue
+  let sentenceIdx = 0;
   sentencesStream.on('data', async (data) => {
     const sentence = data.toString();
-    const generatePromise = (async () => {
-      return await internalGenerateStreamFromString(sentence, options);
-    })();
 
-    promiseStream.push(generatePromise);
+    /**
+     * NOTE:
+     *
+     * If the congestion control algorithm is set to "Off",
+     * then this {@link CongestionController#enqueue} method will invoke the task immediately;
+     * thereby generating the audio chunk for this sentence immediately.
+     *
+     * @see CongestionController
+     * @see CongestionCtrl
+     */
+    congestionController.enqueue(() => {
+      const nextAudioChunk = (async () => {
+        return await internalGenerateStreamFromString(sentence, options);
+      })();
+      audioChunkStream.push(nextAudioChunk);
+    }, `createAudioChunk#${sentenceIdx}`);
+
+    sentenceIdx++;
   });
 
   sentencesStream.on('end', async () => {
-    promiseStream.push(null);
+    /**
+     * NOTE: if the congestion control algorithm is set to "Off", then this enqueue method will simply invoke the task immediately.
+     */
+    congestionController.enqueue(() => {
+      audioChunkStream.push(null);
+    }, 'endAudioChunks');
   });
 
   sentencesStream.on('error', onError);
 
-  // Read from the promiseStream and await for each promise in order
+  // Await each audio chunk in order, and write the raw audio to the output audio stream
   const writeAudio = new Writable({
     objectMode: true,
     write: async (generatePromise, _, callback) => {
@@ -252,8 +275,29 @@ async function audioStreamFromSentences(
           onError();
           return;
         }
+        const completion = {
+          headersRemaining: 0,
+          gotAudio: false,
+        };
+        // NOTE: The cast below is to avoid a cyclic dependency warning from "yarn verify"
+        switch ((<{ outputFormat: string }>options).outputFormat) {
+          case 'wav':
+            completion.headersRemaining = 1;
+            break;
+          case 'mp3':
+            completion.headersRemaining = 1;
+            break;
+          default:
+            break;
+        }
         await new Promise<void>((resolve) => {
           resultStream.on('data', (chunk: Buffer) => {
+            if (completion.headersRemaining > 0) {
+              completion.headersRemaining -= 1;
+            } else if (!completion.gotAudio) {
+              completion.gotAudio = true;
+              congestionController.audioRecvd();
+            }
             writableStream.write(chunk);
           });
 
@@ -272,9 +316,9 @@ async function audioStreamFromSentences(
 
   writeAudio.on('error', onError);
 
-  promiseStream.on('error', onError);
+  audioChunkStream.on('error', onError);
 
-  promiseStream.on('end', () => {
+  audioChunkStream.on('end', () => {
     setTimeout(
       () =>
         writeAudio.on('finish', () => {
@@ -284,5 +328,5 @@ async function audioStreamFromSentences(
     );
   });
 
-  promiseStream.pipe(writeAudio);
+  audioChunkStream.pipe(writeAudio);
 }
