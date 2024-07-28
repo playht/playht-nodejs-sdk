@@ -381,6 +381,7 @@ export type APISettingsInput = {
   userId: string;
   defaultVoiceId?: string;
   defaultVoiceEngine?: VoiceEngine;
+  removeSsmlTags?: boolean;
 
   /**
    * An optional custom address (host:port) to send requests to.

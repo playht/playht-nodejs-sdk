@@ -35,6 +35,11 @@ export interface ClientOptions {
    * (configured with "customAddr" above) to the standard PlayHT address.
    */
   fallbackEnabled?: boolean;
+
+  /**
+   * If present and true, remove SSML-style tags (anything between and including `<` and `>`) from the text of the request
+   */
+  removeSsmlTags?: boolean;
 }
 
 const USE_INSECURE_CONNECTION = false;
@@ -242,6 +247,9 @@ export class Client {
       });
     }
 
+    if (params.text && this.options.removeSsmlTags) {
+        params.text = params.text.map(str => str.replace(/<[^>]*>/g, ''));
+    }
     const request: apiProto.playht.v1.ITtsRequest = {
       params: params,
       lease: this.lease.data,
