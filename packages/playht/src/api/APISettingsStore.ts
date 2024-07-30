@@ -20,6 +20,7 @@ export class APISettingsStore {
       apiKey: settings.apiKey,
       customAddr: settings.customAddr,
       fallbackEnabled: settings.fallbackEnabled,
+      removeSsmlTags: settings.removeSsmlTags,
     });
 
     APISettingsStore._instance = this;
