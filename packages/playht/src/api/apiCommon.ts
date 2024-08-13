@@ -17,6 +17,7 @@ import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
+import { generateV3Stream } from './internal/generateV3Stream';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -88,6 +89,9 @@ export async function internalGenerateStreamFromString(
   } else if (options.voiceEngine === 'PlayHT2.0' || options.voiceEngine === 'PlayHT2.0-turbo') {
     const v2Options = toV2Options(options, true);
     return await generateGRpcStream(input, options.voiceId, v2Options);
+  } else if (options.voiceEngine === 'PlayHT3.0') {
+    const v2Options = toV2Options(options, true);
+    return await generateV3Stream(input, options.voiceId, v2Options);
   } else {
     const v2Options = toV2Options(options, options.voiceEngine !== 'PlayHT1.0');
     return await generateV2Stream(input, options.voiceId, v2Options);
@@ -100,7 +104,7 @@ export async function internalGenerateStreamFromInputStream(
 ): Promise<NodeJS.ReadableStream> {
   const sentencesStream = textStreamToSentences(inputStream);
   const passThrough = new PassThrough();
-  audioStreamFromSentences(sentencesStream, passThrough, options);
+  void audioStreamFromSentences(sentencesStream, passThrough, options);
   return passThrough;
 }
 
@@ -139,9 +143,9 @@ function addDefaultOptions(options?: SpeechOptions | SpeechStreamOptions): Speec
 }
 
 function toV2Options(options: SpeechOptionsWithVoiceID, isPlay20Streaming = false): V2ApiOptions {
-  if (options.voiceEngine === 'PlayHT2.0-turbo' && !isPlay20Streaming) {
+  if (!isPlay20Streaming && (options.voiceEngine === 'PlayHT2.0-turbo' || options.voiceEngine === 'PlayHT3.0')) {
     throw {
-      message: "Invalid engine. The 'PlayHT2.0-turbo' engine is only supported for streaming.",
+      message: `Invalid engine. The '${options.voiceEngine}' engine is only supported for streaming.`,
       code: 'INVALID_ENGINE',
     };
   }
@@ -149,10 +153,11 @@ function toV2Options(options: SpeechOptionsWithVoiceID, isPlay20Streaming = fals
   if (
     options.voiceEngine !== 'PlayHT1.0' &&
     options.voiceEngine !== 'PlayHT2.0' &&
-    options.voiceEngine !== 'PlayHT2.0-turbo'
+    options.voiceEngine !== 'PlayHT2.0-turbo' &&
+    options.voiceEngine !== 'PlayHT3.0'
   ) {
     throw {
-      message: "Invalid engine. Expected 'PlayHT2.0', 'PlayHT2.0-turbo' or 'PlayHT1.0'",
+      message: "Invalid engine. Expected 'PlayHT3.0', 'PlayHT2.0', 'PlayHT2.0-turbo' or 'PlayHT1.0'",
       code: 'INVALID_ENGINE',
     };
   }
