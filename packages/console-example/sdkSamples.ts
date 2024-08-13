@@ -1,9 +1,6 @@
 import * as PlayHT from 'playht';
 import dotenv from 'dotenv';
-import { playHT20Examples } from './src/playHT20Examples.js';
-import { playHT10Examples } from './src/playHT10Examples.js';
-import { standardExamples } from './src/standardExamples.js';
-import { allVoices } from './src/allVoices.js';
+import { playHT30Examples } from './src/playHT30Examples.js';
 
 dotenv.config();
 PlayHT.init({
@@ -17,6 +14,7 @@ PlayHT.init({
     (function () {
       throw new Error('PLAYHT_USER_ID not found in .env file. Please read .env.example to see how to create it.');
     })(),
+  defaultVoiceId: undefined, // TODO (v3) temporary
 });
 
 process.on('unhandledRejection', (error) => {
@@ -25,9 +23,10 @@ process.on('unhandledRejection', (error) => {
   process.exit();
 });
 
-await allVoices();
-await playHT20Examples();
-await playHT10Examples();
-await standardExamples();
+await playHT30Examples();
+// await allVoices();
+// await playHT20Examples();
+// await playHT10Examples();
+// await standardExamples();
 
 process.exit();

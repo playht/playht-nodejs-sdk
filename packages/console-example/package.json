@@ -7,7 +7,8 @@
   "main": "build/sdkSamples.js",
   "scripts": {
     "build": "rm -rf ./build && tsc -b",
-    "start": "yarn build && node --no-warnings build/sdkSamples.js"
+    "start": "yarn build && node --no-warnings build/sdkSamples.js",
+    "lint": "prettier --write ."
   },
   "dependencies": {
     "dotenv": "^16.3.1",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.8.7",
+    "prettier": "3.0.2",
     "typescript": "^5.2.2"
   }
 }

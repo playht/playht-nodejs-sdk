@@ -248,7 +248,7 @@ export class Client {
     }
 
     if (params.text && this.options.removeSsmlTags) {
-        params.text = params.text.map(str => str.replace(/<[^>]*>/g, ''));
+      params.text = params.text.map((str) => str.replace(/<[^>]*>/g, ''));
     }
     const request: apiProto.playht.v1.ITtsRequest = {
       params: params,
