@@ -2,13 +2,14 @@ import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
+import { PlayHT30OutputStreamFormat } from './PlayHT30';
 
 /**
  * Type representing the various voice engines that can be used for speech synthesis.
  *
  * @typedef {'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard'} VoiceEngine
  */
-export type VoiceEngine = 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
+export type VoiceEngine = 'PlayHT3.0' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
 
 /**
  * Type representing the different input types that can be used to define the format of the input text.
@@ -322,6 +323,43 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
 };
 
 /**
+ * The options available for configuring the PlayHT 3.0 voice engine for streaming.
+ *
+ * @typedef {Object} PlayHT20EngineOptions
+ *
+ * @property {'PlayHT3.0'} voiceEngine - The identifier for the PlayHT 3.0 voice engine.
+ * @property {'plain'} [inputType] - The optional input type for the audio. Only 'plain' is supported for PlayHT 1.0
+ * voices.
+ * @property {OutputFormat} [outputFormat] - The optional format in which the output audio stream should be generated.
+ * Defaults to 'mp3'.
+ * @property {number} [sampleRate] - The optional sample rate for the output audio.
+ * @property {number} [seed] - An integer number greater than or equal to 0. If equal to null or not provided, a random
+ * seed will be used. Useful to control the reproducibility of the generated audio. Assuming all other properties
+ * didn't change, a fixed seed will generate the exact same audio file.
+ * @property {number} [temperature] - A floating point number between 0, inclusive, and 2, inclusive. The temperature
+ * parameter controls variance. Lower temperatures result in more predictable results. Higher temperatures allow each
+ * run to vary more, creating voices that sound less like the baseline.
+ * @property {Emotion} [emotion] - An emotion to be applied to the speech. When using a stock voice or a cloned voice
+ * where gender was provided, genderless emotions can be used. For cloned voices with no gender set, use a gender
+ * prefixed emotion. Only supported when `voice_engine` is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [voiceGuidance] - A number between 1 and 6. Use lower numbers to reduce how unique your chosen
+ * voice will be compared to other voices. Higher numbers will maximize its individuality. Only supported when
+ * `voice_engine` is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [styleGuidance] - A number between 1 and 30. Use lower numbers to to reduce how strong your
+ * chosen emotion will be. Higher numbers will create a very emotional performance. Only supported when `voice_engine`
+ * is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [textGuidance] - A number between 1 and 2. This number influences how closely the generated
+ * speech adheres to the input text. Use lower values to create more fluid speech, but with a higher chance of
+ * deviating from the input text. Higher numbers will make the generated speech more accurate to the input text,
+ * ensuring that the words spoken align closely with the provided text. Only supported when `voice_engine` is set
+ * to `PlayHT2.0`, and `voice` uses that engine.
+ */
+export type PlayHT30EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
+  voiceEngine: 'PlayHT3.0';
+  outputFormat?: PlayHT30OutputStreamFormat;
+};
+
+/**
  * The options available for configuring speech synthesis, which include shared options combined with engine-specific
  * options.
  *
@@ -339,6 +377,7 @@ export type SpeechOptions =
  * @typedef {Object} SpeechStreamOptions
  */
 export type SpeechStreamOptions =
+  | (SharedSpeechOptions & PlayHT30EngineStreamOptions)
   | (SharedSpeechOptions & PlayHT20EngineStreamOptions)
   | (SharedSpeechOptions & PlayHT10EngineStreamOptions)
   | (SharedSpeechOptions & StandardEngineOptions);
