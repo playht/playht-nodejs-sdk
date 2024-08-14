@@ -5,6 +5,12 @@ import { InferenceCoordinatesEntry } from './v3/v3Overrides';
  *
  * This object allows extending/overriding the default implementation of some of the SDK capabilities
  * without having to rebuild or modify the SDK itself.
+ *
+ * These overrides are considered internal and thus can be modified at any time.
+ * As such, SDK users should avoid relying on these overrides unless they have an advanced use case.
+ *
+ * Lastly, configurations here may be promoted to PlayHT.init() options in the future if
+ * they are deemed useful for a wider audience.
  */
 export const PlayHTSdkOverrides = {
   v3: {
