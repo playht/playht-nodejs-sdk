@@ -17,7 +17,7 @@ import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
-import { generateV3Stream } from './internal/generateV3Stream';
+import { generateV3Stream } from './internal/v3/generateV3Stream';
 
 export type V1ApiOptions = {
   narrationStyle?: string;

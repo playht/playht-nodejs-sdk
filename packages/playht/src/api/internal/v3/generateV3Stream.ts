@@ -1,9 +1,11 @@
-import type { V2ApiOptions } from '../apiCommon';
+import type { V2ApiOptions } from '../../apiCommon';
 import https from 'https';
 import axios, { AxiosRequestConfig } from 'axios';
-import { APISettingsStore } from '../APISettingsStore';
-import { PlayHT30OutputStreamFormat } from '../../PlayHT30';
-import { convertError } from './convertError';
+import { APISettingsStore } from '../../APISettingsStore';
+import { PlayHT30OutputStreamFormat } from '../../../PlayHT30';
+import { convertError } from '../convertError';
+import { PlayHTSdkOverrides } from '../PlayHTSdkOverrides';
+import { InferenceCoordinatesEntry } from './v3Extensions';
 
 const keepAliveHttpsAgent = new https.Agent({
   keepAlive: true,
@@ -13,15 +15,12 @@ const COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS = 60_000; // refresh no more f
 const COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS = 300_000; // 5 minutes
 const COORDINATES_GET_API_CALL_MAX_RETRIES = 3; // number of attempts to get the coordinates
 
-type InferenceCoordinatesEntry = {
-  inferenceAddress: string;
-  expiresAtMs: number;
-};
-
 const inferenceCoordinatesStore: Record<string, InferenceCoordinatesEntry> = {};
 
-const createInferenceCoordinatesApiCall = async (): Promise<InferenceCoordinatesEntry> => {
-  const { userId, apiKey } = APISettingsStore.getSettings();
+const createInferenceCoordinatesApiCall = async (
+  userId: string,
+  apiKey: string,
+): Promise<InferenceCoordinatesEntry> => {
   const data = await axios
     .post(
       'https://api.play.ht/api/v3/auth',
@@ -48,14 +47,20 @@ const createInferenceCoordinatesApiCall = async (): Promise<InferenceCoordinates
   };
 };
 
-async function createInferenceCoordinates(userId: string, attemptNo = 0): Promise<InferenceCoordinatesEntry> {
+PlayHTSdkOverrides.v3InferenceCoordinatesGenerator = createInferenceCoordinatesApiCall;
+
+async function createInferenceCoordinates(
+  userId: string,
+  apiKey: string,
+  attemptNo = 0,
+): Promise<InferenceCoordinatesEntry> {
   try {
-    const newInferenceCoordinatesEntry = await createInferenceCoordinatesApiCall();
+    const newInferenceCoordinatesEntry = await PlayHTSdkOverrides.v3InferenceCoordinatesGenerator(userId, apiKey);
     const automaticRefreshDelay = Math.max(
       COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS,
       newInferenceCoordinatesEntry.expiresAtMs - Date.now() - COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS,
     );
-    setTimeout(() => createInferenceCoordinates(userId), automaticRefreshDelay).unref();
+    setTimeout(() => createInferenceCoordinates(userId, apiKey), automaticRefreshDelay).unref();
     inferenceCoordinatesStore[userId] = newInferenceCoordinatesEntry;
     return newInferenceCoordinatesEntry;
   } catch (e) {
@@ -65,7 +70,7 @@ async function createInferenceCoordinates(userId: string, attemptNo = 0): Promis
     return new Promise((resolve) => {
       setTimeout(
         () => {
-          resolve(createInferenceCoordinates(userId, attemptNo + 1));
+          resolve(createInferenceCoordinates(userId, apiKey, attemptNo + 1));
         },
         500 * (attemptNo + 1),
       ).unref();
@@ -74,12 +79,12 @@ async function createInferenceCoordinates(userId: string, attemptNo = 0): Promis
 }
 
 async function createOrGetInferenceAddress(): Promise<string> {
-  const { userId } = APISettingsStore.getSettings();
+  const { userId, apiKey } = APISettingsStore.getSettings();
   const inferenceCoordinatesEntry = inferenceCoordinatesStore[userId];
   if (inferenceCoordinatesEntry && inferenceCoordinatesEntry.expiresAtMs >= Date.now() - 5_000) {
     return inferenceCoordinatesEntry.inferenceAddress;
   } else {
-    const newInferenceCoordinatesEntry = await createInferenceCoordinates(userId);
+    const newInferenceCoordinatesEntry = await createInferenceCoordinates(userId, apiKey);
     return newInferenceCoordinatesEntry.inferenceAddress;
   }
 }
