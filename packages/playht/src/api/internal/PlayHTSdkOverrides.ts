@@ -1,4 +1,4 @@
-import { InferenceCoordinatesEntry } from './v3/v3Extensions';
+import { InferenceCoordinatesEntry } from './v3/v3Overrides';
 
 /**
  * Internal SDK injection point for PlayHT SDK extensions.

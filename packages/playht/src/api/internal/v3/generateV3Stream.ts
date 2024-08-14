@@ -1,93 +1,9 @@
 import type { V2ApiOptions } from '../../apiCommon';
-import https from 'https';
 import axios, { AxiosRequestConfig } from 'axios';
-import { APISettingsStore } from '../../APISettingsStore';
 import { PlayHT30OutputStreamFormat } from '../../../PlayHT30';
 import { convertError } from '../convertError';
-import { PlayHTSdkOverrides } from '../PlayHTSdkOverrides';
-import { InferenceCoordinatesEntry } from './v3Extensions';
-
-const keepAliveHttpsAgent = new https.Agent({
-  keepAlive: true,
-});
-
-const COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS = 60_000; // refresh no more frequently than 1 minute
-const COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS = 300_000; // 5 minutes
-const COORDINATES_GET_API_CALL_MAX_RETRIES = 3; // number of attempts to get the coordinates
-
-const inferenceCoordinatesStore: Record<string, InferenceCoordinatesEntry> = {};
-
-const createInferenceCoordinatesApiCall = async (
-  userId: string,
-  apiKey: string,
-): Promise<InferenceCoordinatesEntry> => {
-  const data = await axios
-    .post(
-      'https://api.play.ht/api/v3/auth',
-      {},
-      {
-        headers: {
-          'x-user-id': userId,
-          authorization: `Bearer ${apiKey}`,
-        },
-        httpsAgent: keepAliveHttpsAgent,
-      },
-    )
-    .then(
-      (response) =>
-        response.data as {
-          inference_address: string;
-          expires_at: number;
-        },
-    )
-    .catch((error: any) => convertError(error));
-  return {
-    inferenceAddress: data.inference_address,
-    expiresAtMs: data.expires_at * 1000, // API sends it as seconds, so we need to convert it to milliseconds here
-  };
-};
-
-PlayHTSdkOverrides.v3InferenceCoordinatesGenerator = createInferenceCoordinatesApiCall;
-
-async function createInferenceCoordinates(
-  userId: string,
-  apiKey: string,
-  attemptNo = 0,
-): Promise<InferenceCoordinatesEntry> {
-  try {
-    const newInferenceCoordinatesEntry = await PlayHTSdkOverrides.v3InferenceCoordinatesGenerator(userId, apiKey);
-    const automaticRefreshDelay = Math.max(
-      COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS,
-      newInferenceCoordinatesEntry.expiresAtMs - Date.now() - COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS,
-    );
-    setTimeout(() => createInferenceCoordinates(userId, apiKey), automaticRefreshDelay).unref();
-    inferenceCoordinatesStore[userId] = newInferenceCoordinatesEntry;
-    return newInferenceCoordinatesEntry;
-  } catch (e) {
-    if (attemptNo >= COORDINATES_GET_API_CALL_MAX_RETRIES) {
-      throw e;
-    }
-    return new Promise((resolve) => {
-      setTimeout(
-        () => {
-          resolve(createInferenceCoordinates(userId, apiKey, attemptNo + 1));
-        },
-        500 * (attemptNo + 1),
-      ).unref();
-    });
-  }
-}
-
-async function createOrGetInferenceAddress(): Promise<string> {
-  const { userId, apiKey } = APISettingsStore.getSettings();
-  const inferenceCoordinatesEntry = inferenceCoordinatesStore[userId];
-  if (inferenceCoordinatesEntry && inferenceCoordinatesEntry.expiresAtMs >= Date.now() - 5_000) {
-    return inferenceCoordinatesEntry.inferenceAddress;
-  } else {
-    const newInferenceCoordinatesEntry = await createInferenceCoordinates(userId, apiKey);
-    return newInferenceCoordinatesEntry.inferenceAddress;
-  }
-}
+import { keepAliveHttpsAgent } from '../http';
+import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 
 export async function generateV3Stream(
   text: string,
