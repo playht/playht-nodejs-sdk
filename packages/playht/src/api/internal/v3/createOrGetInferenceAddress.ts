@@ -5,10 +5,6 @@ import { APISettingsStore } from '../../APISettingsStore';
 import { keepAliveHttpsAgent } from '../http';
 import { InferenceCoordinatesEntry } from './v3Overrides';
 
-const COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS = 60_000; // refresh no more frequently than 1 minute
-const COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS = 300_000; // 5 minutes
-const COORDINATES_GET_API_CALL_MAX_RETRIES = 3; // number of attempts to get the coordinates
-
 const inferenceCoordinatesStore: Record<string, InferenceCoordinatesEntry> = {};
 
 const createInferenceCoordinatesApiCall = async (
@@ -41,7 +37,7 @@ const createInferenceCoordinatesApiCall = async (
   };
 };
 
-PlayHTSdkOverrides.v3InferenceCoordinatesGenerator = createInferenceCoordinatesApiCall;
+PlayHTSdkOverrides.v3.inferenceCoordinatesGenerator = createInferenceCoordinatesApiCall;
 
 async function createInferenceCoordinates(
   userId: string,
@@ -49,16 +45,18 @@ async function createInferenceCoordinates(
   attemptNo = 0,
 ): Promise<InferenceCoordinatesEntry> {
   try {
-    const newInferenceCoordinatesEntry = await PlayHTSdkOverrides.v3InferenceCoordinatesGenerator(userId, apiKey);
+    const newInferenceCoordinatesEntry = await PlayHTSdkOverrides.v3.inferenceCoordinatesGenerator(userId, apiKey);
     const automaticRefreshDelay = Math.max(
-      COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS,
-      newInferenceCoordinatesEntry.expiresAtMs - Date.now() - COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS,
+      PlayHTSdkOverrides.v3.COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS,
+      newInferenceCoordinatesEntry.expiresAtMs -
+        Date.now() -
+        PlayHTSdkOverrides.v3.COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS,
     );
     setTimeout(() => createInferenceCoordinates(userId, apiKey), automaticRefreshDelay).unref();
     inferenceCoordinatesStore[userId] = newInferenceCoordinatesEntry;
     return newInferenceCoordinatesEntry;
   } catch (e) {
-    if (attemptNo >= COORDINATES_GET_API_CALL_MAX_RETRIES) {
+    if (attemptNo >= PlayHTSdkOverrides.v3.COORDINATES_GET_API_CALL_MAX_RETRIES) {
       throw e;
     }
     return new Promise((resolve) => {
