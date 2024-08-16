@@ -3,13 +3,14 @@ import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
 import { PlayHT30OutputStreamFormat } from './PlayHT30';
+import { PlayRequestConfig } from './api/config/PlayRequestConfig';
 
 /**
  * Type representing the various voice engines that can be used for speech synthesis.
  *
  * @typedef {'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard'} VoiceEngine
  */
-export type VoiceEngine = 'PlayHT3.0' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
+export type VoiceEngine = 'Play3.0' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
 
 /**
  * Type representing the different input types that can be used to define the format of the input text.
@@ -327,7 +328,7 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  *
  * @typedef {Object} PlayHT20EngineOptions
  *
- * @property {'PlayHT3.0'} voiceEngine - The identifier for the PlayHT 3.0 voice engine.
+ * @property {'Play3.0'} voiceEngine - The identifier for the PlayHT 3.0 voice engine.
  * @property {'plain'} [inputType] - The optional input type for the audio. Only 'plain' is supported for PlayHT 1.0
  * voices.
  * @property {OutputFormat} [outputFormat] - The optional format in which the output audio stream should be generated.
@@ -355,7 +356,7 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  * to `PlayHT2.0`, and `voice` uses that engine.
  */
 export type PlayHT30EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
-  voiceEngine: 'PlayHT3.0';
+  voiceEngine: 'Play3.0';
   outputFormat?: PlayHT30OutputStreamFormat;
 };
 
@@ -472,7 +473,11 @@ export async function stream(
   input: string | NodeJS.ReadableStream,
   options?: SpeechStreamOptions,
 ): Promise<NodeJS.ReadableStream> {
-  return await commonGenerateStream(input, options);
+  // The per-call SDK Settings is "hidden" from the Public API because this feature is still alpha, meaning
+  // not everything supports on-the-fly settings right now.
+  // eslint-disable-next-line prefer-rest-params
+  const perRequestConfig = arguments[2] ?? ({} as PlayRequestConfig);
+  return await commonGenerateStream(input, options, perRequestConfig);
 }
 
 /**
@@ -518,3 +523,5 @@ export async function deleteClone(voiceId: string): Promise<string> {
 export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
   return await commonGetAllVoices(filters);
 }
+
+export { PlayRequestConfig };
