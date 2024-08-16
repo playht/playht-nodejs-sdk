@@ -3,17 +3,19 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { PlayHT30OutputStreamFormat } from '../../../PlayHT30';
 import { convertError } from '../convertError';
 import { keepAliveHttpsAgent } from '../http';
+import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 
 export async function generateV3Stream(
   text: string,
   voice: string,
-  options?: V2ApiOptions,
+  options: V2ApiOptions,
+  reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
   if (options?.outputFormat === 'raw') {
-    throw new Error('Raw output format is not supported in PlayHT3.0');
+    throw new Error('Raw output format is not supported in Play3.0');
   }
-  const inferenceAddress = await createOrGetInferenceAddress();
+  const inferenceAddress = await createOrGetInferenceAddress(reqConfig);
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
     url: inferenceAddress,
