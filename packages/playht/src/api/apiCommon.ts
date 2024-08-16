@@ -18,6 +18,7 @@ import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
 import { generateV3Stream } from './internal/v3/generateV3Stream';
+import { PlayRequestConfig } from './config/PlayRequestConfig';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -68,18 +69,20 @@ export async function commonGenerateSpeech(input: string, optionsInput?: SpeechO
 
 export async function commonGenerateStream(
   input: string | NodeJS.ReadableStream,
-  optionsInput?: SpeechStreamOptions,
+  optionsInput: SpeechStreamOptions | undefined,
+  reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
   if (typeof input === 'string') {
-    return await internalGenerateStreamFromString(input, optionsInput);
+    return await internalGenerateStreamFromString(input, optionsInput, reqConfig);
   } else {
-    return await internalGenerateStreamFromInputStream(input, optionsInput);
+    return await internalGenerateStreamFromInputStream(input, optionsInput, reqConfig);
   }
 }
 
 export async function internalGenerateStreamFromString(
   input: string,
-  optionsInput?: SpeechStreamOptions,
+  optionsInput: SpeechStreamOptions | undefined,
+  reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
   const options = addDefaultOptions(optionsInput);
 
@@ -89,9 +92,9 @@ export async function internalGenerateStreamFromString(
   } else if (options.voiceEngine === 'PlayHT2.0' || options.voiceEngine === 'PlayHT2.0-turbo') {
     const v2Options = toV2Options(options, true);
     return await generateGRpcStream(input, options.voiceId, v2Options);
-  } else if (options.voiceEngine === 'PlayHT3.0') {
+  } else if (options.voiceEngine === 'Play3.0') {
     const v2Options = toV2Options(options, true);
-    return await generateV3Stream(input, options.voiceId, v2Options);
+    return await generateV3Stream(input, options.voiceId, v2Options, reqConfig);
   } else {
     const v2Options = toV2Options(options, options.voiceEngine !== 'PlayHT1.0');
     return await generateV2Stream(input, options.voiceId, v2Options);
@@ -100,11 +103,12 @@ export async function internalGenerateStreamFromString(
 
 export async function internalGenerateStreamFromInputStream(
   inputStream: NodeJS.ReadableStream,
-  options?: SpeechStreamOptions,
+  optionsInput: SpeechStreamOptions | undefined,
+  reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
   const sentencesStream = textStreamToSentences(inputStream);
   const passThrough = new PassThrough();
-  void audioStreamFromSentences(sentencesStream, passThrough, options);
+  void audioStreamFromSentences(sentencesStream, passThrough, optionsInput, reqConfig);
   return passThrough;
 }
 
@@ -143,7 +147,7 @@ function addDefaultOptions(options?: SpeechOptions | SpeechStreamOptions): Speec
 }
 
 function toV2Options(options: SpeechOptionsWithVoiceID, isPlay20Streaming = false): V2ApiOptions {
-  if (!isPlay20Streaming && (options.voiceEngine === 'PlayHT2.0-turbo' || options.voiceEngine === 'PlayHT3.0')) {
+  if (!isPlay20Streaming && (options.voiceEngine === 'PlayHT2.0-turbo' || options.voiceEngine === 'Play3.0')) {
     throw {
       message: `Invalid engine. The '${options.voiceEngine}' engine is only supported for streaming.`,
       code: 'INVALID_ENGINE',
@@ -154,10 +158,10 @@ function toV2Options(options: SpeechOptionsWithVoiceID, isPlay20Streaming = fals
     options.voiceEngine !== 'PlayHT1.0' &&
     options.voiceEngine !== 'PlayHT2.0' &&
     options.voiceEngine !== 'PlayHT2.0-turbo' &&
-    options.voiceEngine !== 'PlayHT3.0'
+    options.voiceEngine !== 'Play3.0'
   ) {
     throw {
-      message: "Invalid engine. Expected 'PlayHT3.0', 'PlayHT2.0', 'PlayHT2.0-turbo' or 'PlayHT1.0'",
+      message: "Invalid engine. Expected 'Play3.0', 'PlayHT2.0', 'PlayHT2.0-turbo' or 'PlayHT1.0'",
       code: 'INVALID_ENGINE',
     };
   }
@@ -201,7 +205,8 @@ function toV1Options(options: SpeechOptionsWithVoiceID): V1ApiOptions {
 async function audioStreamFromSentences(
   sentencesStream: NodeJS.ReadableStream,
   writableStream: NodeJS.WritableStream,
-  options?: SpeechStreamOptions,
+  optionsInput: SpeechStreamOptions | undefined,
+  reqConfig: PlayRequestConfig,
 ) {
   // Create a stream for promises
   const promiseStream = new Readable({
@@ -234,10 +239,7 @@ async function audioStreamFromSentences(
   // For each sentence in the stream, add a task to the queue
   sentencesStream.on('data', async (data) => {
     const sentence = data.toString();
-    const generatePromise = (async () => {
-      return await internalGenerateStreamFromString(sentence, options);
-    })();
-
+    const generatePromise = internalGenerateStreamFromString(sentence, optionsInput, reqConfig);
     promiseStream.push(generatePromise);
   });
 

@@ -1,18 +1,23 @@
 import type { APISettingsInput, VoiceEngine } from '..';
 import { Client } from '../grpc-client/client';
+import { ExperimentalSettings } from './config/ExperimentalSettings';
 
 const DEFAULT_VOICE_ID = 's3://peregrine-voices/larry_ads3_parrot_saad/manifest.json';
 const DEFAULT_VOICE_ENGINE: VoiceEngine = 'PlayHT2.0';
 
-type APISettings = APISettingsInput & { defaultVoiceId: string; defaultVoiceEngine: VoiceEngine };
+export type SDKSettings = APISettingsInput & {
+  defaultVoiceId: string;
+  defaultVoiceEngine: VoiceEngine;
+  experimental?: ExperimentalSettings;
+};
 
 export class APISettingsStore {
-  settings: APISettings;
+  settings: SDKSettings;
   gRpcClient: Client;
 
   private static _instance: APISettingsStore;
 
-  private constructor(settings: APISettings) {
+  private constructor(settings: SDKSettings) {
     this.settings = { ...settings };
 
     this.gRpcClient = new Client({
@@ -39,7 +44,7 @@ export class APISettingsStore {
     return this.getInstance().gRpcClient;
   }
 
-  static getSettings(): APISettings {
+  static getSettings(): SDKSettings {
     return this.getInstance().settings;
   }
 
