@@ -328,11 +328,11 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
 };
 
 /**
- * The options available for configuring the PlayHT 3.0 voice engine for streaming.
+ * The options available for configuring the Play 3.0 voice engine for streaming.
  *
  * @typedef {Object} PlayHT20EngineOptions
  *
- * @property {'Play3.0'} voiceEngine - The identifier for the PlayHT 3.0 voice engine.
+ * @property {'Play3.0'} voiceEngine - The identifier for the Play 3.0 voice engine.
  * @property {'plain'} [inputType] - The optional input type for the audio. Only 'plain' is supported for PlayHT 1.0
  * voices.
  * @property {OutputFormat} [outputFormat] - The optional format in which the output audio stream should be generated.
@@ -359,7 +359,7 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  * ensuring that the words spoken align closely with the provided text. Only supported when `voice_engine` is set
  * to `PlayHT2.0`, and `voice` uses that engine.
  */
-export type PlayHT30EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
+export type Play30EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
   voiceEngine: 'Play3.0';
   outputFormat?: Play30OutputStreamFormat;
   language?:
@@ -420,7 +420,7 @@ export type SpeechOptions =
  * @typedef {Object} SpeechStreamOptions
  */
 export type SpeechStreamOptions =
-  | (SharedSpeechOptions & PlayHT30EngineStreamOptions)
+  | (SharedSpeechOptions & Play30EngineStreamOptions)
   | (SharedSpeechOptions & PlayHT20EngineStreamOptions)
   | (SharedSpeechOptions & PlayHT10EngineStreamOptions)
   | (SharedSpeechOptions & StandardEngineOptions);

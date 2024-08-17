@@ -1,9 +1,9 @@
 import * as PlayHT from 'playht';
 import fs from 'fs';
 
-// PlayHT 3.0 example
-export const playHT30Examples = async () => {
-  console.log('PlayHT 3.0 example');
+// Play 3.0 example
+export const play30Example = async () => {
+  console.log('Play 3.0 example');
   console.log('==================');
 
   // Stream audio from text
@@ -16,6 +16,7 @@ export const playHT30Examples = async () => {
       quality: 'high',
       emotion: 'male_fearful',
       styleGuidance: 16,
+      speed: 1.0,
     },
   );
 
