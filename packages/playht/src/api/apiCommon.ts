@@ -7,7 +7,7 @@ import type {
   VoiceEngine,
   PlayHT10OutputStreamFormat,
   PlayHT20OutputStreamFormat,
-  PlayHT30EngineStreamOptions,
+  Play30EngineStreamOptions,
   OutputFormat,
 } from '..';
 import { PassThrough, Readable, Writable } from 'node:stream';
@@ -43,7 +43,7 @@ export type V2ApiOptions = {
   textGuidance?: number;
 };
 
-export type V3ApiOptions = Pick<PlayHT30EngineStreamOptions, 'language' | 'outputFormat'> &
+export type V3ApiOptions = Pick<Play30EngineStreamOptions, 'language' | 'outputFormat'> &
   Omit<V2ApiOptions, 'outputFormat'>;
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
