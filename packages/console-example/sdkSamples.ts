@@ -1,6 +1,6 @@
 import * as PlayHT from 'playht';
 import dotenv from 'dotenv';
-import { playHT30Examples } from './src/playHT30Examples.js';
+import { play30Example } from './src/play30Example.js';
 
 dotenv.config();
 PlayHT.init({
@@ -23,7 +23,7 @@ process.on('unhandledRejection', (error) => {
   process.exit();
 });
 
-await playHT30Examples();
+await play30Example();
 // await allVoices();
 // await playHT20Examples();
 // await playHT10Examples();
