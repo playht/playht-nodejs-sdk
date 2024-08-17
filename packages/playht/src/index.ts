@@ -2,7 +2,6 @@ import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
-import { PlayHT30OutputStreamFormat } from './PlayHT30';
 import { PlayRequestConfig } from './api/config/PlayRequestConfig';
 
 /**
@@ -46,6 +45,11 @@ export type PlayHT10OutputStreamFormat = 'mp3' | 'mulaw';
  * @typedef {'mp3' | 'mulaw'} PlayHT20OutputStreamFormat
  */
 export type PlayHT20OutputStreamFormat = 'raw' | 'mp3' | 'wav' | 'ogg' | 'flac' | 'mulaw';
+
+/**
+ * The various formats that the Play 3.0 model output audio stream can have.
+ */
+export type Play30OutputStreamFormat = 'mp3' | 'wav' | 'ogg' | 'flac' | 'mulaw';
 
 /**
  * Type representing the different gender options available for voice selection.
@@ -357,7 +361,45 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  */
 export type PlayHT30EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
   voiceEngine: 'Play3.0';
-  outputFormat?: PlayHT30OutputStreamFormat;
+  outputFormat?: Play30OutputStreamFormat;
+  language?:
+    | 'afrikaans'
+    | 'albanian'
+    | 'amharic'
+    | 'arabic'
+    | 'bengali'
+    | 'bulgarian'
+    | 'catalan'
+    | 'croatian'
+    | 'czech'
+    | 'danish'
+    | 'dutch'
+    | 'english'
+    | 'french'
+    | 'galician'
+    | 'german'
+    | 'greek'
+    | 'hebrew'
+    | 'hindi'
+    | 'hungarian'
+    | 'indonesian'
+    | 'italian'
+    | 'japanese'
+    | 'korean'
+    | 'malay'
+    | 'mandarin'
+    | 'polish'
+    | 'portuguese'
+    | 'russian'
+    | 'serbian'
+    | 'spanish'
+    | 'swedish'
+    | 'tagalog'
+    | 'thai'
+    | 'turkish'
+    | 'ukrainian'
+    | 'urdu'
+    | 'xhosa';
 };
 
 /**
