@@ -17,6 +17,7 @@ export const play30Example = async () => {
       emotion: 'male_fearful',
       styleGuidance: 16,
       speed: 1.0,
+      language: 'english',
     },
   );
 
