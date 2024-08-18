@@ -358,6 +358,7 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  * deviating from the input text. Higher numbers will make the generated speech more accurate to the input text,
  * ensuring that the words spoken align closely with the provided text. Only supported when `voice_engine` is set
  * to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {string} {language} - The language spoken by the voice.
  */
 export type Play30EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
   voiceEngine: 'Play3.0';
