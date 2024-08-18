@@ -241,10 +241,7 @@ async function audioStreamFromSentences(
   // For each sentence in the stream, add a task to the queue
   sentencesStream.on('data', async (data) => {
     const sentence = data.toString();
-    const generatePromise = (async () => {
-      return await internalGenerateStreamFromString(sentence, options);
-    })();
-
+    const generatePromise = internalGenerateStreamFromString(sentence, optionsInput, reqConfig);
     promiseStream.push(generatePromise);
   });
 
