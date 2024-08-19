@@ -18,7 +18,6 @@ PlayHT.init({
     (function () {
       throw new Error('PLAYHT_USER_ID not found in .env file. Please read .env.example to see how to create it.');
     })(),
-  defaultVoiceId: undefined, // TODO (v3) temporary
 });
 
 process.on('unhandledRejection', (error) => {
