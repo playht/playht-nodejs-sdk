@@ -26,10 +26,10 @@ process.on('unhandledRejection', (error) => {
   process.exit();
 });
 
-await allVoices();
+await play30Example();
 await playHT20Examples();
 await playHT10Examples();
 await standardExamples();
-await play30Example();
+await allVoices();
 
 process.exit();

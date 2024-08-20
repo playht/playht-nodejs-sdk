@@ -1,9 +1,9 @@
-import type { V3ApiOptions } from '../../apiCommon';
-import type { Play30OutputStreamFormat } from '../../../index';
+import type { V3ApiOptions } from '../apiCommon';
+import type { Play30OutputStreamFormat } from '../../index';
 import axios, { AxiosRequestConfig } from 'axios';
-import { convertError } from '../convertError';
-import { keepAliveHttpsAgent } from '../http';
-import { PlayRequestConfig } from '../../config/PlayRequestConfig';
+import { convertError } from '../internal/convertError';
+import { keepAliveHttpsAgent } from '../internal/http';
+import { PlayRequestConfig } from '../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 
 export async function generateV3Stream(
@@ -18,9 +18,7 @@ export async function generateV3Stream(
     url: inferenceAddress,
     headers: {
       accept: outputFormatToMimeType(options.outputFormat),
-      'content-type': 'application/json',
     },
-    responseType: 'stream',
     data: {
       text,
       voice,
@@ -38,7 +36,9 @@ export async function generateV3Stream(
       language: options.language,
       version: 'v3',
     },
+    responseType: 'stream',
     httpsAgent: keepAliveHttpsAgent,
+    signal: reqConfig.signal,
   };
 
   const response = await axios(streamOptions).catch((error: any) => convertError(error));

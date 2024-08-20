@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { convertError } from '../convertError';
-import { keepAliveHttpsAgent } from '../http';
-import { PlayRequestConfig } from '../../config/PlayRequestConfig';
-import { InferenceCoordinatesEntry } from '../../v3/V3InternalSettings';
-import { V3_DEFAULT_SETTINGS } from '../../v3/V3DefaultSettings';
-import { APISettingsStore } from '../../APISettingsStore';
+import { convertError } from '../internal/convertError';
+import { keepAliveHttpsAgent } from '../internal/http';
+import { PlayRequestConfig } from '../config/PlayRequestConfig';
+import { APISettingsStore } from '../APISettingsStore';
+import { InferenceCoordinatesEntry } from './V3InternalSettings';
+import { V3_DEFAULT_SETTINGS } from './V3DefaultSettings';
 
 const inferenceCoordinatesStore: Record<string, InferenceCoordinatesEntry> = {};
 
