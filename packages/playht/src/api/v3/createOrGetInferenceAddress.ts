@@ -40,25 +40,25 @@ const defaultInferenceCoordinatesGenerator = async (
 };
 
 async function createInferenceCoordinates(
-  reqConfig: PlayRequestConfig,
+  reqConfigSettings?: PlayRequestConfig['settings'],
   attemptNo = 0,
 ): Promise<InferenceCoordinatesEntry> {
-  const userId = reqConfig?.settings?.userId ?? APISettingsStore.getSettings().userId;
-  const apiKey = reqConfig?.settings?.apiKey ?? APISettingsStore.getSettings().apiKey;
+  const userId = reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId;
+  const apiKey = reqConfigSettings?.apiKey ?? APISettingsStore.getSettings().apiKey;
   const inferenceCoordinatesGenerator =
-    reqConfig?.settings?.experimental?.v3?.customInferenceCoordinatesGenerator ??
+    reqConfigSettings?.experimental?.v3?.customInferenceCoordinatesGenerator ??
     APISettingsStore.getSettings().experimental?.v3?.customInferenceCoordinatesGenerator ??
     defaultInferenceCoordinatesGenerator;
   const coordinatesExpirationMinimalFrequencyMs =
-    reqConfig?.settings?.experimental?.v3?.COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS ??
+    reqConfigSettings?.experimental?.v3?.COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS ??
     APISettingsStore.getSettings().experimental?.v3?.COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS ??
     V3_DEFAULT_SETTINGS.COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS;
   const coordinatesExpirationAdvanceRefreshTimeMs =
-    reqConfig?.settings?.experimental?.v3?.COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS ??
+    reqConfigSettings?.experimental?.v3?.COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS ??
     APISettingsStore.getSettings().experimental?.v3?.COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS ??
     V3_DEFAULT_SETTINGS.COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS;
   const coordinatesGetApiCallMaxRetries =
-    reqConfig?.settings?.experimental?.v3?.COORDINATES_GET_API_CALL_MAX_RETRIES ??
+    reqConfigSettings?.experimental?.v3?.COORDINATES_GET_API_CALL_MAX_RETRIES ??
     APISettingsStore.getSettings().experimental?.v3?.COORDINATES_GET_API_CALL_MAX_RETRIES ??
     V3_DEFAULT_SETTINGS.COORDINATES_GET_API_CALL_MAX_RETRIES;
 
@@ -68,7 +68,7 @@ async function createInferenceCoordinates(
       coordinatesExpirationMinimalFrequencyMs,
       newInferenceCoordinatesEntry.expiresAtMs - Date.now() - coordinatesExpirationAdvanceRefreshTimeMs,
     );
-    setTimeout(() => createInferenceCoordinates(reqConfig), automaticRefreshDelay).unref();
+    setTimeout(() => createInferenceCoordinates(reqConfigSettings), automaticRefreshDelay).unref();
     inferenceCoordinatesStore[userId] = newInferenceCoordinatesEntry;
     return newInferenceCoordinatesEntry;
   } catch (e) {
@@ -78,7 +78,7 @@ async function createInferenceCoordinates(
     return new Promise((resolve) => {
       setTimeout(
         () => {
-          resolve(createInferenceCoordinates(reqConfig, attemptNo + 1));
+          resolve(createInferenceCoordinates(reqConfigSettings, attemptNo + 1));
         },
         500 * (attemptNo + 1),
       ).unref();
@@ -86,13 +86,13 @@ async function createInferenceCoordinates(
   }
 }
 
-export async function createOrGetInferenceAddress(reqConfig: PlayRequestConfig): Promise<string> {
-  const userId = reqConfig?.settings?.userId ?? APISettingsStore.getSettings().userId;
+export async function createOrGetInferenceAddress(reqConfigSettings?: PlayRequestConfig['settings']): Promise<string> {
+  const userId = reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId;
   const inferenceCoordinatesEntry = inferenceCoordinatesStore[userId];
   if (inferenceCoordinatesEntry && inferenceCoordinatesEntry.expiresAtMs >= Date.now() - 5_000) {
     return inferenceCoordinatesEntry.inferenceAddress;
   } else {
-    const newInferenceCoordinatesEntry = await createInferenceCoordinates(reqConfig);
+    const newInferenceCoordinatesEntry = await createInferenceCoordinates(reqConfigSettings);
     return newInferenceCoordinatesEntry.inferenceAddress;
   }
 }

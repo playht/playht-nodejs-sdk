@@ -12,7 +12,7 @@ export async function generateV3Stream(
   options: V3ApiOptions,
   reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
-  const inferenceAddress = await createOrGetInferenceAddress(reqConfig);
+  const inferenceAddress = await createOrGetInferenceAddress(reqConfig.settings);
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
     url: inferenceAddress,
