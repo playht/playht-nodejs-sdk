@@ -79,7 +79,7 @@ PlayHT.init({
   apiKey: '<YOUR API KEY>',
   userId: '<YOUR API KEY>',
   defaultVoiceId: 's3://peregrine-voices/oliver_narrative2_parrot_saad/manifest.json',
-  defaultVoiceEngine: 'PlayHT2.0',
+  defaultVoiceEngine: 'Play3.0',
 });
 ```
 
@@ -150,17 +150,41 @@ For a full example of using the streaming speech from input stream API, see our 
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options).
 
-**_Note: For lowest possible latency, use the streaming API with a [PlayHT 2.0 voice](#playht-20-voices)._**
+**_Note: For lowest possible latency, use the streaming API with the Play3.0 model._**
 
 ## Generating Speech Options
 
 All text-to-speech methods above accept an optional `options` parameter. You can use it to generate audio with different voices, AI models, output file formats and much more.
 
-The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports different types of models: 'PlayHT2.0', 'PlayHT2.0-turbo', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](packages/playht/src/index.ts).
+The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports different types of models: 'Play3.0', 'PlayHT2.0', 'PlayHT2.0-turbo', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](packages/playht/src/index.ts).
+
+### Play3.0 Voices (Recommended)
+
+Our newest conversational voice AI model with added languages, lowest latency, and instant cloning. Compatible with `PlayHT2.0` and `PlayHT2.0-turbo`, our most reliable and fastest model for streaming.
+
+To stream using the `Play3.0` model:
+
+```javascript
+import * as PlayHT from 'playht';
+import fs from 'fs';
+
+// Create a file stream
+const fileStream = fs.createWriteStream('play_3.mp3');
+
+// Stream audio from text
+const stream = await PlayHT.stream('Stream realistic voices that say what you want!', {
+  voiceEngine: 'Play3.0',
+  voiceId: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
+  outputFormat: 'mp3',
+});
+
+// Pipe stream into file
+stream.pipe(fileStream);
+```
 
 ### PlayHT 2.0 Voices
 
-Our newest conversational voice AI model with added emotion direction and instant cloning. Compatible with `PlayHT2.0-turbo`, our fastest model for streaming. Supports english only.
+Our newest conversational voice AI model with added emotion direction and instant cloning. Compatible with `PlayHT2.0-turbo`. Supports english only.
 
 To generate an audio file using a PlayHT 2.0 voice with emotion and other options:
 
