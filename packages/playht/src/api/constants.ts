@@ -3,5 +3,5 @@ export const GRPC_STREAMING_LIMITS = {
   LINE_MAX_LENGTH: 300,
   LINE_DESIRED_LENGTH: 200,
 };
-export const PUNCTUATION_REGEX = /[.!?:…\r\n]/m;
+export const PUNCTUATION_REGEX = /((?<!\d)[.:](?!\d))|[!?…\r\n]/m;
 export const STREAM_SENTENCE_AGGREGATE_TIMEOUT = 150;
