@@ -16,12 +16,12 @@ export async function generateGRpcStream(
 
   let emotionCode = null;
   if (options.emotion) {
-    emotionCode = emotionStringToNumber[options.emotion];
-    if (!emotionCode) {
+    if (!Object.hasOwn(emotionStringToNumber, options.emotion)) {
       throw new Error(
         `Invalid emotion "${options.emotion}". Valid values are: ${Object.keys(emotionStringToNumber).join(', ')}.`,
       );
     }
+    emotionCode = emotionStringToNumber[options.emotion];
   }
 
   const grpcInput = splitSentences(input);
