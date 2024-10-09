@@ -50,9 +50,9 @@ async function createInferenceCoordinates(
     APISettingsStore.getSettings().experimental?.v3?.customInferenceCoordinatesGenerator ??
     defaultInferenceCoordinatesGenerator;
   const coordinatesExpirationMinimalFrequencyMs =
-    reqConfigSettings?.experimental?.v3?.COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS ??
-    APISettingsStore.getSettings().experimental?.v3?.COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS ??
-    V3_DEFAULT_SETTINGS.COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS;
+    reqConfigSettings?.experimental?.v3?.coordinatesExpirationMinimalFrequencyMs ??
+    APISettingsStore.getSettings().experimental?.v3?.coordinatesExpirationMinimalFrequencyMs ??
+    V3_DEFAULT_SETTINGS.coordinatesExpirationMinimalFrequencyMs;
   const coordinatesExpirationAdvanceRefreshTimeMs =
     reqConfigSettings?.experimental?.v3?.coordinatesExpirationAdvanceRefreshTimeMs ??
     APISettingsStore.getSettings().experimental?.v3?.coordinatesExpirationAdvanceRefreshTimeMs ??
