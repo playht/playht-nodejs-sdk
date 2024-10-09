@@ -454,11 +454,9 @@ export type SpeechOutput = {
  * @property {string} userId - The user identifier for authentication.
  * @property {string} [defaultVoiceId] - An optional default voice ID to be used in speech synthesis when a voice is
  * not defined.
- * @property {Array<VoiceEngine>} [warmUpEngines] - An optional array of voice engines. When provided, the client will
- * establish connections and authenticate ahead of time for the selected engines, which can reduce latency in the first
- * call.
  * @property {VoiceEngine} [defaultVoiceEngine] - An optional default voice engine to be used in speech synthesis when
- * a voice engine is not defined. If provided, the engine will be warmed up (see warmUpEngines) before the first call.
+ * a voice engine is not defined. If provided, the engine will be warmed up right away, which can reduce latency of
+ * the first call.
  * @property {string} [customAddr] - An optional custom address (host:port) to send requests to.
  * @property {string} [fallbackEnabled] - If true, the client may choose to, under high load scenarios, fallback
  * from a custom address (configured with "customAddr" above) to the standard PlayHT address.
@@ -467,7 +465,6 @@ export type APISettingsInput = {
   apiKey: string;
   userId: string;
   defaultVoiceId?: string;
-  warmUpEngines?: Array<VoiceEngine>;
   defaultVoiceEngine?: VoiceEngine;
   removeSsmlTags?: boolean;
 
@@ -495,7 +492,7 @@ export type APISettingsInput = {
  */
 export function init(settings: APISettingsInput) {
   APISettingsStore.setSettings(settings);
-  if (settings.defaultVoiceEngine === 'Play3.0-mini' || settings.warmUpEngines?.includes('Play3.0-mini')) {
+  if (settings.defaultVoiceEngine === 'Play3.0-mini') {
     void warmUpV3(settings);
   }
 }
