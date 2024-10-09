@@ -4,7 +4,7 @@ import { playHT20Examples } from './src/playHT20Examples.js';
 import { playHT10Examples } from './src/playHT10Examples.js';
 import { standardExamples } from './src/standardExamples.js';
 import { allVoices } from './src/allVoices.js';
-import { play30Example } from './src/play30Example.js';
+import { play30Examples } from './src/play30Examples.js';
 
 dotenv.config();
 PlayHT.init({
@@ -18,7 +18,7 @@ PlayHT.init({
     (function () {
       throw new Error('PLAYHT_USER_ID not found in .env file. Please read .env.example to see how to create it.');
     })(),
-  warmUpEngines: ['Play3.0']
+  warmUpEngines: ['Play3.0-mini']
 });
 
 // wait for 5 s
@@ -30,7 +30,7 @@ process.on('unhandledRejection', (error) => {
   process.exit();
 });
 
-await play30Example();
+await play30Examples();
 await playHT20Examples();
 await playHT10Examples();
 await standardExamples();

@@ -79,7 +79,7 @@ PlayHT.init({
   apiKey: '<YOUR API KEY>',
   userId: '<YOUR API KEY>',
   defaultVoiceId: 's3://peregrine-voices/oliver_narrative2_parrot_saad/manifest.json',
-  defaultVoiceEngine: 'Play3.0',
+  defaultVoiceEngine: 'Play3.0-mini',
 });
 ```
 
@@ -150,19 +150,19 @@ For a full example of using the streaming speech from input stream API, see our 
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options).
 
-**_Note: For lowest possible latency, use the streaming API with the Play3.0 model._**
+**_Note: For lowest possible latency, use the streaming API with the `Play3.0-mini` model._**
 
 ## Generating Speech Options
 
 All text-to-speech methods above accept an optional `options` parameter. You can use it to generate audio with different voices, AI models, output file formats and much more.
 
-The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports different types of models: 'Play3.0', 'PlayHT2.0', 'PlayHT2.0-turbo', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](packages/playht/src/index.ts).
+The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports different types of models: 'Play3.0-mini', 'PlayHT2.0', 'PlayHT2.0-turbo', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](packages/playht/src/index.ts).
 
-### Play3.0 Voices (Recommended)
+### Play3.0-mini Voices (Recommended)
 
 Our newest conversational voice AI model with added languages, lowest latency, and instant cloning. Compatible with `PlayHT2.0` and `PlayHT2.0-turbo`, our most reliable and fastest model for streaming.
 
-To stream using the `Play3.0` model:
+To stream using the `Play3.0-mini` model:
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -173,7 +173,7 @@ const fileStream = fs.createWriteStream('play_3.mp3');
 
 // Stream audio from text
 const stream = await PlayHT.stream('Stream realistic voices that say what you want!', {
-  voiceEngine: 'Play3.0',
+  voiceEngine: 'Play3.0-mini',
   voiceId: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
   outputFormat: 'mp3',
 });

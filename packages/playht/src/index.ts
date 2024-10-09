@@ -8,9 +8,9 @@ import { warmUpV3 } from './api/v3/warmUpV3';
 /**
  * Type representing the various voice engines that can be used for speech synthesis.
  *
- * @typedef {'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard'} VoiceEngine
+ * @typedef {'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard'} VoiceEngine
  */
-export type VoiceEngine = 'Play3.0' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
+export type VoiceEngine = 'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
 
 /**
  * Type representing the different input types that can be used to define the format of the input text.
@@ -48,7 +48,7 @@ export type PlayHT10OutputStreamFormat = 'mp3' | 'mulaw';
 export type PlayHT20OutputStreamFormat = 'raw' | 'mp3' | 'wav' | 'ogg' | 'flac' | 'mulaw';
 
 /**
- * The various formats that the Play 3.0 model output audio stream can have.
+ * The various formats that the Play3.0-mini model output audio stream can have.
  */
 export type Play30OutputStreamFormat = 'mp3' | 'wav' | 'ogg' | 'flac' | 'mulaw';
 
@@ -329,11 +329,11 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
 };
 
 /**
- * The options available for configuring the Play 3.0 voice engine for streaming.
+ * The options available for configuring the Play3.0-mini voice engine for streaming.
  *
  * @typedef {Object} PlayHT20EngineOptions
  *
- * @property {'Play3.0'} voiceEngine - The identifier for the Play 3.0 voice engine.
+ * @property {'Play3.0-mini'} voiceEngine - The identifier for the Play3.0-mini voice engine.
  * @property {'plain'} [inputType] - The optional input type for the audio. Only 'plain' is supported for PlayHT 1.0
  * voices.
  * @property {OutputFormat} [outputFormat] - The optional format in which the output audio stream should be generated.
@@ -362,7 +362,7 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  * @property {string} {language} - The language spoken by the voice.
  */
 export type Play30EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
-  voiceEngine: 'Play3.0';
+  voiceEngine: 'Play3.0-mini';
   outputFormat?: Play30OutputStreamFormat;
   language?:
     | 'afrikaans'
@@ -495,7 +495,7 @@ export type APISettingsInput = {
  */
 export function init(settings: APISettingsInput) {
   APISettingsStore.setSettings(settings);
-  if (settings.defaultVoiceEngine === 'Play3.0' || settings.warmUpEngines?.includes('Play3.0')) {
+  if (settings.defaultVoiceEngine === 'Play3.0-mini' || settings.warmUpEngines?.includes('Play3.0-mini')) {
     void warmUpV3(settings);
   }
 }
