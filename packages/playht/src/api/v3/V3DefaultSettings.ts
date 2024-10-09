@@ -6,6 +6,6 @@ export const V3_DEFAULT_SETTINGS = {
   // Refresh no more frequently than 1 minute
   coordinatesExpirationMinimalFrequencyMs: 60_000,
   // Attempt to get new coordinates 3 times max
-  COORDINATES_GET_API_CALL_MAX_RETRIES: 3,
+  coordinatesGetApiCallMaxRetries: 3,
   customInferenceCoordinatesGenerator: undefined,
 } as const satisfies V3InternalSettings;
