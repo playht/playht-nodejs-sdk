@@ -1,6 +1,6 @@
 export type V3InternalSettings = {
   // how much time before expiration should we refresh the coordinates
-  COORDINATES_EXPIRATION_ADVANCE_REFRESH_TIME_MS?: number;
+  coordinatesExpirationAdvanceRefreshTimeMs?: number;
   // refresh no more frequently than this
   COORDINATES_EXPIRATION_MINIMAL_FREQUENCY_MS?: number;
   // number of attempts when calling API to get new coordinates
