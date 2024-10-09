@@ -58,9 +58,9 @@ async function createInferenceCoordinates(
     APISettingsStore.getSettings().experimental?.v3?.coordinatesExpirationAdvanceRefreshTimeMs ??
     V3_DEFAULT_SETTINGS.coordinatesExpirationAdvanceRefreshTimeMs;
   const coordinatesGetApiCallMaxRetries =
-    reqConfigSettings?.experimental?.v3?.COORDINATES_GET_API_CALL_MAX_RETRIES ??
-    APISettingsStore.getSettings().experimental?.v3?.COORDINATES_GET_API_CALL_MAX_RETRIES ??
-    V3_DEFAULT_SETTINGS.COORDINATES_GET_API_CALL_MAX_RETRIES;
+    reqConfigSettings?.experimental?.v3?.coordinatesGetApiCallMaxRetries ??
+    APISettingsStore.getSettings().experimental?.v3?.coordinatesGetApiCallMaxRetries ??
+    V3_DEFAULT_SETTINGS.coordinatesGetApiCallMaxRetries;
 
   try {
     const newInferenceCoordinatesEntry = await inferenceCoordinatesGenerator(userId, apiKey);

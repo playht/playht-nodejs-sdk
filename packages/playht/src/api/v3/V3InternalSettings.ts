@@ -4,7 +4,7 @@ export type V3InternalSettings = {
   // refresh no more frequently than this
   coordinatesExpirationMinimalFrequencyMs?: number;
   // number of attempts when calling API to get new coordinates
-  COORDINATES_GET_API_CALL_MAX_RETRIES?: number;
+  coordinatesGetApiCallMaxRetries?: number;
   customInferenceCoordinatesGenerator?: (userId: string, apiKey: string) => Promise<InferenceCoordinatesEntry>;
 };
 
