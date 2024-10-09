@@ -18,11 +18,7 @@ PlayHT.init({
     (function () {
       throw new Error('PLAYHT_USER_ID not found in .env file. Please read .env.example to see how to create it.');
     })(),
-  warmUpEngines: ['Play3.0-mini']
 });
-
-// wait for 5 s
-await new Promise((resolve) => setTimeout(resolve, 2000));
 
 process.on('unhandledRejection', (error) => {
   console.error('Unhandled error');
