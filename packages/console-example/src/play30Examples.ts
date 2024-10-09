@@ -1,16 +1,16 @@
 import * as PlayHT from 'playht';
 import fs from 'fs';
 
-// Play 3.0 example
-export const play30Example = async () => {
-  console.log('Play 3.0 example');
+// Play3.0-mini example
+export const play30Examples = async () => {
+  console.log('Play3.0-mini example');
   console.log('==================');
 
   // Stream audio from text
   const streamFromText = await PlayHT.stream(
     'Hi there. I am streaming from text. So easy! I will do that again for sure.',
     {
-      voiceEngine: 'Play3.0',
+      voiceEngine: 'Play3.0-mini',
       outputFormat: 'mp3',
       temperature: 1.2,
       quality: 'high',
