@@ -9,4 +9,5 @@ export default {
   transform: {
     '^.+\\.ts$': ['ts-jest', { useESM: true }],
   },
+  testPathIgnorePatterns: ['<rootDir>/dist', '<rootDir>/node_modules', '^(?!.*\\.test\\.ts$).*$'],
 };
