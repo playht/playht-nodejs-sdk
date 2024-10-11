@@ -31,5 +31,3 @@ await playHT20Examples();
 await playHT10Examples();
 await standardExamples();
 await allVoices();
-
-process.exit();

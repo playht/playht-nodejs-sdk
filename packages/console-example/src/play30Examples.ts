@@ -1,5 +1,6 @@
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Play3.0-mini example
 export const play30Examples = async () => {
@@ -8,9 +9,10 @@ export const play30Examples = async () => {
 
   // Stream audio from text
   const streamFromText = await PlayHT.stream(
-    'Hi there. I am streaming from text. So easy! I will do that again for sure.',
+    'This is me streaming from text.',
     {
       voiceEngine: 'Play3.0-mini',
+      voiceId: 's3://voice-cloning-zero-shot/775ae416-49bb-4fb6-bd45-740f205d20a1/jennifersaad/manifest.json',
       outputFormat: 'mp3',
       temperature: 1.2,
       quality: 'high',
@@ -25,11 +27,7 @@ export const play30Examples = async () => {
   const fileName = 'hello3.0-textStream.mp3';
   const fileStreamForText = fs.createWriteStream(fileName);
 
-  streamFromText.pipe(fileStreamForText);
-
-  await new Promise((resolve) => {
-    fileStreamForText.on('finish', resolve);
-  });
+  await pipeline(streamFromText, fileStreamForText);
 
   console.log(`All done! Please check the generated file: ${fs.realpathSync(fileName)}`);
 };
