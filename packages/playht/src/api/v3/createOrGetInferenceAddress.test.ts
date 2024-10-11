@@ -6,7 +6,6 @@ async function sleep(timeout: number) {
 }
 
 describe('createOrGetInferenceAddress', () => {
-
   let callSequenceNumber = 0;
   const reqConfigSettings = (userId: string) => ({
     userId,
@@ -27,10 +26,11 @@ describe('createOrGetInferenceAddress', () => {
     },
   });
 
-
   it('serializes concurrent calls for the same user', async () => {
     const numberOfTestCalls = 15;
-    const calls = Array.from({ length: numberOfTestCalls }, () => createOrGetInferenceAddress(reqConfigSettings('test-user')));
+    const calls = Array.from({ length: numberOfTestCalls }, () =>
+      createOrGetInferenceAddress(reqConfigSettings('test-user')),
+    );
 
     // Expect all calls to return 'call #1', not 'call #1', 'call #2', 'call #3', etc.
     expect(await Promise.all(calls)).toEqual(Array(numberOfTestCalls).fill('call test-user #1'));
@@ -38,16 +38,20 @@ describe('createOrGetInferenceAddress', () => {
 
   it('doesnt serialize calls for different users', async () => {
     const numberOfTestCalls = 3;
-    const callsOne = Array.from({ length: numberOfTestCalls }, (_, i) => createOrGetInferenceAddress(reqConfigSettings(`test-user#${i}`)));
-    const callsTwo = Array.from({ length: numberOfTestCalls }, (_, i) => createOrGetInferenceAddress(reqConfigSettings(`test-user#${i}`)));
+    const callsOne = Array.from({ length: numberOfTestCalls }, (_, i) =>
+      createOrGetInferenceAddress(reqConfigSettings(`test-user#${i}`)),
+    );
+    const callsTwo = Array.from({ length: numberOfTestCalls }, (_, i) =>
+      createOrGetInferenceAddress(reqConfigSettings(`test-user#${i}`)),
+    );
 
     expect(await Promise.all([...callsOne, ...callsTwo])).toEqual([
-      "call test-user#0 #2",
-      "call test-user#1 #3",
-      "call test-user#2 #4",
-      "call test-user#0 #2",
-      "call test-user#1 #3",
-      "call test-user#2 #4"
+      'call test-user#0 #2',
+      'call test-user#1 #3',
+      'call test-user#2 #4',
+      'call test-user#0 #2',
+      'call test-user#1 #3',
+      'call test-user#2 #4',
     ]);
   });
 });

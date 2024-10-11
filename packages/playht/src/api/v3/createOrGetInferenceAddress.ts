@@ -87,7 +87,7 @@ async function createInferenceCoordinates(
   }
 }
 
-const inferenceCoordinatesCreationPromise: Record<UserId, Promise<InferenceCoordinatesEntry>> = { };
+const inferenceCoordinatesCreationPromise: Record<UserId, Promise<InferenceCoordinatesEntry>> = {};
 
 export async function createOrGetInferenceAddress(reqConfigSettings?: PlayRequestConfig['settings']): Promise<string> {
   const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
