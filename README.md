@@ -3,7 +3,7 @@
     <img
       width="200"
       alt="playht playai logo"
-      src="https://github.com/user-attachments/assets/b47a6536-0529-4e7a-a8ab-547cdce0dbac"
+      src="https://github.com/user-attachments/assets/c97afbf8-0fe2-4cbb-8d32-9af0ca8901c0"
     />
   </a>
 <p></p>
