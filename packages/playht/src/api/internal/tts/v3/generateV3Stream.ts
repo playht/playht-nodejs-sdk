@@ -1,9 +1,9 @@
-import type { V3ApiOptions } from '../apiCommon';
-import type { Play30OutputStreamFormat } from '../../index';
+import type { V3ApiOptions } from '../../../apiCommon';
+import type { Play30OutputStreamFormat } from '../../../../index';
 import axios, { AxiosRequestConfig } from 'axios';
-import { convertError } from '../internal/convertError';
-import { keepAliveHttpsAgent } from '../internal/http';
-import { PlayRequestConfig } from '../config/PlayRequestConfig';
+import { convertError } from '../../convertError';
+import { keepAliveHttpsAgent } from '../../http';
+import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 
 export async function generateV3Stream(

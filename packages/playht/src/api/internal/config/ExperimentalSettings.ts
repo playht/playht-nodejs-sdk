@@ -1,4 +1,4 @@
-import { V3InternalSettings } from '../v3/V3InternalSettings';
+import { V3InternalSettings } from '../tts/v3/V3InternalSettings';
 
 /**
  * experimental settings are hidden from the Public API because they are either incomplete or unstable,

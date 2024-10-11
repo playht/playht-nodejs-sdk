@@ -2,8 +2,8 @@ import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
-import { PlayRequestConfig } from './api/config/PlayRequestConfig';
-import { warmUpV3 } from './api/v3/warmUpV3';
+import { PlayRequestConfig } from './api/internal/config/PlayRequestConfig';
+import { warmUpV3 } from './api/internal/tts/v3/warmUpV3';
 
 /**
  * Type representing the various voice engines that can be used for speech synthesis.

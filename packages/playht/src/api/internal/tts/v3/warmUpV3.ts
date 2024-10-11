@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { keepAliveHttpsAgent } from '../internal/http';
-import { PlayRequestConfig } from '../config/PlayRequestConfig';
+import { keepAliveHttpsAgent } from '../../http';
+import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 
 export async function warmUpV3(reqConfigSettings: PlayRequestConfig['settings']) {

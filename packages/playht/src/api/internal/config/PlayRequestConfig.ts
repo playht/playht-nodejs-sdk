@@ -1,4 +1,4 @@
-import { SDKSettings } from '../APISettingsStore';
+import { SDKSettings } from '../../APISettingsStore';
 
 export type PlayRequestConfig = {
   settings?: Partial<SDKSettings>;
