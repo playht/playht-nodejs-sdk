@@ -3,10 +3,11 @@ import { convertError } from '../internal/convertError';
 import { keepAliveHttpsAgent } from '../internal/http';
 import { PlayRequestConfig } from '../config/PlayRequestConfig';
 import { APISettingsStore } from '../APISettingsStore';
+import { UserId } from '../internal/types';
 import { InferenceCoordinatesEntry } from './V3InternalSettings';
 import { V3_DEFAULT_SETTINGS } from './V3DefaultSettings';
 
-const inferenceCoordinatesStore: Record<string, InferenceCoordinatesEntry> = {};
+const inferenceCoordinatesStore: Record<UserId, InferenceCoordinatesEntry> = {};
 
 // By default, the inference coordinates generator will call the Play API to get the inference coordinates.
 const defaultInferenceCoordinatesGenerator = async (
@@ -43,7 +44,7 @@ async function createInferenceCoordinates(
   reqConfigSettings?: PlayRequestConfig['settings'],
   attemptNo = 0,
 ): Promise<InferenceCoordinatesEntry> {
-  const userId = reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId;
+  const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
   const apiKey = reqConfigSettings?.apiKey ?? APISettingsStore.getSettings().apiKey;
   const inferenceCoordinatesGenerator =
     reqConfigSettings?.experimental?.v3?.customInferenceCoordinatesGenerator ??
@@ -86,13 +87,19 @@ async function createInferenceCoordinates(
   }
 }
 
+const inferenceCoordinatesCreationPromise: Record<UserId, Promise<InferenceCoordinatesEntry>> = { };
+
 export async function createOrGetInferenceAddress(reqConfigSettings?: PlayRequestConfig['settings']): Promise<string> {
-  const userId = reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId;
+  const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
   const inferenceCoordinatesEntry = inferenceCoordinatesStore[userId];
   if (inferenceCoordinatesEntry && inferenceCoordinatesEntry.expiresAtMs >= Date.now() - 5_000) {
     return inferenceCoordinatesEntry.inferenceAddress;
   } else {
-    const newInferenceCoordinatesEntry = await createInferenceCoordinates(reqConfigSettings);
+    if (!(userId in inferenceCoordinatesCreationPromise)) {
+      inferenceCoordinatesCreationPromise[userId] = createInferenceCoordinates(reqConfigSettings);
+    }
+    const newInferenceCoordinatesEntry = (await inferenceCoordinatesCreationPromise[userId])!;
+    delete inferenceCoordinatesCreationPromise[userId];
     return newInferenceCoordinatesEntry.inferenceAddress;
   }
 }
