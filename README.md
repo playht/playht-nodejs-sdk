@@ -13,6 +13,13 @@
 
 ---
 
+<!--
+[![GitHub Actions CI](https://github.com/playht/workflows/CI/badge.svg)](https://github.com/playht/actions?query=workflow%3ACI)
+-->
+
+[![npm version](https://badge.fury.io/js/playht.svg)](https://www.npmjs.com/package/playht) [![Downloads](https://img.shields.io/npm/dm/playht.svg)](https://www.npmjs.com/package/playht)
+
+
 The PlayHT SDK provides easy to use methods to wrap the [PlayHT API](https://docs.play.ht/reference/api-getting-started).
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
