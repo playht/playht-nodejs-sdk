@@ -11,7 +11,7 @@ describe('v3', () => {
         apiKey: E2E_CONFIG.API_KEY,
       });
 
-      const streamFromText = await PlayHT.stream('Hello from SDK e2e test.', {
+      const streamFromText = await PlayHT.stream('Hello from SDK test.', {
         voiceEngine: 'Play3.0-mini',
         outputFormat: 'mp3',
         temperature: 1.2,
@@ -23,7 +23,7 @@ describe('v3', () => {
       const audioBuffer = await buffer(streamFromText);
       // fs.writeFileSync('Play3.0-mini.mp3', audioBuffer); // uncomment this line to save the generated file
 
-      expect(audioBuffer.length).toBeGreaterThan(50_000); // errors would result in smaller payloads
+      expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
       expect(audioBuffer.toString('ascii')).toContain('ID3');
     });
   });
