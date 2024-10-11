@@ -152,7 +152,7 @@ export class Client {
               }
             })(),
           Math.min(1000 * 30, expiresIn - 1000 * 10),
-        );
+        ).unref();
       }
       return;
     } finally {
@@ -224,7 +224,7 @@ export class Client {
           }
         })(),
       expiresIn - 1000 * 60 * 5,
-    );
+    ).unref();
   }
 
   /** Create a new TTS stream. */
