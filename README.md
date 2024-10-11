@@ -2,8 +2,8 @@
   <a href="https://play.ht">
     <img
       width="200"
-      alt="playht logo"
-      src="https://github.com/playht/playht-nodejs-sdk/assets/3000200/e1acecbe-efb9-4b06-8c32-eb25eee6f0f2"
+      alt="playht playai logo"
+      src="https://github.com/user-attachments/assets/b47a6536-0529-4e7a-a8ab-547cdce0dbac"
     />
   </a>
 <p></p>
