@@ -2,13 +2,15 @@ import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
+import { PlayRequestConfig } from './api/internal/config/PlayRequestConfig';
+import { warmUpV3 } from './api/internal/tts/v3/warmUpV3';
 
 /**
  * Type representing the various voice engines that can be used for speech synthesis.
  *
- * @typedef {'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard'} VoiceEngine
+ * @typedef {'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard'} VoiceEngine
  */
-export type VoiceEngine = 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
+export type VoiceEngine = 'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
 
 /**
  * Type representing the different input types that can be used to define the format of the input text.
@@ -44,6 +46,11 @@ export type PlayHT10OutputStreamFormat = 'mp3' | 'mulaw';
  * @typedef {'mp3' | 'mulaw'} PlayHT20OutputStreamFormat
  */
 export type PlayHT20OutputStreamFormat = 'raw' | 'mp3' | 'wav' | 'ogg' | 'flac' | 'mulaw';
+
+/**
+ * The various formats that the Play3.0-mini model output audio stream can have.
+ */
+export type Play30OutputStreamFormat = 'mp3' | 'wav' | 'ogg' | 'flac' | 'mulaw';
 
 /**
  * Type representing the different gender options available for voice selection.
@@ -322,6 +329,82 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
 };
 
 /**
+ * The options available for configuring the Play3.0-mini voice engine for streaming.
+ *
+ * @typedef {Object} PlayHT20EngineOptions
+ *
+ * @property {'Play3.0-mini'} voiceEngine - The identifier for the Play3.0-mini voice engine.
+ * @property {'plain'} [inputType] - The optional input type for the audio. Only 'plain' is supported for PlayHT 1.0
+ * voices.
+ * @property {OutputFormat} [outputFormat] - The optional format in which the output audio stream should be generated.
+ * Defaults to 'mp3'.
+ * @property {number} [sampleRate] - The optional sample rate for the output audio.
+ * @property {number} [seed] - An integer number greater than or equal to 0. If equal to null or not provided, a random
+ * seed will be used. Useful to control the reproducibility of the generated audio. Assuming all other properties
+ * didn't change, a fixed seed will generate the exact same audio file.
+ * @property {number} [temperature] - A floating point number between 0, inclusive, and 2, inclusive. The temperature
+ * parameter controls variance. Lower temperatures result in more predictable results. Higher temperatures allow each
+ * run to vary more, creating voices that sound less like the baseline.
+ * @property {Emotion} [emotion] - An emotion to be applied to the speech. When using a stock voice or a cloned voice
+ * where gender was provided, genderless emotions can be used. For cloned voices with no gender set, use a gender
+ * prefixed emotion. Only supported when `voice_engine` is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [voiceGuidance] - A number between 1 and 6. Use lower numbers to reduce how unique your chosen
+ * voice will be compared to other voices. Higher numbers will maximize its individuality. Only supported when
+ * `voice_engine` is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [styleGuidance] - A number between 1 and 30. Use lower numbers to to reduce how strong your
+ * chosen emotion will be. Higher numbers will create a very emotional performance. Only supported when `voice_engine`
+ * is set to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {number} [textGuidance] - A number between 1 and 2. This number influences how closely the generated
+ * speech adheres to the input text. Use lower values to create more fluid speech, but with a higher chance of
+ * deviating from the input text. Higher numbers will make the generated speech more accurate to the input text,
+ * ensuring that the words spoken align closely with the provided text. Only supported when `voice_engine` is set
+ * to `PlayHT2.0`, and `voice` uses that engine.
+ * @property {string} {language} - The language spoken by the voice.
+ */
+export type Play30EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
+  voiceEngine: 'Play3.0-mini';
+  outputFormat?: Play30OutputStreamFormat;
+  language?:
+    | 'afrikaans'
+    | 'albanian'
+    | 'amharic'
+    | 'arabic'
+    | 'bengali'
+    | 'bulgarian'
+    | 'catalan'
+    | 'croatian'
+    | 'czech'
+    | 'danish'
+    | 'dutch'
+    | 'english'
+    | 'french'
+    | 'galician'
+    | 'german'
+    | 'greek'
+    | 'hebrew'
+    | 'hindi'
+    | 'hungarian'
+    | 'indonesian'
+    | 'italian'
+    | 'japanese'
+    | 'korean'
+    | 'malay'
+    | 'mandarin'
+    | 'polish'
+    | 'portuguese'
+    | 'russian'
+    | 'serbian'
+    | 'spanish'
+    | 'swedish'
+    | 'tagalog'
+    | 'thai'
+    | 'turkish'
+    | 'ukrainian'
+    | 'urdu'
+    | 'xhosa';
+};
+
+/**
  * The options available for configuring speech synthesis, which include shared options combined with engine-specific
  * options.
  *
@@ -339,6 +422,7 @@ export type SpeechOptions =
  * @typedef {Object} SpeechStreamOptions
  */
 export type SpeechStreamOptions =
+  | (SharedSpeechOptions & Play30EngineStreamOptions)
   | (SharedSpeechOptions & PlayHT20EngineStreamOptions)
   | (SharedSpeechOptions & PlayHT10EngineStreamOptions)
   | (SharedSpeechOptions & StandardEngineOptions);
@@ -371,7 +455,8 @@ export type SpeechOutput = {
  * @property {string} [defaultVoiceId] - An optional default voice ID to be used in speech synthesis when a voice is
  * not defined.
  * @property {VoiceEngine} [defaultVoiceEngine] - An optional default voice engine to be used in speech synthesis when
- * a voice engine is not defined.
+ * a voice engine is not defined. If provided, the engine will be warmed up right away, which can reduce latency of
+ * the first call.
  * @property {string} [customAddr] - An optional custom address (host:port) to send requests to.
  * @property {string} [fallbackEnabled] - If true, the client may choose to, under high load scenarios, fallback
  * from a custom address (configured with "customAddr" above) to the standard PlayHT address.
@@ -407,6 +492,9 @@ export type APISettingsInput = {
  */
 export function init(settings: APISettingsInput) {
   APISettingsStore.setSettings(settings);
+  if (settings.defaultVoiceEngine === 'Play3.0-mini') {
+    void warmUpV3(settings);
+  }
 }
 
 /**
@@ -433,7 +521,11 @@ export async function stream(
   input: string | NodeJS.ReadableStream,
   options?: SpeechStreamOptions,
 ): Promise<NodeJS.ReadableStream> {
-  return await commonGenerateStream(input, options);
+  // The per-call SDK Settings is "hidden" from the Public API because this feature is still alpha, meaning
+  // not everything supports on-the-fly settings right now.
+  // eslint-disable-next-line prefer-rest-params
+  const perRequestConfig = arguments[2] ?? ({} as PlayRequestConfig);
+  return await commonGenerateStream(input, options, perRequestConfig);
 }
 
 /**
@@ -479,3 +571,5 @@ export async function deleteClone(voiceId: string): Promise<string> {
 export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInfo>> {
   return await commonGetAllVoices(filters);
 }
+
+export { PlayRequestConfig };

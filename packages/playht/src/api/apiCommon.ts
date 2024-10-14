@@ -7,6 +7,7 @@ import type {
   VoiceEngine,
   PlayHT10OutputStreamFormat,
   PlayHT20OutputStreamFormat,
+  Play30EngineStreamOptions,
   OutputFormat,
 } from '..';
 import { PassThrough, Readable, Writable } from 'node:stream';
@@ -17,6 +18,8 @@ import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
+import { generateV3Stream } from './internal/tts/v3/generateV3Stream';
+import { PlayRequestConfig } from './internal/config/PlayRequestConfig';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -39,6 +42,9 @@ export type V2ApiOptions = {
   styleGuidance?: number;
   textGuidance?: number;
 };
+
+export type V3ApiOptions = Pick<Play30EngineStreamOptions, 'language' | 'outputFormat'> &
+  Omit<V2ApiOptions, 'outputFormat'>;
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
 
@@ -67,18 +73,20 @@ export async function commonGenerateSpeech(input: string, optionsInput?: SpeechO
 
 export async function commonGenerateStream(
   input: string | NodeJS.ReadableStream,
-  optionsInput?: SpeechStreamOptions,
+  optionsInput: SpeechStreamOptions | undefined,
+  reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
   if (typeof input === 'string') {
-    return await internalGenerateStreamFromString(input, optionsInput);
+    return await internalGenerateStreamFromString(input, optionsInput, reqConfig);
   } else {
-    return await internalGenerateStreamFromInputStream(input, optionsInput);
+    return await internalGenerateStreamFromInputStream(input, optionsInput, reqConfig);
   }
 }
 
 export async function internalGenerateStreamFromString(
   input: string,
-  optionsInput?: SpeechStreamOptions,
+  optionsInput: SpeechStreamOptions | undefined,
+  reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
   const options = addDefaultOptions(optionsInput);
 
@@ -88,6 +96,8 @@ export async function internalGenerateStreamFromString(
   } else if (options.voiceEngine === 'PlayHT2.0' || options.voiceEngine === 'PlayHT2.0-turbo') {
     const v2Options = toV2Options(options, true);
     return await generateGRpcStream(input, options.voiceId, v2Options);
+  } else if (options.voiceEngine === 'Play3.0-mini') {
+    return await generateV3Stream(input, options.voiceId, options, reqConfig);
   } else {
     const v2Options = toV2Options(options, options.voiceEngine !== 'PlayHT1.0');
     return await generateV2Stream(input, options.voiceId, v2Options);
@@ -96,11 +106,12 @@ export async function internalGenerateStreamFromString(
 
 export async function internalGenerateStreamFromInputStream(
   inputStream: NodeJS.ReadableStream,
-  options?: SpeechStreamOptions,
+  optionsInput: SpeechStreamOptions | undefined,
+  reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
   const sentencesStream = textStreamToSentences(inputStream);
   const passThrough = new PassThrough();
-  audioStreamFromSentences(sentencesStream, passThrough, options);
+  void audioStreamFromSentences(sentencesStream, passThrough, optionsInput, reqConfig);
   return passThrough;
 }
 
@@ -196,7 +207,8 @@ function toV1Options(options: SpeechOptionsWithVoiceID): V1ApiOptions {
 async function audioStreamFromSentences(
   sentencesStream: NodeJS.ReadableStream,
   writableStream: NodeJS.WritableStream,
-  options?: SpeechStreamOptions,
+  optionsInput: SpeechStreamOptions | undefined,
+  reqConfig: PlayRequestConfig,
 ) {
   // Create a stream for promises
   const promiseStream = new Readable({
@@ -229,10 +241,7 @@ async function audioStreamFromSentences(
   // For each sentence in the stream, add a task to the queue
   sentencesStream.on('data', async (data) => {
     const sentence = data.toString();
-    const generatePromise = (async () => {
-      return await internalGenerateStreamFromString(sentence, options);
-    })();
-
+    const generatePromise = internalGenerateStreamFromString(sentence, optionsInput, reqConfig);
     promiseStream.push(generatePromise);
   });
 

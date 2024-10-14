@@ -2,8 +2,8 @@
   <a href="https://play.ht">
     <img
       width="200"
-      alt="playht logo"
-      src="https://github.com/playht/playht-nodejs-sdk/assets/3000200/e1acecbe-efb9-4b06-8c32-eb25eee6f0f2"
+      alt="playht playai logo"
+      src="https://github.com/user-attachments/assets/c97afbf8-0fe2-4cbb-8d32-9af0ca8901c0"
     />
   </a>
 <p></p>
@@ -13,6 +13,13 @@
 
 ---
 
+<!--
+[![GitHub Actions CI](https://github.com/playht/workflows/CI/badge.svg)](https://github.com/playht/actions?query=workflow%3ACI)
+-->
+
+[![npm version](https://badge.fury.io/js/playht.svg)](https://www.npmjs.com/package/playht) [![Downloads](https://img.shields.io/npm/dm/playht.svg)](https://www.npmjs.com/package/playht)
+
+
 The PlayHT SDK provides easy to use methods to wrap the [PlayHT API](https://docs.play.ht/reference/api-getting-started).
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -21,7 +28,7 @@ The PlayHT SDK provides easy to use methods to wrap the [PlayHT API](https://doc
 **Table of Contents**
 
 - [Usage](#usage)
-  - [Initialising the library](#initialising-the-library)
+  - [Initializing the library](#initializing-the-library)
   - [Generating Speech](#generating-speech)
   - [Streaming Speech](#streaming-speech)
   - [Generating Speech Options](#generating-speech-options)
@@ -51,9 +58,9 @@ or for installation with [yarn](https://yarnpkg.com/) package manager:
 yarn add playht
 ```
 
-## Initialising the library
+## Initializing the library
 
-Before using the SDK, you need to initialise the library with your credentials. You will need your API Secret Key and your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/studio/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
+Before using the SDK, you need to initialize the library with your credentials. You will need your API Secret Key and your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/studio/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
 
 _**Important:** Keep your API Secret Key confidential. Do not share it with anyone or include it in publicly accessible code repositories._
 
@@ -70,7 +77,7 @@ PlayHT.init({
 
 **_Note: All the examples below require that you call the init() method with your credentials first._**
 
-When initialising the library, you can also set a default voice and default voice engine to be used for any subsequent speech generation methods when a voice is not defined:
+When initializing the library, you can also set a default voice and default voice engine to be used for any subsequent speech generation methods when a voice is not defined:
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -79,13 +86,13 @@ PlayHT.init({
   apiKey: '<YOUR API KEY>',
   userId: '<YOUR API KEY>',
   defaultVoiceId: 's3://peregrine-voices/oliver_narrative2_parrot_saad/manifest.json',
-  defaultVoiceEngine: 'Play3.0',
+  defaultVoiceEngine: 'Play3.0-mini',
 });
 ```
 
 ## Generating Speech
 
-To get an URL with the audio for a generated file using the default settings, call the `generate()` method with the text you wish to convert.
+To get a URL with the audio for a generated file using the default settings, call the `generate()` method with the text you wish to convert.
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -105,7 +112,7 @@ For more speech generation options, see [Generating Speech Options](#generating-
 
 ## Streaming Speech
 
-The `stream()` method streams audio from text. It returns a readable stream where the audio bytes will flow to as soon as they're ready. For example, to use the default settings to convert text into a audio stream and write it into a file:
+The `stream()` method streams audio from a text. It returns a readable stream where the audio bytes will flow to as soon as they're ready. For example, to use the default settings to convert text into an audio stream and write it into a file:
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -150,19 +157,19 @@ For a full example of using the streaming speech from input stream API, see our 
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options).
 
-**_Note: For lowest possible latency, use the streaming API with the Play3.0 model._**
+**_Note: For the lowest possible latency, use the streaming API with the `Play3.0-mini` model._**
 
 ## Generating Speech Options
 
 All text-to-speech methods above accept an optional `options` parameter. You can use it to generate audio with different voices, AI models, output file formats and much more.
 
-The options available will depend on the AI model that synthesize the selected voice. PlayHT API supports different types of models: 'Play3.0', 'PlayHT2.0', 'PlayHT2.0-turbo', 'PlayHT1.0' and 'Standard'. For all available options, see the typescript type definitions [in the code](packages/playht/src/index.ts).
+The options available will depend on the AI model that synthesizes the selected voice. PlayHT API supports different types of models: `Play3.0-mini`, `PlayHT2.0`, `PlayHT2.0-turbo`, `PlayHT1.0` and `Standard`. For all available options, see the TypeScript type definitions [in the code](packages/playht/src/index.ts).
 
-### Play3.0 Voices (Recommended)
+### Play3.0-mini Voices (Recommended)
 
 Our newest conversational voice AI model with added languages, lowest latency, and instant cloning. Compatible with `PlayHT2.0` and `PlayHT2.0-turbo`, our most reliable and fastest model for streaming.
 
-To stream using the `Play3.0` model:
+To stream using the `Play3.0-mini` model:
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -173,7 +180,7 @@ const fileStream = fs.createWriteStream('play_3.mp3');
 
 // Stream audio from text
 const stream = await PlayHT.stream('Stream realistic voices that say what you want!', {
-  voiceEngine: 'Play3.0',
+  voiceEngine: 'Play3.0-mini',
   voiceId: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
   outputFormat: 'mp3',
 });
@@ -262,7 +269,7 @@ console.log('The url for the audio file is', audioUrl);
 
 ### Standard Voices
 
-For multi-lingual text-to speech generations, changing pitches, and adding pauses. Voices with reliable outputs and support for Speech Synthesis Markup Language (SSML). Supports 100+ languages.
+For multilingual text-to speech generations, changing pitches, and adding pauses. Voices with reliable outputs and support for Speech Synthesis Markup Language (SSML). Supports 100+ languages.
 
 And an example with standard voice in Spanish:
 
@@ -341,7 +348,7 @@ const stream = await PlayHT.stream('Cloned voices sound realistic too.', {
 stream.pipe(fileStream);
 ```
 
-The `clone()` method can also take in an URL string as input:
+The `clone()` method can also take in a URL string as input:
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -385,7 +392,7 @@ Keep in mind, this action cannot be undone.
 
 This repository contains an implementation example for the API and an example of integrating with ChatGPT API.
 
-To authenticate requests for the examples, you need to generate an API Secret Key and obtain your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/studio/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
+To authenticate requests for the examples, you need to generate an API Secret Key and get your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/studio/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
 
 Before running the examples, build the SDK:
 
@@ -413,7 +420,7 @@ Navigate to http://localhost:3000/ to see the example server.
 ## ChatGPT Integration Example
 
 Create a new `.env` file in the `packages/gpt-example/server` folder by copying the `.env.example` file provided. Then edit the file with your credentials.
-This example requires your [OpenAI credentials](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key) too, the the example `.env` file for details.
+This example requires your [OpenAI credentials](https://help.openai.com/en/articles/4936850-where-do-i-find-my-secret-api-key) too, the example `.env` file for details.
 
 To run it locally:
 

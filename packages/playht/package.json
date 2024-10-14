@@ -1,6 +1,6 @@
 {
   "name": "playht",
-  "version": "0.9.8",
+  "version": "0.10.0",
   "description": "NodeJS SDK for PlayHT generative AI text-to-speech APIs",
   "files": [
     "dist/**/*",
@@ -16,7 +16,7 @@
     "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outdir=dist/esm",
     "build:protobufs": "pbjs -t static-module -w commonjs -o src/grpc-client/protos/api.js src/grpc-client/protoFiles/api.proto && pbts -o src/grpc-client/protos/api.d.ts src/grpc-client/protos/api.js",
     "clean": "rm -rf ./dist && rm -f src/grpc-client/protos/*.js src/grpc-client/protos/*.d.ts",
-    "build": "yarn build:protobufs && tsc -p tsconfig.json --emitDeclarationOnly --outdir dist && yarn build:cjs && yarn build:esm",
+    "build": "yarn clean && yarn build:protobufs && tsc -p tsconfig.json --emitDeclarationOnly --outdir dist && yarn build:cjs && yarn build:esm",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "lint": "prettier --write . && eslint --ext .ts ./src --fix",
     "verify": "yarn check && yarn test",
@@ -30,6 +30,7 @@
     "@types/node": "^20.5.4",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "@typescript-eslint/parser": "^6.4.1",
+    "dotenv": "^16.4.5",
     "esbuild": "^0.19.2",
     "eslint": "^8.47.0",
     "eslint-config-prettier": "^9.0.0",
