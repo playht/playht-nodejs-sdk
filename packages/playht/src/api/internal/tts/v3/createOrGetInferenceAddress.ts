@@ -40,10 +40,10 @@ const defaultInferenceCoordinatesGenerator = async (
   };
 };
 
-async function createInferenceCoordinates(
+const createInferenceCoordinates = async (
   reqConfigSettings?: PlayRequestConfig['settings'],
   attemptNo = 0,
-): Promise<InferenceCoordinatesEntry> {
+): Promise<InferenceCoordinatesEntry> => {
   const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
   const apiKey = reqConfigSettings?.apiKey ?? APISettingsStore.getSettings().apiKey;
   const inferenceCoordinatesGenerator =
@@ -85,11 +85,13 @@ async function createInferenceCoordinates(
       ).unref();
     });
   }
-}
+};
 
 const inferenceCoordinatesCreationPromise: Record<UserId, Promise<InferenceCoordinatesEntry>> = {};
 
-export async function createOrGetInferenceAddress(reqConfigSettings?: PlayRequestConfig['settings']): Promise<string> {
+export const createOrGetInferenceAddress = async (
+  reqConfigSettings?: PlayRequestConfig['settings'],
+): Promise<string> => {
   const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
   const inferenceCoordinatesEntry = inferenceCoordinatesStore[userId];
   if (inferenceCoordinatesEntry && inferenceCoordinatesEntry.expiresAtMs >= Date.now() - 5_000) {
@@ -102,4 +104,4 @@ export async function createOrGetInferenceAddress(reqConfigSettings?: PlayReques
     delete inferenceCoordinatesCreationPromise[userId];
     return newInferenceCoordinatesEntry.inferenceAddress;
   }
-}
+};
