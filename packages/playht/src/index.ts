@@ -9,8 +9,9 @@ import { backgroundWarmUpAuthBasedEngine } from './api/internal/tts/v3/backgroun
  * The various voice engines that can be used for speech synthesis.
  *
  * For the lowest latency, use `Play3.0-mini`.
+ * For the highest quality, use `PlayDialog`.
  */
-export type VoiceEngine = 'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
+export type VoiceEngine = 'PlayDialog' | 'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
 
 /**
  * Type representing the different input types that can be used to define the format of the input text.
@@ -401,6 +402,16 @@ export type Play30EngineStreamOptions = Omit<PlayHT20EngineStreamOptions, 'voice
 };
 
 /**
+ * The options available for configuring the PlayDialog voice engine for streaming.
+ */
+export type PlayDialogEngineStreamOptions = Omit<Play30EngineStreamOptions, 'voiceEngine'> & {
+  /**
+   * The identifier for the PlayDialog voice engine.
+   */
+  voiceEngine: 'PlayDialog';
+};
+
+/**
  * The options available for configuring speech synthesis, which include shared options combined with engine-specific
  * options.
  */
@@ -412,7 +423,13 @@ export type SpeechOptions = SharedSpeechOptions &
  * options.
  */
 export type SpeechStreamOptions = SharedSpeechOptions &
-  (Play30EngineStreamOptions | PlayHT20EngineStreamOptions | PlayHT10EngineStreamOptions | StandardEngineOptions);
+  (
+    | PlayDialogEngineStreamOptions
+    | Play30EngineStreamOptions
+    | PlayHT20EngineStreamOptions
+    | PlayHT10EngineStreamOptions
+    | StandardEngineOptions
+  );
 
 /**
  * `SpeechOutput` is the output type for a text-to-speech method, providing information about the generated
@@ -479,8 +496,9 @@ export type APISettingsInput = {
  */
 export function init(settings: APISettingsInput) {
   APISettingsStore.setSettings(settings);
-  if (settings.defaultVoiceEngine === 'Play3.0-mini') {
-    backgroundWarmUpAuthBasedEngine(settings);
+  // todo: change to isAuthBasedEngine at the same file of the warm upper
+  if (settings.defaultVoiceEngine === 'Play3.0-mini' || settings.defaultVoiceEngine === 'PlayDialog') {
+    backgroundWarmUpAuthBasedEngine(settings.defaultVoiceEngine, settings);
   }
 }
 

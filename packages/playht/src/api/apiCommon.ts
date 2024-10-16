@@ -104,7 +104,8 @@ export async function internalGenerateStreamFromString(
       const v2Options = toV2Options(options, true);
       return await generateGRpcStream(input, options.voiceId, v2Options);
     }
-    case 'Play3.0-mini': {
+    case 'Play3.0-mini':
+    case 'PlayDialog': {
       return await generateV3Stream(input, options.voiceId, options, reqConfig);
     }
   }
