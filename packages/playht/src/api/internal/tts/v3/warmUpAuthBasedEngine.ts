@@ -4,7 +4,10 @@ import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 import { AuthBasedEngines } from './V3InternalSettings';
 
-export const warmUpAuthBasedEngine = async (engine: AuthBasedEngines, reqConfigSettings: PlayRequestConfig['settings']) => {
+export const warmUpAuthBasedEngine = async (
+  engine: AuthBasedEngines,
+  reqConfigSettings: PlayRequestConfig['settings'],
+) => {
   const inferenceAddress = await createOrGetInferenceAddress(engine, reqConfigSettings);
   const streamOptions: AxiosRequestConfig = {
     method: 'OPTIONS',
