@@ -1,5 +1,4 @@
-import type { V3ApiOptions } from '../../../apiCommon';
-import type { Play30OutputStreamFormat } from '../../../../index';
+import type { V2ApiOptions, V3ApiOptions } from '../../../apiCommon';
 import axios, { AxiosRequestConfig } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
@@ -12,7 +11,7 @@ export async function generateV3Stream(
   options: V3ApiOptions,
   reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
-  const inferenceAddress = await createOrGetInferenceAddress(reqConfig.settings);
+  const inferenceAddress = await createOrGetInferenceAddress(options.voiceEngine, reqConfig.settings);
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
     url: inferenceAddress,
@@ -45,7 +44,7 @@ export async function generateV3Stream(
   return response.data;
 }
 
-const outputFormatToMimeType = (outputFormat: Play30OutputStreamFormat | undefined): `audio/${string}` => {
+const outputFormatToMimeType = (outputFormat: V2ApiOptions['outputFormat'] | undefined): `audio/${string}` => {
   switch (outputFormat) {
     case 'mulaw':
       return 'audio/basic';

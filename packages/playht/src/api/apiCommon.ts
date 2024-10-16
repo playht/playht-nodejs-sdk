@@ -9,6 +9,7 @@ import type {
   PlayHT20OutputStreamFormat,
   Play30EngineStreamOptions,
   OutputFormat,
+  PlayDialogEngineStreamOptions,
 } from '..';
 import { PassThrough, Readable, Writable } from 'node:stream';
 import { APISettingsStore } from './APISettingsStore';
@@ -43,8 +44,8 @@ export type V2ApiOptions = {
   textGuidance?: number;
 };
 
-export type V3ApiOptions = Pick<Play30EngineStreamOptions, 'language' | 'outputFormat'> &
-  Omit<V2ApiOptions, 'outputFormat'>;
+export type V3ApiOptions = Pick<Play30EngineStreamOptions | PlayDialogEngineStreamOptions, 'language' | 'voiceEngine'> &
+  Omit<V2ApiOptions, 'voiceEngine'>;
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
 
@@ -90,17 +91,24 @@ export async function internalGenerateStreamFromString(
 ): Promise<NodeJS.ReadableStream> {
   const options = addDefaultOptions(optionsInput);
 
-  if (options.voiceEngine === 'Standard') {
-    const v1Options = toV1Options(options);
-    return await generateV1Stream(input, options.voiceId, v1Options);
-  } else if (options.voiceEngine === 'PlayHT2.0' || options.voiceEngine === 'PlayHT2.0-turbo') {
-    const v2Options = toV2Options(options, true);
-    return await generateGRpcStream(input, options.voiceId, v2Options);
-  } else if (options.voiceEngine === 'Play3.0-mini') {
-    return await generateV3Stream(input, options.voiceId, options, reqConfig);
-  } else {
-    const v2Options = toV2Options(options, options.voiceEngine !== 'PlayHT1.0');
-    return await generateV2Stream(input, options.voiceId, v2Options);
+  switch (options.voiceEngine) {
+    case 'Standard': {
+      const v1Options = toV1Options(options);
+      return await generateV1Stream(input, options.voiceId, v1Options);
+    }
+    case 'PlayHT1.0': {
+      const v2Options = toV2Options(options, options.voiceEngine !== 'PlayHT1.0');
+      return await generateV2Stream(input, options.voiceId, v2Options);
+    }
+    case 'PlayHT2.0':
+    case 'PlayHT2.0-turbo': {
+      const v2Options = toV2Options(options, true);
+      return await generateGRpcStream(input, options.voiceId, v2Options);
+    }
+    case 'Play3.0-mini':
+    case 'PlayDialog': {
+      return await generateV3Stream(input, options.voiceId, options, reqConfig);
+    }
   }
 }
 

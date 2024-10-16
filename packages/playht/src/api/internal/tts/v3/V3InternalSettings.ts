@@ -5,8 +5,14 @@ export type V3InternalSettings = {
   coordinatesExpirationMinimalFrequencyMs?: number;
   // number of attempts when calling API to get new coordinates
   coordinatesGetApiCallMaxRetries?: number;
-  customInferenceCoordinatesGenerator?: (userId: string, apiKey: string) => Promise<InferenceCoordinatesEntry>;
+  customInferenceCoordinatesGenerator?: (
+    engine: 'Play3.0-mini' | 'PlayDialog',
+    userId: string,
+    apiKey: string,
+  ) => Promise<InferenceCoordinatesEntry>;
 };
+
+export type AuthBasedEngines = 'PlayDialog' | 'Play3.0-mini';
 
 export type InferenceCoordinatesEntry = {
   inferenceAddress: string;

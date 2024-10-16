@@ -2,9 +2,10 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
+import { AuthBasedEngines } from './V3InternalSettings';
 
-export async function warmUpV3(reqConfigSettings: PlayRequestConfig['settings']) {
-  const inferenceAddress = await createOrGetInferenceAddress(reqConfigSettings);
+export const warmUpAuthBasedEngine = async (engine: AuthBasedEngines, reqConfigSettings: PlayRequestConfig['settings']) => {
+  const inferenceAddress = await createOrGetInferenceAddress(engine, reqConfigSettings);
   const streamOptions: AxiosRequestConfig = {
     method: 'OPTIONS',
     url: inferenceAddress,
@@ -21,4 +22,4 @@ export async function warmUpV3(reqConfigSettings: PlayRequestConfig['settings'])
       console.log(`[PlayHT SDK] Error response from warmUpV3: ${error.message}`);
     }
   });
-}
+};
