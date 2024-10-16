@@ -10,9 +10,11 @@ import { V3_DEFAULT_SETTINGS } from './V3DefaultSettings';
 const inferenceCoordinatesStore: Record<UserId, InferenceCoordinatesEntry> = {};
 
 // By default, the inference coordinates generator will call the Play API to get the inference coordinates.
-const defaultInferenceCoordinatesGenerator:
-  V3InternalSettings['customInferenceCoordinatesGenerator']
- = async (engine, userId, apiKey): Promise<InferenceCoordinatesEntry> => {
+const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceCoordinatesGenerator'] = async (
+  engine,
+  userId,
+  apiKey,
+): Promise<InferenceCoordinatesEntry> => {
   const data = await axios
     .post(
       'https://api.play.ht/api/v3/http-streaming-auth',
