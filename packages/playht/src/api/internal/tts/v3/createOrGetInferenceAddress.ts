@@ -7,7 +7,10 @@ import { UserId } from '../../types';
 import { AuthBasedEngines, InferenceCoordinatesEntry, V3InternalSettings } from './V3InternalSettings';
 import { V3_DEFAULT_SETTINGS } from './V3DefaultSettings';
 
-const inferenceCoordinatesStore: Record<UserId, InferenceCoordinatesEntry> = {};
+const inferenceCoordinatesStores: Record<AuthBasedEngines, Record<UserId, InferenceCoordinatesEntry>> = {
+  'Play3.0-mini': {},
+  PlayDialog: {},
+};
 
 // By default, the inference coordinates generator will call the Play API to get the inference coordinates.
 const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceCoordinatesGenerator'] = async (
@@ -76,7 +79,7 @@ const createInferenceCoordinates = async (
       newInferenceCoordinatesEntry.expiresAtMs - Date.now() - coordinatesExpirationAdvanceRefreshTimeMs,
     );
     setTimeout(() => createInferenceCoordinates(engine, reqConfigSettings), automaticRefreshDelay).unref();
-    inferenceCoordinatesStore[userId] = newInferenceCoordinatesEntry;
+    inferenceCoordinatesStores[engine][userId] = newInferenceCoordinatesEntry;
     return newInferenceCoordinatesEntry;
   } catch (e) {
     if (attemptNo >= coordinatesGetApiCallMaxRetries) {
@@ -100,7 +103,7 @@ export const createOrGetInferenceAddress = async (
   reqConfigSettings?: PlayRequestConfig['settings'],
 ): Promise<string> => {
   const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
-  const inferenceCoordinatesEntry = inferenceCoordinatesStore[userId];
+  const inferenceCoordinatesEntry = inferenceCoordinatesStores[engine][userId];
   if (inferenceCoordinatesEntry && inferenceCoordinatesEntry.expiresAtMs >= Date.now() - 5_000) {
     return inferenceCoordinatesEntry.inferenceAddress;
   } else {
