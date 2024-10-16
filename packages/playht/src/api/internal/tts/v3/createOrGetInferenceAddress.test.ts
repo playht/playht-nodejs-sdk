@@ -29,7 +29,7 @@ describe('createOrGetInferenceAddress', () => {
   it('serializes concurrent calls for the same user', async () => {
     const numberOfTestCalls = 15;
     const calls = Array.from({ length: numberOfTestCalls }, () =>
-      createOrGetInferenceAddress(reqConfigSettings('test-user')),
+      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings('test-user')),
     );
 
     // Expect all calls to return 'call #1', not 'call #1', 'call #2', 'call #3', etc.
@@ -39,10 +39,10 @@ describe('createOrGetInferenceAddress', () => {
   it('doesnt serialize calls for different users', async () => {
     const numberOfTestCalls = 3;
     const callsOne = Array.from({ length: numberOfTestCalls }, (_, i) =>
-      createOrGetInferenceAddress(reqConfigSettings(`test-user#${i}`)),
+      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(`test-user#${i}`)),
     );
     const callsTwo = Array.from({ length: numberOfTestCalls }, (_, i) =>
-      createOrGetInferenceAddress(reqConfigSettings(`test-user#${i}`)),
+      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(`test-user#${i}`)),
     );
 
     expect(await Promise.all([...callsOne, ...callsTwo])).toEqual([
