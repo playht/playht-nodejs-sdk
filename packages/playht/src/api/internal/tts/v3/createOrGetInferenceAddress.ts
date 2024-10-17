@@ -20,7 +20,7 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
 ): Promise<InferenceCoordinatesEntry> => {
   const data = await axios
     .post(
-      'https://api.play.ht/api/v3/http-streaming-auth',
+      'https://api.play.ht/api/v3/auth?dialog',
       {},
       {
         headers: {
@@ -32,13 +32,12 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
     )
     .then(
       (response) =>
-        response.data as {
-          http_streaming_urls: Record<string, string>;
+        response.data as Record<AuthBasedEngines, { http_streaming_url: string; websocket_url: string }> & {
           expires_at_ms: number;
         },
     )
     .catch((error: any) => convertError(error));
-  const httpStreamingUrl = data.http_streaming_urls[engine];
+  const httpStreamingUrl = data[engine].http_streaming_url;
   if (!httpStreamingUrl) {
     return convertError(new Error(`Engine ${engine} not found in AUTH response`));
   }
