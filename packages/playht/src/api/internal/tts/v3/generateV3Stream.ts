@@ -1,5 +1,4 @@
-import type { V3ApiOptions } from '../../../apiCommon';
-import type { Play30OutputStreamFormat } from '../../../../index';
+import type { V2ApiOptions, V3ApiOptions } from '../../../apiCommon';
 import axios, { AxiosRequestConfig } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
@@ -29,12 +28,10 @@ export async function generateV3Stream(
       seed: options.seed,
       temperature: options.temperature,
       voice_engine: options.voiceEngine,
-      emotion: options.emotion,
       voice_guidance: options.voiceGuidance,
       text_guidance: options.textGuidance,
       style_guidance: options.styleGuidance,
       language: options.language,
-      version: 'v3',
     },
     responseType: 'stream',
     httpsAgent: keepAliveHttpsAgent,
@@ -45,8 +42,13 @@ export async function generateV3Stream(
   return response.data;
 }
 
-const outputFormatToMimeType = (outputFormat: Play30OutputStreamFormat | undefined): `audio/${string}` => {
+const outputFormatToMimeType = (outputFormat: V2ApiOptions['outputFormat'] | undefined): `audio/${string}` => {
+  if (!outputFormat) {
+    return outputFormatToMimeType('mp3');
+  }
   switch (outputFormat) {
+    case 'raw':
+      // fallthrough
     case 'mulaw':
       return 'audio/basic';
     case 'wav':
@@ -57,7 +59,5 @@ const outputFormatToMimeType = (outputFormat: Play30OutputStreamFormat | undefin
       return 'audio/flac';
     case 'mp3':
       return 'audio/mpeg';
-    default:
-      return outputFormatToMimeType('mp3');
   }
 };

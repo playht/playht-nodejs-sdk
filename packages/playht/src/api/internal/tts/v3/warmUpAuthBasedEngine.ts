@@ -3,7 +3,14 @@ import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 
-export async function warmUpV3(reqConfigSettings: PlayRequestConfig['settings']) {
+export const warmUpAuthBasedEngine = async (reqConfigSettings: PlayRequestConfig['settings']) => {
+  warmUp(reqConfigSettings).catch((error: any) => {
+    // eslint-disable-next-line no-process-env
+    console.log(`[PlayHT SDK] Error response from warmUpV3: ${error.message}`, process.env.DEBUG ? error : '');
+  });
+};
+
+const warmUp = async (reqConfigSettings: PlayRequestConfig['settings']) => {
   const inferenceAddress = await createOrGetInferenceAddress(reqConfigSettings);
   const streamOptions: AxiosRequestConfig = {
     method: 'OPTIONS',
@@ -15,10 +22,5 @@ export async function warmUpV3(reqConfigSettings: PlayRequestConfig['settings'])
     httpsAgent: keepAliveHttpsAgent,
   };
   // Trigger call to complete TCP handshake ahead of time
-  axios(streamOptions).catch((error: any) => {
-    // eslint-disable-next-line no-process-env
-    if (process.env.DEBUG) {
-      console.log(`[PlayHT SDK] Error response from warmUpV3: ${error.message}`);
-    }
-  });
-}
+  return axios(streamOptions);
+};
