@@ -16,7 +16,6 @@ export const play30Examples = async () => {
       outputFormat: 'mp3',
       temperature: 1.2,
       quality: 'high',
-      emotion: 'male_fearful',
       styleGuidance: 16,
       speed: 1.0,
       language: 'english',
