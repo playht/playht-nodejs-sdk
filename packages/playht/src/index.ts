@@ -412,12 +412,7 @@ export type SpeechOptions = SharedSpeechOptions &
  * options.
  */
 export type SpeechStreamOptions = SharedSpeechOptions &
-  (
-    | Play30EngineStreamOptions
-    | PlayHT20EngineStreamOptions
-    | PlayHT10EngineStreamOptions
-    | StandardEngineOptions
-  );
+  (Play30EngineStreamOptions | PlayHT20EngineStreamOptions | PlayHT10EngineStreamOptions | StandardEngineOptions);
 
 /**
  * `SpeechOutput` is the output type for a text-to-speech method, providing information about the generated

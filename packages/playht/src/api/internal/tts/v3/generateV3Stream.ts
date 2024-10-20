@@ -48,7 +48,7 @@ const outputFormatToMimeType = (outputFormat: V2ApiOptions['outputFormat'] | und
   }
   switch (outputFormat) {
     case 'raw':
-      // fallthrough
+    // fallthrough
     case 'mulaw':
       return 'audio/basic';
     case 'wav':
