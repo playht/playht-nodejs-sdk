@@ -96,7 +96,7 @@ export async function internalGenerateStreamFromString(
       return await generateV1Stream(input, options.voiceId, v1Options);
     }
     case 'PlayHT1.0': {
-      const v2Options = toV2Options(options, options.voiceEngine !== 'PlayHT1.0');
+      const v2Options = toV2Options(options, false);
       return await generateV2Stream(input, options.voiceId, v2Options);
     }
     case 'PlayHT2.0':
