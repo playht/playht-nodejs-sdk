@@ -3,7 +3,7 @@ import { describe, expect, it } from '@jest/globals';
 import * as PlayHT from '../../../../index';
 import { E2E_CONFIG } from '../../../../__tests__/e2eTestConfig';
 
-describe('v3', () => {
+describe('Auth-Based Models', () => {
   describe('Play3.0-mini', () => {
     it('streams from text', async () => {
       PlayHT.init({
@@ -16,7 +16,8 @@ describe('v3', () => {
         outputFormat: 'mp3',
         temperature: 1.2,
         quality: 'high',
-        emotion: 'male_fearful',
+        // @ts-expect-error emotion is not part of the Play3.0-mini contract
+        emotion: 'not-used',
         styleGuidance: 16,
       });
 

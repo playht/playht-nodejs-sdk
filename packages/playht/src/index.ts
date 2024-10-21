@@ -3,12 +3,12 @@ import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
 import { PlayRequestConfig } from './api/internal/config/PlayRequestConfig';
-import { warmUpV3 } from './api/internal/tts/v3/warmUpV3';
+import { backgroundWarmUpAuthBasedEngine } from './api/internal/tts/v3/backgroundWarmUpAuthBasedEngine';
 
 /**
- * Type representing the various voice engines that can be used for speech synthesis.
+ * The various voice engines that can be used for speech synthesis.
  *
- * @typedef {'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard'} VoiceEngine
+ * For the lowest latency, use `Play3.0-mini`.
  */
 export type VoiceEngine = 'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
 
@@ -34,23 +34,56 @@ export type OutputQuality = 'draft' | 'low' | 'medium' | 'high' | 'premium';
 export type OutputFormat = 'mp3' | 'ogg' | 'wav' | 'flac' | 'mulaw';
 
 /**
- * Type representing the various formats that the PlayHT 1.0 model output audio stream can have.
- *
- * @typedef {'mp3' | 'mulaw'} PlayHT10OutputStreamFormat
+ * The various formats that the PlayHT 1.0 model output audio stream can have.
  */
 export type PlayHT10OutputStreamFormat = 'mp3' | 'mulaw';
 
 /**
- * Type representing the various formats that the PlayHT 2.0 model output audio stream can have.
- *
- * @typedef {'mp3' | 'mulaw'} PlayHT20OutputStreamFormat
+ * The various formats that the PlayHT 2.0 model output audio stream can have.
  */
 export type PlayHT20OutputStreamFormat = 'raw' | 'mp3' | 'wav' | 'ogg' | 'flac' | 'mulaw';
 
 /**
- * The various formats that the Play3.0-mini model output audio stream can have.
+ * The various languages that the Play3.0-mini model output audio stream support.
  */
-export type Play30OutputStreamFormat = 'mp3' | 'wav' | 'ogg' | 'flac' | 'mulaw';
+export type Play30StreamLanguage =
+  | 'afrikaans'
+  | 'albanian'
+  | 'amharic'
+  | 'arabic'
+  | 'bengali'
+  | 'bulgarian'
+  | 'catalan'
+  | 'croatian'
+  | 'czech'
+  | 'danish'
+  | 'dutch'
+  | 'english'
+  | 'french'
+  | 'galician'
+  | 'german'
+  | 'greek'
+  | 'hebrew'
+  | 'hindi'
+  | 'hungarian'
+  | 'indonesian'
+  | 'italian'
+  | 'japanese'
+  | 'korean'
+  | 'malay'
+  | 'mandarin'
+  | 'polish'
+  | 'portuguese'
+  | 'russian'
+  | 'serbian'
+  | 'spanish'
+  | 'swedish'
+  | 'tagalog'
+  | 'thai'
+  | 'turkish'
+  | 'ukrainian'
+  | 'urdu'
+  | 'xhosa';
 
 /**
  * Type representing the different gender options available for voice selection.
@@ -333,7 +366,6 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  *
  * @typedef {Object} PlayHT20EngineOptions
  *
- * @property {'Play3.0-mini'} voiceEngine - The identifier for the Play3.0-mini voice engine.
  * @property {'plain'} [inputType] - The optional input type for the audio. Only 'plain' is supported for PlayHT 1.0
  * voices.
  * @property {OutputFormat} [outputFormat] - The optional format in which the output audio stream should be generated.
@@ -345,9 +377,6 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  * @property {number} [temperature] - A floating point number between 0, inclusive, and 2, inclusive. The temperature
  * parameter controls variance. Lower temperatures result in more predictable results. Higher temperatures allow each
  * run to vary more, creating voices that sound less like the baseline.
- * @property {Emotion} [emotion] - An emotion to be applied to the speech. When using a stock voice or a cloned voice
- * where gender was provided, genderless emotions can be used. For cloned voices with no gender set, use a gender
- * prefixed emotion. Only supported when `voice_engine` is set to `PlayHT2.0`, and `voice` uses that engine.
  * @property {number} [voiceGuidance] - A number between 1 and 6. Use lower numbers to reduce how unique your chosen
  * voice will be compared to other voices. Higher numbers will maximize its individuality. Only supported when
  * `voice_engine` is set to `PlayHT2.0`, and `voice` uses that engine.
@@ -359,73 +388,31 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  * deviating from the input text. Higher numbers will make the generated speech more accurate to the input text,
  * ensuring that the words spoken align closely with the provided text. Only supported when `voice_engine` is set
  * to `PlayHT2.0`, and `voice` uses that engine.
- * @property {string} {language} - The language spoken by the voice.
  */
-export type Play30EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFormat' | 'voiceEngine'> & {
+export type Play30EngineStreamOptions = Omit<PlayHT20EngineStreamOptions, 'voiceEngine' | 'emotion'> & {
+  /**
+   * The identifier for the Play3.0-mini voice engine.
+   */
   voiceEngine: 'Play3.0-mini';
-  outputFormat?: Play30OutputStreamFormat;
-  language?:
-    | 'afrikaans'
-    | 'albanian'
-    | 'amharic'
-    | 'arabic'
-    | 'bengali'
-    | 'bulgarian'
-    | 'catalan'
-    | 'croatian'
-    | 'czech'
-    | 'danish'
-    | 'dutch'
-    | 'english'
-    | 'french'
-    | 'galician'
-    | 'german'
-    | 'greek'
-    | 'hebrew'
-    | 'hindi'
-    | 'hungarian'
-    | 'indonesian'
-    | 'italian'
-    | 'japanese'
-    | 'korean'
-    | 'malay'
-    | 'mandarin'
-    | 'polish'
-    | 'portuguese'
-    | 'russian'
-    | 'serbian'
-    | 'spanish'
-    | 'swedish'
-    | 'tagalog'
-    | 'thai'
-    | 'turkish'
-    | 'ukrainian'
-    | 'urdu'
-    | 'xhosa';
+  /**
+   * The language spoken by the voice.
+   */
+  language?: Play30StreamLanguage;
 };
 
 /**
  * The options available for configuring speech synthesis, which include shared options combined with engine-specific
  * options.
- *
- * @typedef {Object} SpeechOptions
  */
-export type SpeechOptions =
-  | (SharedSpeechOptions & PlayHT20EngineOptions)
-  | (SharedSpeechOptions & PlayHT10EngineOptions)
-  | (SharedSpeechOptions & StandardEngineOptions);
+export type SpeechOptions = SharedSpeechOptions &
+  (PlayHT20EngineOptions | PlayHT10EngineOptions | StandardEngineOptions);
 
 /**
  * The options available for configuring speech stream, which include shared options combined with engine-specific
  * options.
- *
- * @typedef {Object} SpeechStreamOptions
  */
-export type SpeechStreamOptions =
-  | (SharedSpeechOptions & Play30EngineStreamOptions)
-  | (SharedSpeechOptions & PlayHT20EngineStreamOptions)
-  | (SharedSpeechOptions & PlayHT10EngineStreamOptions)
-  | (SharedSpeechOptions & StandardEngineOptions);
+export type SpeechStreamOptions = SharedSpeechOptions &
+  (Play30EngineStreamOptions | PlayHT20EngineStreamOptions | PlayHT10EngineStreamOptions | StandardEngineOptions);
 
 /**
  * `SpeechOutput` is the output type for a text-to-speech method, providing information about the generated
@@ -493,7 +480,7 @@ export type APISettingsInput = {
 export function init(settings: APISettingsInput) {
   APISettingsStore.setSettings(settings);
   if (settings.defaultVoiceEngine === 'Play3.0-mini') {
-    void warmUpV3(settings);
+    backgroundWarmUpAuthBasedEngine(settings);
   }
 }
 

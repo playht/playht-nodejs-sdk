@@ -5,8 +5,8 @@ export const convertError = async (error: any) => {
   return Promise.reject({
     message: body?.error_message || error.message,
     code: error.code,
-    statusCode: error.response?.statusCode,
-    statusMessage: error.response?.statusMessage,
+    statusCode: error.response?.status ?? error.response?.statusCode,
+    statusMessage: error.response?.statusText ?? error.response?.statusMessage,
     body: body,
   });
 };
