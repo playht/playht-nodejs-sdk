@@ -3,10 +3,10 @@ import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 
-export const warmUpAuthBasedEngine = async (reqConfigSettings: PlayRequestConfig['settings']) => {
+export const backgroundWarmUpAuthBasedEngine = (reqConfigSettings: PlayRequestConfig['settings']) => {
   warmUp(reqConfigSettings).catch((error: any) => {
     // eslint-disable-next-line no-process-env
-    console.log(`[PlayHT SDK] Error response from warmUpV3: ${error.message}`, process.env.DEBUG ? error : '');
+    console.log(`[PlayHT SDK] Error while warming up SDK: ${error.message}`, process.env.DEBUG ? error : '');
   });
 };
 

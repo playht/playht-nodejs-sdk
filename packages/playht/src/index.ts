@@ -3,7 +3,7 @@ import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
 import { PlayRequestConfig } from './api/internal/config/PlayRequestConfig';
-import { warmUpAuthBasedEngine } from './api/internal/tts/v3/warmUpAuthBasedEngine';
+import { backgroundWarmUpAuthBasedEngine } from './api/internal/tts/v3/backgroundWarmUpAuthBasedEngine';
 
 /**
  * The various voice engines that can be used for speech synthesis.
@@ -480,7 +480,7 @@ export type APISettingsInput = {
 export function init(settings: APISettingsInput) {
   APISettingsStore.setSettings(settings);
   if (settings.defaultVoiceEngine === 'Play3.0-mini') {
-    warmUpAuthBasedEngine(settings);
+    backgroundWarmUpAuthBasedEngine(settings);
   }
 }
 
