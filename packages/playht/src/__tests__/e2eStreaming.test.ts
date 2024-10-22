@@ -1,9 +1,9 @@
 import { buffer } from 'node:stream/consumers';
 import { describe, expect, it } from '@jest/globals';
-import * as PlayHT from '../../../../index';
-import { E2E_CONFIG } from '../../../../__tests__/e2eTestConfig';
+import * as PlayHT from '../index';
+import { E2E_CONFIG } from './e2eTestConfig';
 
-describe('Auth-Based Models', () => {
+describe('E2E Streaming', () => {
   describe('Play3.0-mini', () => {
     it('streams from text', async () => {
       PlayHT.init({
