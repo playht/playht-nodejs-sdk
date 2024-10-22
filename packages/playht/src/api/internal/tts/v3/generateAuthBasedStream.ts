@@ -1,14 +1,14 @@
-import type { V2ApiOptions, V3ApiOptions } from '../../../apiCommon';
+import type { V2ApiOptions, AuthBasedApiOptions } from '../../../apiCommon';
 import axios, { AxiosRequestConfig } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 
-export async function generateV3Stream(
+export async function generateAuthBasedStream(
   text: string,
   voice: string,
-  options: V3ApiOptions,
+  options: AuthBasedApiOptions,
   reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
   const inferenceAddress = await createOrGetInferenceAddress(options.voiceEngine, reqConfig.settings);

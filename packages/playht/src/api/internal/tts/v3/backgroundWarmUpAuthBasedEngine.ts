@@ -4,7 +4,10 @@ import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 import { AuthBasedEngines } from './V3InternalSettings';
 
-export const backgroundWarmUpAuthBasedEngine = (engine: AuthBasedEngines, reqConfigSettings: PlayRequestConfig['settings']) => {
+export const backgroundWarmUpAuthBasedEngine = (
+  engine: AuthBasedEngines,
+  reqConfigSettings: PlayRequestConfig['settings'],
+) => {
   warmUp(engine, reqConfigSettings).catch((error: any) => {
     // eslint-disable-next-line no-process-env
     console.log(`[PlayHT SDK] Error while warming up SDK: ${error.message}`, process.env.DEBUG ? error : '');

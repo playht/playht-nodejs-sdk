@@ -9,6 +9,7 @@ import type {
   PlayHT20OutputStreamFormat,
   Play30EngineStreamOptions,
   OutputFormat,
+  PlayDialogEngineStreamOptions,
 } from '..';
 import { PassThrough, Readable, Writable } from 'node:stream';
 import { APISettingsStore } from './APISettingsStore';
@@ -18,7 +19,7 @@ import { generateV2Speech } from './generateV2Speech';
 import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
-import { generateV3Stream } from './internal/tts/v3/generateV3Stream';
+import { generateAuthBasedStream } from './internal/tts/v3/generateAuthBasedStream';
 import { PlayRequestConfig } from './internal/config/PlayRequestConfig';
 
 export type V1ApiOptions = {
@@ -43,7 +44,10 @@ export type V2ApiOptions = {
   textGuidance?: number;
 };
 
-export type V3ApiOptions = Pick<Play30EngineStreamOptions, 'language' | 'voiceEngine'> &
+export type AuthBasedApiOptions = (
+  | Pick<Play30EngineStreamOptions, 'language' | 'voiceEngine'>
+  | Pick<PlayDialogEngineStreamOptions, 'language' | 'voiceEngine'>
+) &
   Omit<V2ApiOptions, 'voiceEngine' | 'emotion'>;
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
@@ -106,7 +110,7 @@ export async function internalGenerateStreamFromString(
     }
     case 'Play3.0-mini':
     case 'PlayDialog': {
-      return await generateV3Stream(input, options.voiceId, options, reqConfig);
+      return await generateAuthBasedStream(input, options.voiceId, options, reqConfig);
     }
   }
 }

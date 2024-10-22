@@ -14,7 +14,7 @@ describe('Auth-Based Models', () => {
       const streamFromText = await PlayHT.stream('Hello from SDK test.', {
         voiceEngine: 'Play3.0-mini',
         outputFormat: 'mp3',
-       });
+      });
 
       const audioBuffer = await buffer(streamFromText);
       // fs.writeFileSync('Play3.0-mini.mp3', audioBuffer); // uncomment this line to save the generated file
