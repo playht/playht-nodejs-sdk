@@ -12,8 +12,7 @@ export type V3InternalSettings = {
   ) => Promise<InferenceCoordinatesEntry>;
 };
 
-// todo rename singular
-export type AuthBasedEngines = 'PlayDialog' | 'Play3.0-mini';
+export type AuthBasedEngine = 'PlayDialog' | 'Play3.0-mini';
 
 export type InferenceCoordinatesEntry = {
   inferenceAddress: string;

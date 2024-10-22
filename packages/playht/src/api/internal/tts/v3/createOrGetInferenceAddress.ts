@@ -4,10 +4,10 @@ import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { APISettingsStore } from '../../../APISettingsStore';
 import { UserId } from '../../types';
-import { AuthBasedEngines, InferenceCoordinatesEntry, V3InternalSettings } from './V3InternalSettings';
+import { AuthBasedEngine, InferenceCoordinatesEntry, V3InternalSettings } from './V3InternalSettings';
 import { V3_DEFAULT_SETTINGS } from './V3DefaultSettings';
 
-const inferenceCoordinatesStores: Record<AuthBasedEngines, Record<UserId, InferenceCoordinatesEntry>> = {
+const inferenceCoordinatesStores: Record<AuthBasedEngine, Record<UserId, InferenceCoordinatesEntry>> = {
   'Play3.0-mini': {},
   PlayDialog: {},
 };
@@ -32,7 +32,7 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
     )
     .then(
       (response) =>
-        response.data as Record<AuthBasedEngines, { http_streaming_url: string; websocket_url: string }> & {
+        response.data as Record<AuthBasedEngine, { http_streaming_url: string; websocket_url: string }> & {
           expires_at_ms: number;
         },
     )
@@ -48,7 +48,7 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
 };
 
 const createInferenceCoordinates = async (
-  engine: AuthBasedEngines,
+  engine: AuthBasedEngine,
   reqConfigSettings?: PlayRequestConfig['settings'],
   attemptNo = 0,
 ): Promise<InferenceCoordinatesEntry> => {
@@ -98,7 +98,7 @@ const createInferenceCoordinates = async (
 const inferenceCoordinatesCreationPromise: Record<UserId, Promise<InferenceCoordinatesEntry>> = {};
 
 export const createOrGetInferenceAddress = async (
-  engine: AuthBasedEngines,
+  engine: AuthBasedEngine,
   reqConfigSettings?: PlayRequestConfig['settings'],
 ): Promise<string> => {
   const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;

@@ -2,10 +2,10 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
-import { AuthBasedEngines } from './V3InternalSettings';
+import { AuthBasedEngine } from './V3InternalSettings';
 
 export const backgroundWarmUpAuthBasedEngine = (
-  engine: AuthBasedEngines,
+  engine: AuthBasedEngine,
   reqConfigSettings: PlayRequestConfig['settings'],
 ) => {
   warmUp(engine, reqConfigSettings).catch((error: any) => {
@@ -14,7 +14,7 @@ export const backgroundWarmUpAuthBasedEngine = (
   });
 };
 
-const warmUp = async (engine: AuthBasedEngines, reqConfigSettings: PlayRequestConfig['settings']) => {
+const warmUp = async (engine: AuthBasedEngine, reqConfigSettings: PlayRequestConfig['settings']) => {
   const inferenceAddress = await createOrGetInferenceAddress(engine, reqConfigSettings);
   const streamOptions: AxiosRequestConfig = {
     method: 'OPTIONS',
