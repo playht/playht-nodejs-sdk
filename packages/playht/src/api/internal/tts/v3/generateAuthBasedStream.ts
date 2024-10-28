@@ -1,4 +1,5 @@
-import type { V2ApiOptions, AuthBasedApiOptions } from '../../../apiCommon';
+import type { AuthBasedApiOptions, V2ApiOptions } from '../../../apiCommon';
+import type { Play30EngineStreamOptions, PlayDialogEngineStreamOptions } from '../../../../index';
 import axios, { AxiosRequestConfig } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
@@ -18,21 +19,7 @@ export async function generateAuthBasedStream(
     headers: {
       accept: outputFormatToMimeType(options.outputFormat),
     },
-    data: {
-      text,
-      voice,
-      quality: options.quality,
-      output_format: options.outputFormat,
-      speed: options.speed,
-      sample_rate: options.sampleRate,
-      seed: options.seed,
-      temperature: options.temperature,
-      voice_engine: options.voiceEngine,
-      voice_guidance: options.voiceGuidance,
-      text_guidance: options.textGuidance,
-      style_guidance: options.styleGuidance,
-      language: options.language,
-    },
+    data: createPayloadForEngine(text, voice, options),
     responseType: 'stream',
     httpsAgent: keepAliveHttpsAgent,
     signal: reqConfig.signal,
@@ -59,5 +46,44 @@ const outputFormatToMimeType = (outputFormat: V2ApiOptions['outputFormat'] | und
       return 'audio/flac';
     case 'mp3':
       return 'audio/mpeg';
+  }
+};
+
+const createPayloadForEngine = (
+  text: string,
+  voice: string,
+  options: Play30EngineStreamOptions | PlayDialogEngineStreamOptions,
+) => {
+  const common = {
+    text,
+    voice,
+    quality: options.quality,
+    output_format: options.outputFormat,
+    speed: options.speed,
+    sample_rate: options.sampleRate,
+    seed: options.seed,
+    temperature: options.temperature,
+    voice_engine: options.voiceEngine,
+    voice_guidance: options.voiceGuidance,
+    text_guidance: options.textGuidance,
+    style_guidance: options.styleGuidance,
+  };
+  switch (options.voiceEngine) {
+    case 'Play3.0-mini':
+      return {
+        ...common,
+        language: options.language,
+      };
+    case 'PlayDialog':
+      return {
+        ...common,
+        voice_2: options.voiceId2,
+        turn_prefix: options.turnPrefix,
+        turn_prefix_2: options.turnPrefix2,
+        prompt: options.prompt,
+        prompt_2: options.prompt2,
+        voice_conditioning_seconds: options.voiceConditioningSeconds,
+        voice_conditioning_seconds_2: options.voiceConditioningSeconds2,
+      };
   }
 };
