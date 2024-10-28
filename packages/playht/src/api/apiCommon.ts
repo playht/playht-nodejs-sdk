@@ -46,7 +46,7 @@ export type V2ApiOptions = {
 
 export type AuthBasedApiOptions = (
   | Pick<Play30EngineStreamOptions, 'language' | 'voiceEngine'>
-  | Pick<PlayDialogEngineStreamOptions, 'language' | 'voiceEngine'>
+  | Pick<PlayDialogEngineStreamOptions, 'voiceEngine'>
 ) &
   Omit<V2ApiOptions, 'voiceEngine' | 'emotion'>;
 
