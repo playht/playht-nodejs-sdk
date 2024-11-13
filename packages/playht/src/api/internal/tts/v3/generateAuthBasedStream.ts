@@ -57,22 +57,22 @@ const createPayloadForEngine = (
   const common = {
     text,
     voice,
-    quality: options.quality,
     output_format: options.outputFormat,
     speed: options.speed,
     sample_rate: options.sampleRate,
     seed: options.seed,
     temperature: options.temperature,
     voice_engine: options.voiceEngine,
-    voice_guidance: options.voiceGuidance,
-    text_guidance: options.textGuidance,
-    style_guidance: options.styleGuidance,
+    language: options.language,
   };
   switch (options.voiceEngine) {
     case 'Play3.0-mini':
       return {
         ...common,
-        language: options.language,
+        quality: options.quality,
+        voice_guidance: options.voiceGuidance,
+        text_guidance: options.textGuidance,
+        style_guidance: options.styleGuidance,
       };
     case 'PlayDialog':
       return {

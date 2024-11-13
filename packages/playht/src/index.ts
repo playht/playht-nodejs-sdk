@@ -405,7 +405,10 @@ export type Play30EngineStreamOptions = Omit<PlayHT20EngineStreamOptions, 'voice
 /**
  * The options available for configuring the PlayDialog voice engine for streaming.
  */
-export type PlayDialogEngineStreamOptions = Omit<Play30EngineStreamOptions, 'voiceEngine' | 'language'> & {
+export type PlayDialogEngineStreamOptions = Omit<
+  Play30EngineStreamOptions,
+  'voiceEngine' | 'quality' | 'styleGuidance' | 'textGuidance' | 'voiceGuidance'
+> & {
   /**
    * The identifier for the PlayDialog voice engine.
    */
