@@ -14,7 +14,6 @@ export async function generateAuthBasedStream(
   reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
   const inferenceAddress = await createOrGetInferenceAddress(getInternalEngineForEndpoint(options), reqConfig.settings);
-  console.log(inferenceAddress);
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
     url: inferenceAddress,
