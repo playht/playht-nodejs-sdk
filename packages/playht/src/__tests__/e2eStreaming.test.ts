@@ -20,7 +20,7 @@ describe('E2E Streaming', () => {
       });
 
       const audioBuffer = await buffer(streamFromText);
-      // fs.writeFileSync('test-output-Play3.0-mini.mp3', audioBuffer); // uncomment this line to save the generated file
+      fs.writeFileSync('test-output-Play3.0-mini.mp3', audioBuffer); // for debugging
 
       expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
       expect(audioBuffer.toString('ascii')).toContain('ID3');
@@ -50,7 +50,7 @@ describe('E2E Streaming', () => {
       });
 
       const audioBuffer = await buffer(streamFromText);
-      // fs.writeFileSync('test-output-PlayDialog.mp3', audioBuffer); // uncomment this line to save the generated file
+      fs.writeFileSync('test-output-PlayDialog.mp3', audioBuffer); // for debugging
 
       expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
       expect(audioBuffer.toString('ascii')).toContain('ID3');
@@ -83,7 +83,7 @@ describe('E2E Streaming', () => {
       );
 
       const audioBuffer = await buffer(streamFromText);
-      fs.writeFileSync('test-output-PlayDialogMultilingual.mp3', audioBuffer); // uncomment this line to save the generated file
+      fs.writeFileSync('test-output-PlayDialogMultilingual.mp3', audioBuffer); // for debugging
 
       expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
       expect(audioBuffer.toString('ascii')).toContain('ID3');
