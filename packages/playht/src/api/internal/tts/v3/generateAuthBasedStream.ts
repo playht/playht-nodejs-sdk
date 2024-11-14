@@ -1,18 +1,20 @@
-import type { AuthBasedApiOptions, V2ApiOptions } from '../../../apiCommon';
+import type { AuthBasedEngineOptions, V2ApiOptions } from '../../../apiCommon';
 import type { Play30EngineStreamOptions, PlayDialogEngineStreamOptions } from '../../../../index';
 import axios, { AxiosRequestConfig } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
+import { InternalAuthBasedEngine } from './V3InternalSettings';
 
 export async function generateAuthBasedStream(
   text: string,
   voice: string,
-  options: AuthBasedApiOptions,
+  options: AuthBasedEngineOptions,
   reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
-  const inferenceAddress = await createOrGetInferenceAddress(options.voiceEngine, reqConfig.settings);
+  const inferenceAddress = await createOrGetInferenceAddress(getInternalEngineForEndpoint(options), reqConfig.settings);
+  console.log(inferenceAddress);
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
     url: inferenceAddress,
@@ -87,3 +89,15 @@ const createPayloadForEngine = (
       };
   }
 };
+
+// visible for test
+export const getInternalEngineForEndpoint = (options: AuthBasedEngineOptions): InternalAuthBasedEngine => {
+  switch (options.voiceEngine) {
+    case 'Play3.0-mini':
+      return 'Play3.0-mini';
+    case 'PlayDialog':
+      if (options.language && options.language !== 'english')
+        return 'PlayDialogMultilingual';
+      return 'PlayDialog';
+  }
+}

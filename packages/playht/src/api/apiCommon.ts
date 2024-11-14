@@ -44,11 +44,7 @@ export type V2ApiOptions = {
   textGuidance?: number;
 };
 
-export type AuthBasedApiOptions = (
-  | Pick<Play30EngineStreamOptions, 'language' | 'voiceEngine'>
-  | Pick<PlayDialogEngineStreamOptions, 'voiceEngine'>
-) &
-  Omit<V2ApiOptions, 'voiceEngine' | 'emotion'>;
+export type AuthBasedEngineOptions =  Play30EngineStreamOptions | PlayDialogEngineStreamOptions;
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
 

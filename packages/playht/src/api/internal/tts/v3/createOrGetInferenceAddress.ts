@@ -4,12 +4,13 @@ import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { APISettingsStore } from '../../../APISettingsStore';
 import { UserId } from '../../types';
-import { AuthBasedEngine, InferenceCoordinatesEntry, V3InternalSettings } from './V3InternalSettings';
+import { InternalAuthBasedEngine, InferenceCoordinatesEntry, V3InternalSettings } from './V3InternalSettings';
 import { V3_DEFAULT_SETTINGS } from './V3DefaultSettings';
 
-const inferenceCoordinatesStores: Record<AuthBasedEngine, Record<UserId, InferenceCoordinatesEntry>> = {
+const inferenceCoordinatesStores: Record<InternalAuthBasedEngine, Record<UserId, InferenceCoordinatesEntry>> = {
   'Play3.0-mini': {},
   PlayDialog: {},
+  PlayDialogMultilingual: {},
 };
 
 // By default, the inference coordinates generator will call the Play API to get the inference coordinates.
@@ -32,12 +33,12 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
     )
     .then(
       (response) =>
-        response.data as Record<AuthBasedEngine, { http_streaming_url: string; websocket_url: string }> & {
+        response.data as Record<InternalAuthBasedEngine, { http_streaming_url: string; websocket_url: string }> & {
           expires_at_ms: number;
         },
     )
     .catch((error: any) => convertError(error));
-  const httpStreamingUrl = data[engine].http_streaming_url;
+  const httpStreamingUrl = data[engine]?.http_streaming_url;
   if (!httpStreamingUrl) {
     return convertError(new Error(`Engine ${engine} not found in AUTH response`));
   }
@@ -48,7 +49,7 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
 };
 
 const createInferenceCoordinates = async (
-  engine: AuthBasedEngine,
+  voiceEngine: InternalAuthBasedEngine,
   reqConfigSettings?: PlayRequestConfig['settings'],
   attemptNo = 0,
 ): Promise<InferenceCoordinatesEntry> => {
@@ -72,13 +73,13 @@ const createInferenceCoordinates = async (
     V3_DEFAULT_SETTINGS.coordinatesGetApiCallMaxRetries;
 
   try {
-    const newInferenceCoordinatesEntry = await inferenceCoordinatesGenerator(engine, userId, apiKey);
+    const newInferenceCoordinatesEntry = await inferenceCoordinatesGenerator(voiceEngine, userId, apiKey);
     const automaticRefreshDelay = Math.max(
       coordinatesExpirationMinimalFrequencyMs,
       newInferenceCoordinatesEntry.expiresAtMs - Date.now() - coordinatesExpirationAdvanceRefreshTimeMs,
     );
-    setTimeout(() => createInferenceCoordinates(engine, reqConfigSettings), automaticRefreshDelay).unref();
-    inferenceCoordinatesStores[engine][userId] = newInferenceCoordinatesEntry;
+    setTimeout(() => createInferenceCoordinates(voiceEngine, reqConfigSettings), automaticRefreshDelay).unref();
+    inferenceCoordinatesStores[voiceEngine][userId] = newInferenceCoordinatesEntry;
     return newInferenceCoordinatesEntry;
   } catch (e) {
     if (attemptNo >= coordinatesGetApiCallMaxRetries) {
@@ -87,7 +88,7 @@ const createInferenceCoordinates = async (
     return new Promise((resolve) => {
       setTimeout(
         () => {
-          resolve(createInferenceCoordinates(engine, reqConfigSettings, attemptNo + 1));
+          resolve(createInferenceCoordinates(voiceEngine, reqConfigSettings, attemptNo + 1));
         },
         500 * (attemptNo + 1),
       ).unref();
@@ -98,16 +99,16 @@ const createInferenceCoordinates = async (
 const inferenceCoordinatesCreationPromise: Record<UserId, Promise<InferenceCoordinatesEntry>> = {};
 
 export const createOrGetInferenceAddress = async (
-  engine: AuthBasedEngine,
+  voiceEngine: InternalAuthBasedEngine,
   reqConfigSettings?: PlayRequestConfig['settings'],
 ): Promise<string> => {
   const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
-  const inferenceCoordinatesEntry = inferenceCoordinatesStores[engine][userId];
+  const inferenceCoordinatesEntry = inferenceCoordinatesStores[voiceEngine][userId];
   if (inferenceCoordinatesEntry && inferenceCoordinatesEntry.expiresAtMs >= Date.now() - 5_000) {
     return inferenceCoordinatesEntry.inferenceAddress;
   } else {
     if (!(userId in inferenceCoordinatesCreationPromise)) {
-      inferenceCoordinatesCreationPromise[userId] = createInferenceCoordinates(engine, reqConfigSettings);
+      inferenceCoordinatesCreationPromise[userId] = createInferenceCoordinates(voiceEngine, reqConfigSettings);
     }
     const newInferenceCoordinatesEntry = (await inferenceCoordinatesCreationPromise[userId])!;
     delete inferenceCoordinatesCreationPromise[userId];

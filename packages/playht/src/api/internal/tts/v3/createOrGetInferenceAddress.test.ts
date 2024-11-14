@@ -1,18 +1,25 @@
-import { describe, expect } from '@jest/globals';
+import { beforeEach, describe, expect } from '@jest/globals';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
+import { InternalAuthBasedEngine } from './V3InternalSettings';
 
 async function sleep(timeout: number) {
   await new Promise((resolve) => setTimeout(resolve, timeout));
 }
 
 describe('createOrGetInferenceAddress', () => {
-  let callSequenceNumber = 0;
+  let callSequenceNumber: number;
+  beforeEach(() => {
+    callSequenceNumber = 0;
+  });
   const reqConfigSettings = (userId: string) => ({
     userId,
-    apiKey: 'test',
+    apiKey: 'test-api-key',
     experimental: {
       v3: {
-        customInferenceCoordinatesGenerator: async () => {
+        customInferenceCoordinatesGenerator: async (
+          _: InternalAuthBasedEngine,
+          userId: string,
+        ) => {
           await sleep(10); // simulate a delay
           return {
             inferenceAddress: `call ${userId} #${++callSequenceNumber}`,
@@ -46,12 +53,12 @@ describe('createOrGetInferenceAddress', () => {
     );
 
     expect(await Promise.all([...callsOne, ...callsTwo])).toEqual([
-      'call test-user#0 #2',
-      'call test-user#1 #3',
-      'call test-user#2 #4',
-      'call test-user#0 #2',
-      'call test-user#1 #3',
-      'call test-user#2 #4',
+      'call test-user#0 #1',
+      'call test-user#1 #2',
+      'call test-user#2 #3',
+      'call test-user#0 #1',
+      'call test-user#1 #2',
+      'call test-user#2 #3',
     ]);
   });
 });
