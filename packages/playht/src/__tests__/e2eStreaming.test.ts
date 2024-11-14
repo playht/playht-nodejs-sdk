@@ -15,7 +15,7 @@ describe('E2E Streaming', () => {
       const streamFromText = await PlayHT.stream('Hello from SDK test.', {
         voiceEngine: 'Play3.0-mini',
         // @ts-expect-error emotion is not part of the Play3.0-mini contract
-        emotion: 'not-used',
+        emotion: 'female_surprised',
         outputFormat: 'mp3',
       });
 
@@ -45,7 +45,7 @@ describe('E2E Streaming', () => {
         language: 'english',
 
         // @ts-expect-error emotion and language are not part of the PlayDialog contract
-        emotion: 'not-used',
+        emotion: 'female_surprised',
         styleGuidance: 16,
       });
 
@@ -77,7 +77,7 @@ describe('E2E Streaming', () => {
           language: 'portuguese',
 
           // @ts-expect-error emotion and language are not part of the PlayDialog contract
-          emotion: 'not-used',
+          emotion: 'female_surprised',
           styleGuidance: 16,
         },
       );
