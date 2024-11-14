@@ -8,11 +8,17 @@ export const backgroundWarmUpAuthBasedEngine = (
   selectedEngine: PublicAuthBasedEngine,
   reqConfigSettings: PlayRequestConfig['settings'],
 ) => {
-  const engines = selectedEngine === 'Play3.0-mini' ? ['Play3.0-mini'] as const : ['PlayDialog', 'PlayDialogMultilingual'] as const;
+  const engines =
+    selectedEngine === 'Play3.0-mini'
+      ? (['Play3.0-mini'] as const)
+      : (['PlayDialog', 'PlayDialogMultilingual'] as const);
   for (const engine of engines) {
     warmUp(engine, reqConfigSettings).catch((error: any) => {
-      // eslint-disable-next-line no-process-env
-      console.log(`[PlayHT SDK] Error while warming up SDK (${engine}): ${error.message}`, process.env.DEBUG ? error : '');
+      console.log(
+        `[PlayHT SDK] Error while warming up SDK (${engine}): ${error.message}`,
+        // eslint-disable-next-line no-process-env
+        process.env.DEBUG ? error : '',
+      );
     });
   }
 };

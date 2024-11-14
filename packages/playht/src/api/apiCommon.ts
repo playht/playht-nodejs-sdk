@@ -44,7 +44,7 @@ export type V2ApiOptions = {
   textGuidance?: number;
 };
 
-export type AuthBasedEngineOptions =  Play30EngineStreamOptions | PlayDialogEngineStreamOptions;
+export type AuthBasedEngineOptions = Play30EngineStreamOptions | PlayDialogEngineStreamOptions;
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
 

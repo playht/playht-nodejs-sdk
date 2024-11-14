@@ -16,13 +16,10 @@ describe('createOrGetInferenceAddress', () => {
     apiKey: 'test-api-key',
     experimental: {
       v3: {
-        customInferenceCoordinatesGenerator: async (
-          _: InternalAuthBasedEngine,
-          userId: string,
-        ) => {
+        customInferenceCoordinatesGenerator: async (_: InternalAuthBasedEngine, u: string) => {
           await sleep(10); // simulate a delay
           return {
-            inferenceAddress: `call ${userId} #${++callSequenceNumber}`,
+            inferenceAddress: `call ${u} #${++callSequenceNumber}`,
             expiresAtMs: Date.now() + 1_000_000,
           };
         },

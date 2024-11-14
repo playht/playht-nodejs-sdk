@@ -64,20 +64,23 @@ describe('E2E Streaming', () => {
         apiKey: E2E_CONFIG.API_KEY,
       });
 
-      const streamFromText = await PlayHT.stream('Host 1: Estamos todos prontos para fazer o que for necessário aqui.\nHost 2: É impossível esquecer tudo que vivemos.', {
-        voiceEngine: 'PlayDialog',
-        outputFormat: 'mp3',
-        temperature: 1.2,
-        quality: 'high',
-        voiceId2: 's3://voice-cloning-zero-shot/775ae416-49bb-4fb6-bd45-740f205d20a1/jennifersaad/manifest.json',
-        turnPrefix: 'Host 1:',
-        turnPrefix2: 'Host 2:',
-        language: 'portuguese',
+      const streamFromText = await PlayHT.stream(
+        'Host 1: Estamos todos prontos para fazer o que for necessário aqui. Host 2: É impossível esquecer tudo que vivemos.',
+        {
+          voiceEngine: 'PlayDialog',
+          outputFormat: 'mp3',
+          temperature: 1.2,
+          quality: 'high',
+          voiceId2: 's3://voice-cloning-zero-shot/775ae416-49bb-4fb6-bd45-740f205d20a1/jennifersaad/manifest.json',
+          turnPrefix: 'Host 1:',
+          turnPrefix2: 'Host 2:',
+          language: 'portuguese',
 
-        // @ts-expect-error emotion and language are not part of the PlayDialog contract
-        emotion: 'not-used',
-        styleGuidance: 16,
-      });
+          // @ts-expect-error emotion and language are not part of the PlayDialog contract
+          emotion: 'not-used',
+          styleGuidance: 16,
+        },
+      );
 
       const audioBuffer = await buffer(streamFromText);
       fs.writeFileSync('test-output-PlayDialogMultilingual.mp3', audioBuffer); // uncomment this line to save the generated file
