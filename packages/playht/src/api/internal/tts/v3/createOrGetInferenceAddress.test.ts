@@ -1,21 +1,25 @@
-import { describe, expect } from '@jest/globals';
+import { beforeEach, describe, expect } from '@jest/globals';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
+import { InternalAuthBasedEngine } from './V3InternalSettings';
 
 async function sleep(timeout: number) {
   await new Promise((resolve) => setTimeout(resolve, timeout));
 }
 
 describe('createOrGetInferenceAddress', () => {
-  let callSequenceNumber = 0;
+  let callSequenceNumber: number;
+  beforeEach(() => {
+    callSequenceNumber = 0;
+  });
   const reqConfigSettings = (userId: string) => ({
     userId,
-    apiKey: 'test',
+    apiKey: 'test-api-key',
     experimental: {
       v3: {
-        customInferenceCoordinatesGenerator: async () => {
+        customInferenceCoordinatesGenerator: async (_: InternalAuthBasedEngine, u: string) => {
           await sleep(10); // simulate a delay
           return {
-            inferenceAddress: `call ${userId} #${++callSequenceNumber}`,
+            inferenceAddress: `call ${u} #${++callSequenceNumber}`,
             expiresAtMs: Date.now() + 1_000_000,
           };
         },
@@ -29,7 +33,7 @@ describe('createOrGetInferenceAddress', () => {
   it('serializes concurrent calls for the same user', async () => {
     const numberOfTestCalls = 15;
     const calls = Array.from({ length: numberOfTestCalls }, () =>
-      createOrGetInferenceAddress(reqConfigSettings('test-user')),
+      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings('test-user')),
     );
 
     // Expect all calls to return 'call #1', not 'call #1', 'call #2', 'call #3', etc.
@@ -39,19 +43,19 @@ describe('createOrGetInferenceAddress', () => {
   it('doesnt serialize calls for different users', async () => {
     const numberOfTestCalls = 3;
     const callsOne = Array.from({ length: numberOfTestCalls }, (_, i) =>
-      createOrGetInferenceAddress(reqConfigSettings(`test-user#${i}`)),
+      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(`test-user#${i}`)),
     );
     const callsTwo = Array.from({ length: numberOfTestCalls }, (_, i) =>
-      createOrGetInferenceAddress(reqConfigSettings(`test-user#${i}`)),
+      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(`test-user#${i}`)),
     );
 
     expect(await Promise.all([...callsOne, ...callsTwo])).toEqual([
-      'call test-user#0 #2',
-      'call test-user#1 #3',
-      'call test-user#2 #4',
-      'call test-user#0 #2',
-      'call test-user#1 #3',
-      'call test-user#2 #4',
+      'call test-user#0 #1',
+      'call test-user#1 #2',
+      'call test-user#2 #3',
+      'call test-user#0 #1',
+      'call test-user#1 #2',
+      'call test-user#2 #3',
     ]);
   });
 });

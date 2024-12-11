@@ -9,8 +9,9 @@ import { backgroundWarmUpAuthBasedEngine } from './api/internal/tts/v3/backgroun
  * The various voice engines that can be used for speech synthesis.
  *
  * For the lowest latency, use `Play3.0-mini`.
+ * For the highest quality, use `PlayDialog`.
  */
-export type VoiceEngine = 'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
+export type VoiceEngine = 'PlayDialog' | 'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
 
 /**
  * Type representing the different input types that can be used to define the format of the input text.
@@ -101,20 +102,6 @@ export type VoiceAgeGroup = 'youth' | 'adult' | 'senior';
 
 /**
  * Potential values for emotions to be applied to speech.
- * @typedef {(
- *   'female_happy' |
- *   'female_sad' |
- *   'female_angry' |
- *   'female_fearful' |
- *   'female_disgust' |
- *   'female_surprised' |
- *   'male_happy' |
- *   'male_sad' |
- *   'male_angry' |
- *   'male_fearful' |
- *   'male_disgust' |
- *   'male_surprised'
- * )} Emotion
  */
 export type Emotion =
   | 'female_happy'
@@ -203,7 +190,6 @@ export type VoicesFilter = {
  * @property {OutputQuality} [quality] - Optional parameter to define the output quality of the speech.
  */
 export type SharedSpeechOptions = {
-  voiceEngine: VoiceEngine;
   voiceId?: string;
   inputType?: InputType;
   speed?: number;
@@ -394,10 +380,64 @@ export type Play30EngineStreamOptions = Omit<PlayHT20EngineStreamOptions, 'voice
    * The identifier for the Play3.0-mini voice engine.
    */
   voiceEngine: 'Play3.0-mini';
+  speed?: number;
+  quality?: OutputQuality;
   /**
    * The language spoken by the voice.
    */
   language?: Play30StreamLanguage;
+};
+
+/**
+ * The options available for configuring the PlayDialog voice engine for streaming.
+ */
+export type PlayDialogEngineStreamOptions = Omit<
+  Play30EngineStreamOptions,
+  'voiceEngine' | 'quality' | 'styleGuidance' | 'textGuidance' | 'voiceGuidance'
+> & {
+  /**
+   * The identifier for the PlayDialog voice engine.
+   */
+  voiceEngine: 'PlayDialog';
+
+  /**
+   * The unique ID for a PlayHT or Cloned Voice. Used for generating turn-based dialogues.
+   */
+  voiceId2?: string;
+
+  /**
+   * The prefix to indicate the start of a turn in a dialogue with `voice`.
+   */
+  turnPrefix?: string;
+
+  /**
+   * The prefix to indicate the start of a turn in a dialogue with `voiceId2`.
+   */
+  turnPrefix2?: string;
+
+  /**
+   * The prompt to be used for the `PlayDialog` model with `voice`.
+   */
+  prompt?: string;
+
+  /**
+   * The prompt to be used for the `PlayDialog` model with `voiceId2`.
+   */
+  prompt2?: string;
+
+  /**
+   * The number of seconds of conditioning to use from the selected `voice`.
+   * If equal to 0 (default value), the generation will be unconditioned.
+   * Higher values lead to higher model instability.
+   */
+  voiceConditioningSeconds?: number;
+
+  /**
+   * The number of seconds of conditioning to use from the selected `voiceId2`.
+   * If equal to 0 (default value), the generation will be unconditioned.
+   * Higher values lead to higher model instability.
+   */
+  voiceConditioningSeconds2?: number;
 };
 
 /**
@@ -412,7 +452,13 @@ export type SpeechOptions = SharedSpeechOptions &
  * options.
  */
 export type SpeechStreamOptions = SharedSpeechOptions &
-  (Play30EngineStreamOptions | PlayHT20EngineStreamOptions | PlayHT10EngineStreamOptions | StandardEngineOptions);
+  (
+    | PlayDialogEngineStreamOptions
+    | Play30EngineStreamOptions
+    | PlayHT20EngineStreamOptions
+    | PlayHT10EngineStreamOptions
+    | StandardEngineOptions
+  );
 
 /**
  * `SpeechOutput` is the output type for a text-to-speech method, providing information about the generated
@@ -479,8 +525,9 @@ export type APISettingsInput = {
  */
 export function init(settings: APISettingsInput) {
   APISettingsStore.setSettings(settings);
-  if (settings.defaultVoiceEngine === 'Play3.0-mini') {
-    backgroundWarmUpAuthBasedEngine(settings);
+  // todo: change to isAuthBasedEngine at the same file of the warm upper
+  if (settings.defaultVoiceEngine === 'Play3.0-mini' || settings.defaultVoiceEngine === 'PlayDialog') {
+    backgroundWarmUpAuthBasedEngine(settings.defaultVoiceEngine, settings);
   }
 }
 

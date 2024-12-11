@@ -1,6 +1,6 @@
 {
   "name": "playht",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "NodeJS SDK for PlayHT generative AI text-to-speech APIs",
   "files": [
     "dist/**/*",
@@ -22,6 +22,7 @@
     "verify": "yarn check && yarn test",
     "check": "yarn build:protobufs && tsc -p tsconfig.json --noEmit && prettier --check . && eslint --ext .ts ./src",
     "release": "yarn && yarn verify && yarn build && cp ../../README.md . && npm publish || true && rm README.md",
+    "release-alpha": "yarn && yarn verify && yarn build && cp ../../README.md . && npm publish --tag=alpha || true && rm README.md",
     "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push --tags"
   },
   "devDependencies": {
