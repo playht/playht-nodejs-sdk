@@ -1,6 +1,6 @@
 {
   "name": "playht",
-  "version": "0.11.2-alpha.6",
+  "version": "0.14.0",
   "description": "NodeJS SDK for PlayHT generative AI text-to-speech APIs",
   "files": [
     "dist/**/*",
