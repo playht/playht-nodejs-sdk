@@ -291,13 +291,15 @@ async function audioStreamFromSentences(
   promiseStream.on('error', onError);
 
   promiseStream.on('end', () => {
-    setTimeout(
-      () =>
-        writeAudio.on('finish', () => {
-          writableStream.end();
-        }),
-      0,
-    );
+    setTimeout(() => {
+      if (writeAudio.closed) {
+        writableStream.end();
+        return;
+      }
+      writeAudio.on('finish', () => {
+        writableStream.end();
+      });
+    }, 0);
   });
 
   promiseStream.pipe(writeAudio);
