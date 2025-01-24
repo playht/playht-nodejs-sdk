@@ -14,16 +14,25 @@ export async function generateAuthBasedStream(
   reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
   const inferenceAddress = await createOrGetInferenceAddress(getInternalEngineForEndpoint(options), reqConfig.settings);
+  const payloadForEngine = createPayloadForEngine(text, voice, options);
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
     url: inferenceAddress,
-    data: createPayloadForEngine(text, voice, options),
+    data: payloadForEngine,
     responseType: 'stream',
     httpsAgent: keepAliveHttpsAgent,
     signal: reqConfig.signal,
   };
 
   const response = await axios(streamOptions).catch((error: any) => convertError(error));
+  if (reqConfig.settings?.debug) {
+    console.log(
+      `[PlaySDK] Request - URL: ${inferenceAddress.replace(
+        /fal_jwt_token=.*/,
+        'fal_jwt_token=<redacted>',
+      )} - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${response.headers['x-fal-request-id']}`,
+    );
+  }
   return response.data;
 }
 
