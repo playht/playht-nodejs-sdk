@@ -1,5 +1,9 @@
-import type { AuthBasedEngineOptions, V2ApiOptions } from '../../../apiCommon';
-import type { Play30EngineStreamOptions, PlayDialogEngineStreamOptions } from '../../../../index';
+import type { AuthBasedEngineOptions } from '../../../apiCommon';
+import type {
+  Play30EngineStreamOptions,
+  Play30MiniOutputStreamFormat,
+  PlayDialogEngineStreamOptions,
+} from '../../../../index';
 import axios, { AxiosRequestConfig } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
@@ -30,15 +34,13 @@ export async function generateAuthBasedStream(
   return response.data;
 }
 
-const outputFormatToMimeType = (outputFormat: V2ApiOptions['outputFormat'] | undefined): `audio/${string}` => {
+const outputFormatToMimeType = (outputFormat: Play30MiniOutputStreamFormat | undefined): `audio/${string}` => {
   if (!outputFormat) {
     return outputFormatToMimeType('mp3');
   }
   switch (outputFormat) {
     case 'raw':
     // fallthrough
-    case 'mulaw':
-      return 'audio/basic';
     case 'wav':
       return 'audio/wav';
     case 'ogg':
@@ -47,6 +49,10 @@ const outputFormatToMimeType = (outputFormat: V2ApiOptions['outputFormat'] | und
       return 'audio/flac';
     case 'mp3':
       return 'audio/mpeg';
+    case 'mulaw':
+      return 'audio/basic';
+    case 'wav_mulaw':
+      return 'audio/wav';
   }
 };
 

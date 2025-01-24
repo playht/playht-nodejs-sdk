@@ -348,9 +348,24 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
 };
 
 /**
+ * The optional format in which the output audio stream should be generated.
+ *
+ * - 'raw' - Raw audio format.
+ * - 'mp3' - MP3 format.
+ * - 'wav' - WAV format.
+ * - 'ogg' - OGG format.
+ * - 'flac' - FLAC format.
+ * - 'mulaw' - Mulaw format (headerless).
+ * - 'wav_mulaw' - WAV header format with mulaw sample encoding.
+ *
+ * @default 'mp3'
+ */
+export type Play30MiniOutputStreamFormat = PlayHT20OutputStreamFormat | 'wav_mulaw';
+
+/**
  * The options available for configuring the Play3.0-mini voice engine for streaming.
  *
- * @typedef {Object} PlayHT20EngineOptions
+ * @typedef {Object} Play30EngineStreamOptions
  *
  * @property {'plain'} [inputType] - The optional input type for the audio. Only 'plain' is supported for PlayHT 1.0
  * voices.
@@ -375,7 +390,10 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  * ensuring that the words spoken align closely with the provided text. Only supported when `voice_engine` is set
  * to `PlayHT2.0`, and `voice` uses that engine.
  */
-export type Play30EngineStreamOptions = Omit<PlayHT20EngineStreamOptions, 'voiceEngine' | 'emotion'> & {
+export type Play30EngineStreamOptions = Omit<
+  PlayHT20EngineStreamOptions,
+  'voiceEngine' | 'emotion' | 'outputFormat'
+> & {
   /**
    * The identifier for the Play3.0-mini voice engine.
    */
@@ -386,6 +404,7 @@ export type Play30EngineStreamOptions = Omit<PlayHT20EngineStreamOptions, 'voice
    * The language spoken by the voice.
    */
   language?: Play30StreamLanguage;
+  outputFormat?: Play30MiniOutputStreamFormat;
 };
 
 /**

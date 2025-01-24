@@ -5,6 +5,27 @@ import * as PlayHT from '../index';
 import { E2E_CONFIG } from './e2eTestConfig';
 
 describe('E2E Streaming', () => {
+  xdescribe('PlayHT2.0-turbo [DOESNT WORK, BUT HERE FOR TYPE CHECKS]', () => {
+    it('streams from text', async () => {
+      PlayHT.init({
+        userId: E2E_CONFIG.USER_ID,
+        apiKey: E2E_CONFIG.API_KEY,
+      });
+
+      const streamFromText = await PlayHT.stream('Hello from SDK test.', {
+        voiceEngine: 'PlayHT2.0-turbo',
+        outputFormat: 'wav',
+        emotion: 'female_surprised',
+      });
+
+      const audioBuffer = await buffer(streamFromText);
+      fs.writeFileSync('test-output-PlayHT2.0-turbo.mp3', audioBuffer); // for debugging
+
+      expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
+      expect(audioBuffer.toString('ascii')).toContain('ID3');
+    });
+  });
+
   describe('Play3.0-mini', () => {
     it('streams from text', async () => {
       PlayHT.init({
@@ -14,9 +35,10 @@ describe('E2E Streaming', () => {
 
       const streamFromText = await PlayHT.stream('Hello from SDK test.', {
         voiceEngine: 'Play3.0-mini',
+        outputFormat: 'wav_mulaw',
+
         // @ts-expect-error emotion is not part of the Play3.0-mini contract
         emotion: 'female_surprised',
-        outputFormat: 'mp3',
       });
 
       const audioBuffer = await buffer(streamFromText);
