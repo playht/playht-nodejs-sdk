@@ -1,4 +1,4 @@
-import type { AuthBasedEngineOptions, V2ApiOptions } from '../../../apiCommon';
+import type { AuthBasedEngineOptions } from '../../../apiCommon';
 import type { Play30EngineStreamOptions, PlayDialogEngineStreamOptions } from '../../../../index';
 import axios, { AxiosRequestConfig } from 'axios';
 import { convertError } from '../../convertError';
@@ -17,9 +17,6 @@ export async function generateAuthBasedStream(
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
     url: inferenceAddress,
-    headers: {
-      accept: outputFormatToMimeType(options.outputFormat),
-    },
     data: createPayloadForEngine(text, voice, options),
     responseType: 'stream',
     httpsAgent: keepAliveHttpsAgent,
@@ -29,26 +26,6 @@ export async function generateAuthBasedStream(
   const response = await axios(streamOptions).catch((error: any) => convertError(error));
   return response.data;
 }
-
-const outputFormatToMimeType = (outputFormat: V2ApiOptions['outputFormat'] | undefined): `audio/${string}` => {
-  if (!outputFormat) {
-    return outputFormatToMimeType('mp3');
-  }
-  switch (outputFormat) {
-    case 'raw':
-    // fallthrough
-    case 'mulaw':
-      return 'audio/basic';
-    case 'wav':
-      return 'audio/wav';
-    case 'ogg':
-      return 'audio/ogg';
-    case 'flac':
-      return 'audio/flac';
-    case 'mp3':
-      return 'audio/mpeg';
-  }
-};
 
 const createPayloadForEngine = (
   text: string,
