@@ -1,9 +1,5 @@
 import type { AuthBasedEngineOptions } from '../../../apiCommon';
-import type {
-  Play30EngineStreamOptions,
-  Play30MiniOutputStreamFormat,
-  PlayDialogEngineStreamOptions,
-} from '../../../../index';
+import type { Play30EngineStreamOptions, PlayDialogEngineStreamOptions } from '../../../../index';
 import axios, { AxiosRequestConfig } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
@@ -21,9 +17,6 @@ export async function generateAuthBasedStream(
   const streamOptions: AxiosRequestConfig = {
     method: 'POST',
     url: inferenceAddress,
-    headers: {
-      accept: outputFormatToMimeType(options.outputFormat),
-    },
     data: createPayloadForEngine(text, voice, options),
     responseType: 'stream',
     httpsAgent: keepAliveHttpsAgent,
@@ -33,28 +26,6 @@ export async function generateAuthBasedStream(
   const response = await axios(streamOptions).catch((error: any) => convertError(error));
   return response.data;
 }
-
-const outputFormatToMimeType = (outputFormat: Play30MiniOutputStreamFormat | undefined): `audio/${string}` => {
-  if (!outputFormat) {
-    return outputFormatToMimeType('mp3');
-  }
-  switch (outputFormat) {
-    case 'raw':
-    // fallthrough
-    case 'wav':
-      return 'audio/wav';
-    case 'ogg':
-      return 'audio/ogg';
-    case 'flac':
-      return 'audio/flac';
-    case 'mp3':
-      return 'audio/mpeg';
-    case 'mulaw':
-      return 'audio/basic';
-    case 'wav_mulaw':
-      return 'audio/wav';
-  }
-};
 
 const createPayloadForEngine = (
   text: string,
