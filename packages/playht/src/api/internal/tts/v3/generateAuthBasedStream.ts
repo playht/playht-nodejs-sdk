@@ -1,6 +1,6 @@
 import type { AuthBasedEngineOptions } from '../../../apiCommon';
 import type { Play30EngineStreamOptions, PlayDialogEngineStreamOptions } from '../../../../index';
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
@@ -24,16 +24,23 @@ export async function generateAuthBasedStream(
     signal: reqConfig.signal,
   };
 
-  const response = await axios(streamOptions).catch((error: any) => convertError(error));
-  if (reqConfig.settings?.debug) {
+  const response = await axios(streamOptions).catch((error: any) => {
+    debugRequest(reqConfig.settings?.debug, inferenceAddress, payloadForEngine, error.response);
+    return convertError(error);
+  });
+  debugRequest(reqConfig.settings?.debug, inferenceAddress, payloadForEngine, response);
+  return response.data;
+}
+
+function debugRequest(debug: boolean | undefined, inferenceAddress: string, payloadForEngine: any, response: AxiosResponse) {
+  if (debug) {
     console.log(
       `[PlaySDK] Request - URL: ${inferenceAddress.replace(
         /fal_jwt_token=.*/,
-        'fal_jwt_token=<redacted>',
-      )} - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${response.headers['x-fal-request-id']}`,
+        'fal_jwt_token=<redacted>'
+      )} - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${response.headers['x-fal-request-id']} - Status: ${response.status}`
     );
   }
-  return response.data;
 }
 
 const createPayloadForEngine = (
