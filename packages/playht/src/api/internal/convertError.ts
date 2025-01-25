@@ -2,6 +2,7 @@ import { Readable } from 'node:stream';
 
 export const convertError = async (error: any) => {
   const body = await bodyAsString(error);
+  console.log(body);
   return Promise.reject({
     message: body?.error_message || error.message,
     code: error.code,
