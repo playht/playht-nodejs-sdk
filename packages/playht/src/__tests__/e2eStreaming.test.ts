@@ -35,7 +35,7 @@ describe('E2E Streaming', () => {
 
       const streamFromText = await PlayHT.stream('Hello from SDK test.', {
         voiceEngine: 'Play3.0-mini',
-        outputFormat: 'wav_mulaw',
+        outputFormat: 'pcm',
 
         // @ts-expect-error emotion is not part of the Play3.0-mini contract
         emotion: 'female_surprised',

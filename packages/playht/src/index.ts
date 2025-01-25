@@ -355,12 +355,13 @@ export type PlayHT20EngineStreamOptions = Omit<PlayHT20EngineOptions, 'outputFor
  * - 'wav' - WAV format.
  * - 'ogg' - OGG format.
  * - 'flac' - FLAC format.
+ * - 'pcm' - PCM format.
  * - 'mulaw' - Mulaw format (headerless).
  * - 'wav_mulaw' - WAV header format with mulaw sample encoding.
  *
  * @default 'mp3'
  */
-export type Play30MiniOutputStreamFormat = PlayHT20OutputStreamFormat | 'wav_mulaw';
+export type Play30MiniOutputStreamFormat = PlayHT20OutputStreamFormat | 'pcm' | 'wav_mulaw';
 
 /**
  * The options available for configuring the Play3.0-mini voice engine for streaming.
