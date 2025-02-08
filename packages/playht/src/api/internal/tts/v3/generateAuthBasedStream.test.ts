@@ -14,6 +14,12 @@ describe('getInternalEngineForEndpoint', () => {
     expect(result).toBe('PlayDialog');
   });
 
+  it('returns PlayDialogArabic for PlayDialog engine with arabic language', () => {
+    const options = { voiceEngine: 'PlayDialog', language: 'arabic' } as const;
+    const result = getInternalEngineForEndpoint(options);
+    expect(result).toBe('PlayDialogArabic');
+  });
+
   it('returns PlayDialogMultilingual for PlayDialog engine with non-english language', () => {
     const options = { voiceEngine: 'PlayDialog', language: 'spanish' } as const;
     const result = getInternalEngineForEndpoint(options);

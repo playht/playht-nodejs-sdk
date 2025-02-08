@@ -4,12 +4,13 @@ import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { APISettingsStore } from '../../../APISettingsStore';
 import { UserId } from '../../types';
-import { InternalAuthBasedEngine, InferenceCoordinatesEntry, V3InternalSettings } from './V3InternalSettings';
+import { InferenceCoordinatesEntry, InternalAuthBasedEngine, V3InternalSettings } from './V3InternalSettings';
 import { V3_DEFAULT_SETTINGS } from './V3DefaultSettings';
 
 const inferenceCoordinatesStores: Record<InternalAuthBasedEngine, Record<UserId, InferenceCoordinatesEntry>> = {
   'Play3.0-mini': {},
   PlayDialog: {},
+  PlayDialogArabic: {},
   PlayDialogMultilingual: {},
 };
 
@@ -21,7 +22,7 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
 ): Promise<InferenceCoordinatesEntry> => {
   const data = await axios
     .post(
-      'https://api.play.ht/api/v3/auth?dialog',
+      'https://api.play.ht/api/v4/sdk-auth',
       {},
       {
         headers: {
@@ -34,7 +35,7 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
     .then(
       (response) =>
         response.data as Record<InternalAuthBasedEngine, { http_streaming_url: string; websocket_url: string }> & {
-          expires_at_ms: number;
+          expires_at: string; // ISO Date string, e.g., "2025-02-08T02:09:53.499Z"
         },
     )
     .catch((error: any) => convertError(error));
@@ -44,7 +45,7 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
   }
   return {
     inferenceAddress: httpStreamingUrl,
-    expiresAtMs: data.expires_at_ms,
+    expiresAtMs: new Date(data.expires_at).getTime(),
   };
 };
 
