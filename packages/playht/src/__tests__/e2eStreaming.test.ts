@@ -35,7 +35,7 @@ describe('E2E Streaming', () => {
 
       const streamFromText = await PlayHT.stream('Hello from SDK test.', {
         voiceEngine: 'Play3.0-mini',
-        outputFormat: 'pcm',
+        outputFormat: 'mp3',
 
         // @ts-expect-error emotion is not part of the Play3.0-mini contract
         emotion: 'female_surprised',
@@ -69,6 +69,32 @@ describe('E2E Streaming', () => {
         // @ts-expect-error emotion and language are not part of the PlayDialog contract
         emotion: 'female_surprised',
         styleGuidance: 16,
+      });
+
+      const audioBuffer = await buffer(streamFromText);
+      fs.writeFileSync('test-output-PlayDialog.mp3', audioBuffer); // for debugging
+
+      expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
+      expect(audioBuffer.toString('ascii')).toContain('ID3');
+    }, 120_000);
+  });
+
+  describe('PlayDialogArabic', () => {
+    it('streams from text', async () => {
+      PlayHT.init({
+        userId: E2E_CONFIG.USER_ID,
+        apiKey: E2E_CONFIG.API_KEY,
+      });
+
+      const streamFromText = await PlayHT.stream('Host 1: هل هذا هو SDK؟\nHost 2: نعم، هو.', {
+        voiceEngine: 'PlayDialog',
+        outputFormat: 'mp3',
+        temperature: 1.2,
+        quality: 'high',
+        voiceId2: 's3://voice-cloning-zero-shot/775ae416-49bb-4fb6-bd45-740f205d20a1/jennifersaad/manifest.json',
+        turnPrefix: 'Host 1:',
+        turnPrefix2: 'Host 2:',
+        language: 'arabic',
       });
 
       const audioBuffer = await buffer(streamFromText);
