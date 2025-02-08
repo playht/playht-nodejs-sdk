@@ -32,13 +32,20 @@ export async function generateAuthBasedStream(
   return response.data;
 }
 
-function debugRequest(debug: boolean | undefined, inferenceAddress: string, payloadForEngine: any, response: AxiosResponse) {
+function debugRequest(
+  debug: boolean | undefined,
+  inferenceAddress: string,
+  payloadForEngine: any,
+  response: AxiosResponse,
+) {
   if (debug) {
     console.log(
       `[PlaySDK] Request - URL: ${inferenceAddress.replace(
         /fal_jwt_token=.*/,
-        'fal_jwt_token=<redacted>'
-      )} - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${response.headers['x-fal-request-id']} - Status: ${response.status}`
+        'fal_jwt_token=<redacted>',
+      )} - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${
+        response.headers['x-fal-request-id']
+      } - Status: ${response.status}`,
     );
   }
 }
