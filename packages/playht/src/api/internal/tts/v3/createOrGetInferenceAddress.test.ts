@@ -4,7 +4,7 @@ import { expectToBeDateCloseToNow } from '../../../../__tests__/helpers/expectTo
 import {
   _inspectInferenceCoordinatesStoreForUser,
   clearInferenceCoordinatesStoreForUser,
-  createOrGetInferenceAddress
+  createOrGetInferenceAddress,
 } from './createOrGetInferenceAddress';
 import { InternalAuthBasedEngine } from './V3InternalSettings';
 
@@ -17,10 +17,13 @@ describe('createOrGetInferenceAddress', () => {
   beforeEach(() => {
     callSequenceNumber = 0;
   });
-  const reqConfigSettings = (userId: string, options: {
-    expirationDiffMs?: number;
-    forcedError?: Error
-  } = { }) => ({
+  const reqConfigSettings = (
+    userId: string,
+    options: {
+      expirationDiffMs?: number;
+      forcedError?: Error;
+    } = {},
+  ) => ({
     userId,
     apiKey: 'test-api-key',
     experimental: {
@@ -77,21 +80,21 @@ describe('createOrGetInferenceAddress', () => {
       const userId = 'test-user' as UserId;
       await createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(userId));
       expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
-        "Play3.0-mini": {
-          "expiresAtMs": expectToBeDateCloseToNow(),
-          "inferenceAddress": "call test-user #1"
-        }
+        'Play3.0-mini': {
+          expiresAtMs: expectToBeDateCloseToNow(),
+          inferenceAddress: 'call test-user #1',
+        },
       });
       await createOrGetInferenceAddress('PlayDialogArabic', reqConfigSettings(userId));
       expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
-        "Play3.0-mini": {
-          "expiresAtMs": expectToBeDateCloseToNow(),
-          "inferenceAddress": "call test-user #1"
+        'Play3.0-mini': {
+          expiresAtMs: expectToBeDateCloseToNow(),
+          inferenceAddress: 'call test-user #1',
         },
-        "PlayDialogArabic": {
-          "expiresAtMs": expectToBeDateCloseToNow(),
-          "inferenceAddress": "call test-user #2"
-        }
+        PlayDialogArabic: {
+          expiresAtMs: expectToBeDateCloseToNow(),
+          inferenceAddress: 'call test-user #2',
+        },
       });
       clearInferenceCoordinatesStoreForUser(userId);
       expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({});

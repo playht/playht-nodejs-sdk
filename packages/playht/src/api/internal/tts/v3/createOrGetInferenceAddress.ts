@@ -18,17 +18,16 @@ export const clearInferenceCoordinatesStoreForUser = (userId: UserId): void => {
   for (const engine in inferenceCoordinatesStores) {
     delete inferenceCoordinatesStores[engine as keyof typeof inferenceCoordinatesStores][userId];
   }
-}
+};
 export const _inspectInferenceCoordinatesStoreForUser = (userId: UserId) => {
   const result: Record<InternalAuthBasedEngine, InferenceCoordinatesEntry | null> = {} as any;
   for (const engine in inferenceCoordinatesStores) {
     const typedEngine = engine as keyof typeof inferenceCoordinatesStores;
     const value = inferenceCoordinatesStores[typedEngine][userId];
-    if (value)
-    result[typedEngine] = value;
+    if (value) result[typedEngine] = value;
   }
   return result;
-}
+};
 
 // By default, the inference coordinates generator will call the Play API to get the inference coordinates.
 const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceCoordinatesGenerator'] = async (

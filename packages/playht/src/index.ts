@@ -633,5 +633,5 @@ export const cache = {
   /**
    * Clears the local cache for inference coordinates (JWTs and inference URLs) for the specified user, if exists.
    */
-  clearInferenceCoordinatesStoreForUser
-}
+  clearInferenceCoordinatesStoreForUser,
+};
