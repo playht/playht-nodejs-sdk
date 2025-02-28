@@ -4,6 +4,7 @@ import { commonGetAllVoices } from './api/commonGetAllVoices';
 import { commonInstantClone, internalDeleteClone } from './api/instantCloneInternal';
 import { PlayRequestConfig } from './api/internal/config/PlayRequestConfig';
 import { backgroundWarmUpAuthBasedEngine } from './api/internal/tts/v3/backgroundWarmUpAuthBasedEngine';
+import { clearInferenceCoordinatesStoreForUser } from './api/internal/tts/v3/createOrGetInferenceAddress';
 
 /**
  * The various voice engines that can be used for speech synthesis.
@@ -627,3 +628,10 @@ export async function listVoices(filters?: VoicesFilter): Promise<Array<VoiceInf
 }
 
 export { PlayRequestConfig };
+
+export const cache = {
+  /**
+   * Clears the local cache for inference coordinates (JWTs and inference URLs) for the specified user, if exists.
+   */
+  clearInferenceCoordinatesStoreForUser,
+};

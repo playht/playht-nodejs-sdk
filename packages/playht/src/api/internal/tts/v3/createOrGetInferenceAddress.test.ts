@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect } from '@jest/globals';
-import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
+import { UserId } from '../../types';
+import { expectToBeDateCloseToNow } from '../../../../__tests__/helpers/expectToBeDateCloseToNow';
+import {
+  _inspectInferenceCoordinatesStoreForUser,
+  clearInferenceCoordinatesStoreForUser,
+  createOrGetInferenceAddress,
+} from './createOrGetInferenceAddress';
 import { InternalAuthBasedEngine } from './V3InternalSettings';
 
 async function sleep(timeout: number) {
@@ -11,16 +17,25 @@ describe('createOrGetInferenceAddress', () => {
   beforeEach(() => {
     callSequenceNumber = 0;
   });
-  const reqConfigSettings = (userId: string) => ({
+  const reqConfigSettings = (
+    userId: string,
+    options: {
+      expirationDiffMs?: number;
+      forcedError?: Error;
+    } = {},
+  ) => ({
     userId,
     apiKey: 'test-api-key',
     experimental: {
       v3: {
         customInferenceCoordinatesGenerator: async (_: InternalAuthBasedEngine, u: string) => {
           await sleep(10); // simulate a delay
+          if (options.forcedError) {
+            throw options.forcedError;
+          }
           return {
             inferenceAddress: `call ${u} #${++callSequenceNumber}`,
-            expiresAtMs: Date.now() + 1_000_000,
+            expiresAtMs: Date.now() + (options.expirationDiffMs ?? 1_000_000),
           };
         },
         coordinatesExpirationMinimalFrequencyMs: 0,
@@ -57,5 +72,31 @@ describe('createOrGetInferenceAddress', () => {
       'call test-user#1 #2',
       'call test-user#2 #3',
     ]);
+  });
+
+  describe('clearInferenceCoordinatesStoreForUser', () => {
+    it('clears the inference coordinates store for the given user', async () => {
+      const userId = 'test-user' as UserId;
+      await createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(userId));
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
+        'Play3.0-mini': {
+          expiresAtMs: expectToBeDateCloseToNow(),
+          inferenceAddress: 'call test-user #1',
+        },
+      });
+      await createOrGetInferenceAddress('PlayDialogArabic', reqConfigSettings(userId));
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
+        'Play3.0-mini': {
+          expiresAtMs: expectToBeDateCloseToNow(),
+          inferenceAddress: 'call test-user #1',
+        },
+        PlayDialogArabic: {
+          expiresAtMs: expectToBeDateCloseToNow(),
+          inferenceAddress: 'call test-user #2',
+        },
+      });
+      clearInferenceCoordinatesStoreForUser(userId);
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({});
+    });
   });
 });
