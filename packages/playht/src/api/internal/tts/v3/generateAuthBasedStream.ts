@@ -4,6 +4,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
+import { SDKSettings } from '../../../APISettingsStore';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 import { InternalAuthBasedEngine } from './V3InternalSettings';
 
@@ -25,22 +26,23 @@ export async function generateAuthBasedStream(
   };
 
   const response = await axios(streamOptions).catch((error: any) => {
-    debugRequest(reqConfig.settings?.debug, inferenceAddress, payloadForEngine, error.response);
+    debugRequest(reqConfig.settings, inferenceAddress, payloadForEngine, error.response);
     return convertError(error);
   });
-  debugRequest(reqConfig.settings?.debug, inferenceAddress, payloadForEngine, response);
+  debugRequest(reqConfig.settings, inferenceAddress, payloadForEngine, response);
   return response.data;
 }
 
 function debugRequest(
-  debug: boolean | undefined,
+  sdkSettings: Partial<SDKSettings> | undefined,
   inferenceAddress: string,
   payloadForEngine: any,
   response: AxiosResponse,
 ) {
+  const debug = sdkSettings?.debug;
   if (debug) {
     console.log(
-      `[PlaySDK] Request - URL: ${inferenceAddress.replace(
+      `[PlaySDK][${sdkSettings?.userId}] Request - URL: ${inferenceAddress.replace(
         /fal_jwt_token=.*/,
         'fal_jwt_token=<redacted>',
       )} - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${
