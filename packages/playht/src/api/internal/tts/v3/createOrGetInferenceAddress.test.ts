@@ -38,7 +38,6 @@ describe('createOrGetInferenceAddress', () => {
     experimental: {
       v3: {
         customInferenceCoordinatesGenerator: async (_: InternalAuthBasedEngine, u: string) => {
-          console.log('custom', options);
           await sleep(10); // simulate a delay
           if (options.forcedError) {
             throw options.forcedError;
