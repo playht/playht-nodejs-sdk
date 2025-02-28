@@ -38,6 +38,7 @@ describe('createOrGetInferenceAddress', () => {
         coordinatesExpirationMinimalFrequencyMs: 0,
         coordinatesExpirationAdvanceRefreshTimeMs: 0,
         coordinatesGetApiCallMaxRetries: 0,
+        coordinatesUsableThresholdTimeMs: 56_123,
       },
     },
   });
@@ -94,6 +95,37 @@ describe('createOrGetInferenceAddress', () => {
       });
       clearInferenceCoordinatesStoreForUser(userId);
       expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({});
+    });
+
+    it('honors expiration threshold', async () => {
+      const paddingMs = 2; // typically the time you'd expect these functions to run (1ms is already A LOT!)
+      const userId = 'test-user' as UserId;
+      const r0 = await createOrGetInferenceAddress(
+        'PlayDialog',
+        reqConfigSettings(userId, { expirationDiffMs: -56_123 + paddingMs }),
+      );
+      expect(r0).toBe('call test-user #1'); // first call
+      const r1 = await createOrGetInferenceAddress(
+        'PlayDialog',
+        reqConfigSettings(userId, {
+          forcedError: new Error('should not have been called because previous auth hasnt expired'),
+        }),
+      );
+      expect(r1).toBe('call test-user #1'); // first call, still
+
+      clearInferenceCoordinatesStoreForUser(userId);
+
+      const r2 = await createOrGetInferenceAddress(
+        'PlayDialog',
+        reqConfigSettings(userId, { expirationDiffMs: -56_123 - paddingMs }),
+      );
+      expect(r2).toBe('call test-user #2'); // second call, but token should be expired next
+
+      const r3Promise = createOrGetInferenceAddress(
+        'PlayDialog',
+        reqConfigSettings(userId, { forcedError: new Error('should attempt to refresh and fail') }),
+      );
+      await expect(r3Promise).rejects.toThrow('should attempt to refresh and fail');
     });
   });
 });

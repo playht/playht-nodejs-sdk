@@ -121,7 +121,18 @@ export const createOrGetInferenceAddress = async (
 ): Promise<string> => {
   const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
   const inferenceCoordinatesEntry = inferenceCoordinatesStores[voiceEngine][userId];
-  if (inferenceCoordinatesEntry && inferenceCoordinatesEntry.expiresAtMs >= Date.now() - 5_000) {
+
+  const coordinatesUsableThresholdTimeMs = getSetting(
+    'coordinatesUsableThresholdTimeMs',
+    reqConfigSettings?.experimental?.v3,
+    APISettingsStore.getSettings().experimental?.v3,
+    V3_DEFAULT_SETTINGS,
+  );
+
+  if (
+    inferenceCoordinatesEntry &&
+    inferenceCoordinatesEntry.expiresAtMs >= Date.now() - coordinatesUsableThresholdTimeMs
+  ) {
     return inferenceCoordinatesEntry.inferenceAddress;
   } else {
     if (!(userId in inferenceCoordinatesCreationPromise)) {
