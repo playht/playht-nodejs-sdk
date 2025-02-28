@@ -135,6 +135,10 @@ export const createOrGetInferenceAddress = async (
   ) {
     return inferenceCoordinatesEntry.inferenceAddress;
   } else {
+    // Clear expired entry
+    if (inferenceCoordinatesEntry) {
+      delete inferenceCoordinatesStores[voiceEngine][userId];
+    }
     if (!(userId in inferenceCoordinatesCreationPromise)) {
       inferenceCoordinatesCreationPromise[userId] = createInferenceCoordinates(voiceEngine, reqConfigSettings);
     }
