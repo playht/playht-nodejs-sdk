@@ -15,6 +15,9 @@ export type V3InternalSettings = {
   coordinatesExpirationMinimalFrequencyMs?: number;
   // number of attempts when calling API to get new coordinates
   coordinatesGetApiCallMaxRetries?: number;
+  // Time in ms that we should consider an entry of auth coordinates still usable;
+  // e.g., if we set this to 10_000ms, and the token will expire in 9_000s, we already consider it unusable/expired.
+  coordinatesUsableThresholdTimeMs?: number;
   customInferenceCoordinatesGenerator?: (
     engine: InternalAuthBasedEngine,
     userId: string,
