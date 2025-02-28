@@ -4,6 +4,7 @@ import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { APISettingsStore } from '../../../APISettingsStore';
 import { UserId } from '../../types';
+import { getSetting } from '../../settings/getSetting';
 import { InferenceCoordinatesEntry, InternalAuthBasedEngine, V3InternalSettings } from './V3InternalSettings';
 import { V3_DEFAULT_SETTINGS } from './V3DefaultSettings';
 
