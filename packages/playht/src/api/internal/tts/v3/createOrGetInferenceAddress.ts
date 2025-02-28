@@ -72,6 +72,13 @@ const createInferenceCoordinates = async (
 ): Promise<InferenceCoordinatesEntry> => {
   const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
   const apiKey = reqConfigSettings?.apiKey ?? APISettingsStore.getSettings().apiKey;
+
+  const coordinatesAheadOfTimeAutoRefresh = getSetting(
+    'coordinatesAheadOfTimeAutoRefresh',
+    reqConfigSettings?.experimental?.v3,
+    APISettingsStore.getSettings().experimental?.v3,
+    V3_DEFAULT_SETTINGS,
+  );
   const inferenceCoordinatesGenerator =
     reqConfigSettings?.experimental?.v3?.customInferenceCoordinatesGenerator ??
     APISettingsStore.getSettings().experimental?.v3?.customInferenceCoordinatesGenerator ??
@@ -91,11 +98,13 @@ const createInferenceCoordinates = async (
 
   try {
     const newInferenceCoordinatesEntry = await inferenceCoordinatesGenerator(voiceEngine, userId, apiKey);
-    const automaticRefreshDelay = Math.max(
-      coordinatesExpirationMinimalFrequencyMs,
-      newInferenceCoordinatesEntry.expiresAtMs - Date.now() - coordinatesExpirationAdvanceRefreshTimeMs,
-    );
-    setTimeout(() => createInferenceCoordinates(voiceEngine, reqConfigSettings), automaticRefreshDelay).unref();
+    if (coordinatesAheadOfTimeAutoRefresh) {
+      const automaticRefreshDelay = Math.max(
+        coordinatesExpirationMinimalFrequencyMs,
+        newInferenceCoordinatesEntry.expiresAtMs - Date.now() - coordinatesExpirationAdvanceRefreshTimeMs,
+      );
+      setTimeout(() => createInferenceCoordinates(voiceEngine, reqConfigSettings), automaticRefreshDelay).unref();
+    }
     inferenceCoordinatesStores[voiceEngine][userId] = newInferenceCoordinatesEntry;
     return newInferenceCoordinatesEntry;
   } catch (e) {

@@ -9,6 +9,8 @@ export type PublicAuthBasedEngine = 'Play3.0-mini' | 'PlayDialog';
 export type InternalAuthBasedEngine = PublicAuthBasedEngine | 'PlayDialogArabic' | 'PlayDialogMultilingual';
 
 export type V3InternalSettings = {
+  // If the SDK should automatically try to refresh the coordinates before they expire (default: true)
+  coordinatesAheadOfTimeAutoRefresh?: boolean;
   // how much time before expiration should we refresh the coordinates
   coordinatesExpirationAdvanceRefreshTimeMs?: number;
   // refresh no more frequently than this

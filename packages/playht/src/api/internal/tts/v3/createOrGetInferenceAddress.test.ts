@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect } from '@jest/globals';
 import { UserId } from '../../types';
 import { expectToBeDateCloseToNow } from '../../../../__tests__/helpers/expectToBeDateCloseToNow';
+import { APISettingsStore } from '../../../APISettingsStore';
 import {
   _inspectInferenceCoordinatesStoreForUser,
   clearInferenceCoordinatesStoreForUser,
@@ -13,6 +14,13 @@ async function sleep(timeout: number) {
 }
 
 describe('createOrGetInferenceAddress', () => {
+  beforeAll(() => {
+    // Equivalent to PlayHT.init()
+    APISettingsStore.setSettings({
+      userId: 'not-used',
+      apiKey: 'not-used',
+    });
+  });
   let callSequenceNumber: number;
   beforeEach(() => {
     callSequenceNumber = 0;
@@ -22,6 +30,7 @@ describe('createOrGetInferenceAddress', () => {
     options: {
       expirationDiffMs?: number;
       forcedError?: Error;
+      coordinatesAheadOfTimeAutoRefresh?: boolean;
     } = {},
   ) => ({
     userId,
@@ -29,6 +38,7 @@ describe('createOrGetInferenceAddress', () => {
     experimental: {
       v3: {
         customInferenceCoordinatesGenerator: async (_: InternalAuthBasedEngine, u: string) => {
+          console.log('custom', options);
           await sleep(10); // simulate a delay
           if (options.forcedError) {
             throw options.forcedError;
@@ -38,6 +48,7 @@ describe('createOrGetInferenceAddress', () => {
             expiresAtMs: Date.now() + (options.expirationDiffMs ?? 1_000_000),
           };
         },
+        coordinatesAheadOfTimeAutoRefresh: options.coordinatesAheadOfTimeAutoRefresh ?? false,
         coordinatesExpirationMinimalFrequencyMs: 0,
         coordinatesExpirationAdvanceRefreshTimeMs: 0,
         coordinatesGetApiCallMaxRetries: 0,
@@ -77,23 +88,23 @@ describe('createOrGetInferenceAddress', () => {
 
   describe('clearInferenceCoordinatesStoreForUser', () => {
     it('clears the inference coordinates store for the given user', async () => {
-      const userId = 'test-user' as UserId;
+      const userId = 'tc-user' as UserId;
       await createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(userId));
       expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
         'Play3.0-mini': {
           expiresAtMs: expectToBeDateCloseToNow(),
-          inferenceAddress: 'call test-user #1',
+          inferenceAddress: 'call tc-user #1',
         },
       });
       await createOrGetInferenceAddress('PlayDialogArabic', reqConfigSettings(userId));
       expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
         'Play3.0-mini': {
           expiresAtMs: expectToBeDateCloseToNow(),
-          inferenceAddress: 'call test-user #1',
+          inferenceAddress: 'call tc-user #1',
         },
         PlayDialogArabic: {
           expiresAtMs: expectToBeDateCloseToNow(),
-          inferenceAddress: 'call test-user #2',
+          inferenceAddress: 'call tc-user #2',
         },
       });
       clearInferenceCoordinatesStoreForUser(userId);
@@ -102,19 +113,25 @@ describe('createOrGetInferenceAddress', () => {
 
     it('honors expiration threshold', async () => {
       const paddingMs = 2; // typically the time you'd expect these functions to run (1ms is already A LOT!)
-      const userId = 'test-user' as UserId;
+      const userId = 'threshold-user' as UserId;
       const r0 = await createOrGetInferenceAddress(
         'PlayDialog',
         reqConfigSettings(userId, { expirationDiffMs: -56_123 + paddingMs }),
       );
-      expect(r0).toBe('call test-user #1'); // first call
+      expect(r0).toBe('call threshold-user #1'); // first call
       const r1 = await createOrGetInferenceAddress(
         'PlayDialog',
         reqConfigSettings(userId, {
           forcedError: new Error('should not have been called because previous auth hasnt expired'),
         }),
       );
-      expect(r1).toBe('call test-user #1'); // first call, still
+      expect(r1).toBe('call threshold-user #1'); // first call, still
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
+        PlayDialog: {
+          expiresAtMs: expectToBeDateCloseToNow(56_123 + paddingMs),
+          inferenceAddress: 'call threshold-user #1',
+        },
+      });
 
       clearInferenceCoordinatesStoreForUser(userId);
 
@@ -122,13 +139,34 @@ describe('createOrGetInferenceAddress', () => {
         'PlayDialog',
         reqConfigSettings(userId, { expirationDiffMs: -56_123 - paddingMs }),
       );
-      expect(r2).toBe('call test-user #2'); // second call, but token should be expired next
+      expect(r2).toBe('call threshold-user #2'); // second call, but token should be expired next
 
       const r3Promise = createOrGetInferenceAddress(
         'PlayDialog',
         reqConfigSettings(userId, { forcedError: new Error('should attempt to refresh and fail') }),
       );
       await expect(r3Promise).rejects.toThrow('should attempt to refresh and fail');
+      // attempt above, which found the token expired, should have cleared the store
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({});
+    });
+
+    it('refreshes ahead of time', async () => {
+      const paddingMs = 2; // typically the time you'd expect these functions to run (1ms is already A LOT!)
+      const userId = 'ahead-user' as UserId;
+      const r0 = await createOrGetInferenceAddress(
+        'PlayDialog',
+        // notice that this generates a token that will be VERY EXPIRED :D
+        reqConfigSettings(userId, { expirationDiffMs: -999999 + paddingMs, coordinatesAheadOfTimeAutoRefresh: true }),
+      );
+      expect(r0).toBe('call ahead-user #1'); // first call
+      await sleep(20); // leave some time for the auto-refresh interval to kick in
+      // now verify that the inference address has changed on its own, even though we never called createOrGetInferenceAddress ourselves
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
+        PlayDialog: {
+          expiresAtMs: expectToBeDateCloseToNow(9999999),
+          inferenceAddress: 'call ahead-user #2',
+        },
+      });
     });
   });
 });
