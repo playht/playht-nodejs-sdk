@@ -629,27 +629,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grpc/grpc-js@npm:^1.9.4":
-  version: 1.9.4
-  resolution: "@grpc/grpc-js@npm:1.9.4"
+"@grpc/grpc-js@npm:^1.13.0":
+  version: 1.13.0
+  resolution: "@grpc/grpc-js@npm:1.13.0"
   dependencies:
-    "@grpc/proto-loader": ^0.7.8
-    "@types/node": ">=12.12.47"
-  checksum: 83616d3727f16d9caf57fb16f8525e6884856569624a244ef8dde2873b7d7a439d302fd0a82d28bbbf9ba9777d3b25a58c706e35daa30120abb04f1646aa0e11
+    "@grpc/proto-loader": ^0.7.13
+    "@js-sdsl/ordered-map": ^4.4.2
+  checksum: 5153924bd9a995c6a820fb5a5d439cb4258a83cc92b9cca6c896d5f909dea99a8fa4ca63a036dea96657fbfd4a17727e8e3be88ce2530da908e73667f5fa2db7
   languageName: node
   linkType: hard
 
-"@grpc/proto-loader@npm:^0.7.8":
-  version: 0.7.10
-  resolution: "@grpc/proto-loader@npm:0.7.10"
+"@grpc/proto-loader@npm:^0.7.13":
+  version: 0.7.13
+  resolution: "@grpc/proto-loader@npm:0.7.13"
   dependencies:
     lodash.camelcase: ^4.3.0
     long: ^5.0.0
-    protobufjs: ^7.2.4
+    protobufjs: ^7.2.5
     yargs: ^17.7.2
   bin:
     proto-loader-gen-types: build/bin/proto-loader-gen-types.js
-  checksum: 4987e23b57942c2363b6a6a106e63efae636666cefa348778dfafef2ff72da7343c8587667521cb1d52482827bcd001dd535bdc27065110af56d9c7c176334c9
+  checksum: 399c1b8a4627f93dc31660d9636ea6bf58be5675cc7581e3df56a249369e5be02c6cd0d642c5332b0d5673bc8621619bc06fb045aa3e8f57383737b5d35930dc
   languageName: node
   linkType: hard
 
@@ -1003,6 +1003,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@js-sdsl/ordered-map@npm:^4.4.2":
+  version: 4.4.2
+  resolution: "@js-sdsl/ordered-map@npm:4.4.2"
+  checksum: a927ae4ff8565ecb75355cc6886a4f8fadbf2af1268143c96c0cce3ba01261d241c3f4ba77f21f3f017a00f91dfe9e0673e95f830255945c80a0e96c6d30508a
+  languageName: node
+  linkType: hard
+
 "@jsdoc/salty@npm:^0.2.1":
   version: 0.2.5
   resolution: "@jsdoc/salty@npm:0.2.5"
@@ -1325,7 +1332,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:>=12.12.47, @types/node@npm:>=13.7.0":
+"@types/node@npm:>=13.7.0":
   version: 20.7.2
   resolution: "@types/node@npm:20.7.2"
   checksum: 5baa09368c8daa50ad1eaa2499b988b2f4c06cacf8b251d1e63f68ad32df97b21d8104f1ac06889481f1d3e84056842732bb848dd1136164d823c1d4a6baf435
@@ -1763,14 +1770,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.4.0":
-  version: 1.5.0
-  resolution: "axios@npm:1.5.0"
+"axios@npm:^1.8.3":
+  version: 1.8.3
+  resolution: "axios@npm:1.8.3"
   dependencies:
-    follow-redirects: ^1.15.0
+    follow-redirects: ^1.15.6
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
-  checksum: e7405a5dbbea97760d0e6cd58fecba311b0401ddb4a8efbc4108f5537da9b3f278bde566deb777935a960beec4fa18e7b8353881f2f465e4f2c0e949fead35be
+  checksum: 85fc8ad7d968e43ea9da5513310637d29654b181411012ee14cc0a4b3662782e6c81ac25eea40b5684f86ed2d8a01fa6fc20b9b48c4da14ef4eaee848fea43bc
   languageName: node
   linkType: hard
 
@@ -2984,13 +2991,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.0":
-  version: 1.15.2
-  resolution: "follow-redirects@npm:1.15.2"
+"follow-redirects@npm:^1.15.6":
+  version: 1.15.9
+  resolution: "follow-redirects@npm:1.15.9"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: faa66059b66358ba65c234c2f2a37fcec029dc22775f35d9ad6abac56003268baf41e55f9ee645957b32c7d9f62baf1f0b906e68267276f54ec4b4c597c2b190
+  checksum: 859e2bacc7a54506f2bf9aacb10d165df78c8c1b0ceb8023f966621b233717dab56e8d08baadc3ad3b9db58af290413d585c999694b7c146aaf2616340c3d2a6
   languageName: node
   linkType: hard
 
@@ -5220,13 +5227,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "playht@workspace:."
   dependencies:
-    "@grpc/grpc-js": ^1.9.4
+    "@grpc/grpc-js": ^1.13.0
     "@jest/globals": ^29.7.0
     "@types/jest": ^29.5.14
     "@types/node": ^20.5.4
     "@typescript-eslint/eslint-plugin": ^6.4.1
     "@typescript-eslint/parser": ^6.4.1
-    axios: ^1.4.0
+    axios: ^1.8.3
     cross-fetch: ^4.0.0
     dotenv: ^16.4.5
     esbuild: ^0.19.2
@@ -5334,7 +5341,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:^7.2.4, protobufjs@npm:^7.2.5":
+"protobufjs@npm:^7.2.5":
   version: 7.2.5
   resolution: "protobufjs@npm:7.2.5"
   dependencies:

@@ -1,6 +1,6 @@
 {
   "name": "playht",
-  "version": "0.16.0",
+  "version": "0.17.0-beta.1",
   "description": "NodeJS SDK for PlayHT generative AI text-to-speech APIs",
   "files": [
     "dist/**/*",
@@ -22,7 +22,7 @@
     "verify": "yarn check && yarn test",
     "check": "yarn build:protobufs && tsc -p tsconfig.json --noEmit && prettier --check . && eslint --ext .ts ./src",
     "release": "yarn && yarn verify && yarn build && cp ../../README.md . && npm publish || true && rm README.md",
-    "release-alpha": "yarn && yarn verify && yarn build && cp ../../README.md . && npm publish --tag=alpha || true && rm README.md",
+    "release-alpha": "yarn && yarn verify && yarn build && cp ../../README.md . && npm publish --tag=beta || true && rm README.md",
     "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push --tags"
   },
   "devDependencies": {
@@ -46,8 +46,8 @@
   },
   "packageManager": "yarn@3.6.2",
   "dependencies": {
-    "@grpc/grpc-js": "^1.9.4",
-    "axios": "^1.4.0",
+    "@grpc/grpc-js": "^1.13.0",
+    "axios": "^1.8.3",
     "cross-fetch": "^4.0.0",
     "file-type": "^18.5.0",
     "protobufjs": "^7.2.5",
