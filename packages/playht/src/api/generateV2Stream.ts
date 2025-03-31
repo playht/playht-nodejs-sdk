@@ -17,14 +17,13 @@ export async function generateV2Stream(
   const outputFormat = options?.outputFormat || 'mp3';
   const accept = outputFormat === 'mp3' ? 'audio/mpeg' : 'audio/basic';
 
-  console.log('USING V2 API');
   const data = {
     text,
     voice_engine: options?.voiceEngine,
     ...(options?.voiceEngine === 'PlayDialog-turbo'
       ? {
           voice: mapPlayDialogTurboVoice(options?.voiceId),
-          language: options?.language || 'english',
+          language: options?.language,
         }
       : {
           voice,
