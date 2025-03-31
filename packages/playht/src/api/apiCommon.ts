@@ -1,15 +1,15 @@
 import type {
-  SpeechOptions,
-  SpeechStreamOptions,
-  SpeechOutput,
-  OutputQuality,
   Emotion,
-  VoiceEngine,
+  OutputFormat,
+  OutputQuality,
+  Play30EngineStreamOptions,
+  PlayDialogEngineStreamOptions,
   PlayHT10OutputStreamFormat,
   PlayHT20OutputStreamFormat,
-  Play30EngineStreamOptions,
-  OutputFormat,
-  PlayDialogEngineStreamOptions,
+  SpeechOptions,
+  SpeechOutput,
+  SpeechStreamOptions,
+  VoiceEngine,
 } from '..';
 import { PassThrough, Readable, Writable } from 'node:stream';
 import { APISettingsStore } from './APISettingsStore';
@@ -21,6 +21,7 @@ import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
 import { generateAuthBasedStream } from './internal/tts/v3/generateAuthBasedStream';
 import { PlayRequestConfig } from './internal/config/PlayRequestConfig';
+import { isPlayDialogTurboSupportedCall } from './internal/tts/dialog-turbo/isPlayDialogTurboSupportedCall';
 
 export type V1ApiOptions = {
   narrationStyle?: string;
@@ -48,7 +49,7 @@ export type AuthBasedEngineOptions = Play30EngineStreamOptions | PlayDialogEngin
 
 type Preset = 'real-time' | 'balanced' | 'low-latency' | 'high-quality';
 
-type SpeechOptionsWithVoiceID = (SpeechStreamOptions | SpeechOptions) & { voiceId: string };
+export type SpeechOptionsWithVoiceID = (SpeechStreamOptions | SpeechOptions) & { voiceId: string };
 
 export async function commonGenerateSpeech(input: string, optionsInput?: SpeechOptions): Promise<SpeechOutput> {
   const options = addDefaultOptions(optionsInput);
@@ -105,8 +106,13 @@ export async function internalGenerateStreamFromString(
       return await generateGRpcStream(input, options.voiceId, v2Options);
     }
     case 'Play3.0-mini':
-    case 'PlayDialog': {
-      return await generateAuthBasedStream(input, options.voiceId, options, reqConfig);
+    case 'PlayDialog':
+    case 'PlayDialog-turbo': {
+      if (isPlayDialogTurboSupportedCall(options)) {
+        return await generateV2Stream(input, options.voiceId, options);
+      } else {
+        return await generateAuthBasedStream(input, options.voiceId, options, reqConfig);
+      }
     }
   }
 }

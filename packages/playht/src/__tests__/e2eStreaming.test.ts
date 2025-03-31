@@ -137,4 +137,27 @@ describe('E2E Streaming', () => {
       expect(audioBuffer.toString('ascii')).toContain('ID3');
     }, 120_000);
   });
+
+  describe('PlayDialog-turbo', () => {
+    it('streams from text', async () => {
+      PlayHT.init({
+        userId: E2E_CONFIG.USER_ID,
+        apiKey: E2E_CONFIG.API_KEY,
+      });
+
+      const p = PlayHT.stream('Hey Turbo', {
+        voiceEngine: 'PlayDialog-turbo',
+        voiceId: 'Celeste-PlayAI',
+        quality: 'high',
+        language: 'english',
+      });
+      const streamFromText = await p;
+
+      const audioBuffer = await buffer(streamFromText);
+      fs.writeFileSync('test-output-PlayDialogTurbo--no-git.wav', audioBuffer); // for debugging
+
+      expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
+      expect(audioBuffer.toString('ascii')).toContain('RIFF\u007F\u007F\u007F\u007FWAVEfmt');
+    }, 120_000);
+  });
 });
