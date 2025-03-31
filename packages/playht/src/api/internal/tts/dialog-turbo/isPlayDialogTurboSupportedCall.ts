@@ -1,5 +1,6 @@
 import type { PlayDialogTurboEngineStreamOptions } from '../../../../index';
 import type { SpeechOptionsWithVoiceID } from '../../../apiCommon';
+import { isPlayDialogTurboVoice } from './PlayDialogTurboVoice';
 
 export function isPlayDialogTurboSupportedCall(
   options: SpeechOptionsWithVoiceID,
@@ -20,5 +21,5 @@ export function isPlayDialogTurboSupportedCall(
     (!options.speed || options.speed === 1) &&
     (!options.outputFormat || options.outputFormat === 'wav');
 
-  return isSupportedLanguage && isNotUsingUnsupportedParam;
+  return isSupportedLanguage && isNotUsingUnsupportedParam && isPlayDialogTurboVoice(options.voiceId);
 }

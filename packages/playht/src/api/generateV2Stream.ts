@@ -5,6 +5,7 @@ import { type PlayDialogTurboEngineStreamOptions } from '../index';
 import { APISettingsStore } from './APISettingsStore';
 import { keepAliveHttpsAgent } from './internal/http';
 import { convertError } from './internal/convertError';
+import { mapPlayDialogTurboVoice } from './internal/tts/dialog-turbo/PlayDialogTurboVoice';
 
 export async function generateV2Stream(
   text: string,
@@ -19,13 +20,14 @@ export async function generateV2Stream(
   console.log('USING V2 API');
   const data = {
     text,
-    voice,
     voice_engine: options?.voiceEngine,
     ...(options?.voiceEngine === 'PlayDialog-turbo'
       ? {
+          voice: mapPlayDialogTurboVoice(options?.voiceId),
           language: options?.language,
         }
       : {
+          voice,
           quality: options?.quality || 'medium',
           output_format: outputFormat,
           speed: options?.speed || 1,
