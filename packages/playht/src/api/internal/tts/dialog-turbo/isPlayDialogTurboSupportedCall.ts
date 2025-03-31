@@ -8,9 +8,14 @@ export function isPlayDialogTurboSupportedCall(
   if (options.voiceEngine === 'PlayDialog-turbo') return true;
   if (options.voiceEngine !== 'PlayDialog') return false;
 
+  if (!isPlayDialogTurboVoice(options.voiceId)) return false;
+
   const isSupportedLanguage = !options.language || options.language === 'english' || options.language === 'arabic';
+  if (!isSupportedLanguage) return false;
+
+  // Is turbo call if none of the unsupported parameters are provided
   // ignored: seed, quality
-  const isNotUsingUnsupportedParam =
+  return (
     !options.sampleRate &&
     !options.temperature &&
     !options.voiceId2 &&
@@ -19,7 +24,6 @@ export function isPlayDialogTurboSupportedCall(
     !options.voiceConditioningSeconds &&
     !options.voiceConditioningSeconds2 &&
     (!options.speed || options.speed === 1) &&
-    (!options.outputFormat || options.outputFormat === 'wav');
-
-  return isSupportedLanguage && isNotUsingUnsupportedParam && isPlayDialogTurboVoice(options.voiceId);
+    (!options.outputFormat || options.outputFormat === 'wav')
+  );
 }
