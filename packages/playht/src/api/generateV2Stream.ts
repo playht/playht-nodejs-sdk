@@ -24,7 +24,7 @@ export async function generateV2Stream(
     ...(options?.voiceEngine === 'PlayDialog-turbo'
       ? {
           voice: mapPlayDialogTurboVoice(options?.voiceId),
-          language: options?.language,
+          language: options?.language || 'english',
         }
       : {
           voice,
