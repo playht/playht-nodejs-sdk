@@ -7,7 +7,8 @@
     "build:all": "yarn build:sdk && yarn build:gpt-example && yarn build:sdk-example",
     "start:sdk-example": "yarn build:sdk && yarn workspace sdk-example start",
     "start:gpt-example": "yarn build:sdk && yarn workspace gpt-example start",
-    "update:toc": "doctoc --title '**Table of Contents**' README.md"
+    "update:toc": "doctoc --title '**Table of Contents**' README.md",
+    "jest": "jest"
   },
   "workspaces": [
     "packages/*"
