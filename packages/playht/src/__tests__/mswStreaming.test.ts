@@ -105,7 +105,7 @@ describe('Streaming (Mocked)', () => {
         'Hey Turbo',
         {
           voiceEngine: 'PlayDialog',
-          voiceId: 'Celeste-PlayAI',
+          voiceId: 's3://voice-cloning-zero-shot/24507c14-c743-4943-80db-a1e16248309a/original/manifest.json', // Celeste
           language: 'english',
         },
         // @ts-expect-error experimental settings are not exposed in the public API
