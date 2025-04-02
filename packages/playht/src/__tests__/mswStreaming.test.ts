@@ -19,7 +19,7 @@ describe('Streaming (Mocked)', () => {
 
       console.log(JSON.stringify(body, null, 2));
 
-      expect(body).toStrictEqual({
+      expect(JSON.parse(JSON.stringify(body))).toStrictEqual({
         text: 'Hey Turbo',
         voice_engine: 'PlayDialog-turbo',
         voice: 'Celeste-PlayAI',
@@ -84,7 +84,6 @@ describe('Streaming (Mocked)', () => {
 
   describe('PlayDialog-turbo', () => {
     it('streams as usual', async () => {
-      // setup:
       PlayHT.init({
         userId: 'mock-user-id',
         apiKey: 'mock-api-key',
@@ -112,6 +111,7 @@ describe('Streaming (Mocked)', () => {
       const audioBuffer = await buffer(streamFromText);
       expect(audioBuffer).toEqual(mockAudioData);
     });
+
     it('streams if PlayDialog and defaultPlayDialogToPlayDialogTurbo have been specified', async () => {
       // setup:
       PlayHT.init({
