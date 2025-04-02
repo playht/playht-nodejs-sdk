@@ -5,13 +5,13 @@ import { http, HttpResponse } from 'msw';
 import * as PlayHT from '../index';
 import { __createLeasesMwsEndpointHandler } from './helpers/leases/createLeasesMswEndpointHandler';
 
-// Mock audio data for tests
+const playDialogAudioResponse = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt playDialogAudioResponse');
 const playDialogTurboAudioResponse = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt playDialogTurboAudioResponse');
 
 describe('Streaming (Mocked)', () => {
   // Set longer timeout for all tests in this file
   jest.setTimeout(30000);
-  
+
   //#region MSW Server
   const server = setupServer(
     __createLeasesMwsEndpointHandler('mock-user-id', 'mock-api-key'),
@@ -28,47 +28,40 @@ describe('Streaming (Mocked)', () => {
 
       return new HttpResponse(playDialogTurboAudioResponse, { headers: { 'Content-Type': 'audio/wav' } });
     }),
-    
-    // Mock the inference server endpoint (returned from sdk-auth)
-    http.post('https://mock-inference-server.play.ht/v1/tts', async ({ request }) => {
-      const body = await request.json() as any;
-      
-      // Verify the request parameters for PlayDialog
-      if (body.text === 'Hey Turbo' && 
-          body.voice_id === 'Celeste-PlayAI') {
-        return new HttpResponse(playDialogTurboAudioResponse, {
-          headers: {
-            'Content-Type': 'audio/wav',
-          },
-        });
-      }
-      
-      // If parameters don't match, return an error
-      return new HttpResponse(JSON.stringify({ error: 'Invalid inference server parameters' }), {
-        status: 400,
+
+    http.post('https://mock-inference-server.play.ht/v1/other/tts/stream', async ({ request }) => {
+      const body = JSON.parse(JSON.stringify(await request.json()));
+
+      expect(body).toStrictEqual({
+        text: 'Hey Turbo',
+        voice_engine: 'PlayDialog',
+        voice: 's3://voice-cloning-zero-shot/24507c14-c743-4943-80db-a1e16248309a/original/manifest.json',
+        language: 'english',
       });
+
+      return new HttpResponse(playDialogAudioResponse, { headers: { 'Content-Type': 'audio/wav' } });
     }),
 
     http.post('https://api.play.ht/api/v4/sdk-auth', async ({ request }) => {
-      expect(request.headers.get('x-user-id')).toBe('mock-user-id');
-      expect(request.headers.get('authorization')).toBe('mock-api-key');
+      expect(request.headers.get('x-user-id')?.toString()).toBe('mock-user-id');
+      expect(request.headers.get('authorization')?.toString()).toBe('Bearer mock-api-key');
 
       return HttpResponse.json({
         PlayDialog: {
-          http_streaming_url: 'https://mock-inference-server.play.ht/v1/tts',
-          websocket_url: 'wss://mock-inference-server.play.ht/v1/tts',
+          http_streaming_url: 'https://mock-inference-server.play.ht/v1/other/tts/stream',
+          websocket_url: 'wss://mock-inference-server.play.ht/v1/other/tts/stream',
         },
         'Play3.0-mini': {
-          http_streaming_url: 'https://mock-inference-server.play.ht/v1/tts',
-          websocket_url: 'wss://mock-inference-server.play.ht/v1/tts',
+          http_streaming_url: 'https://mock-inference-server.play.ht/v1/other/tts/stream',
+          websocket_url: 'wss://mock-inference-server.play.ht/v1/other/tts/stream',
         },
         PlayDialogArabic: {
-          http_streaming_url: 'https://mock-inference-server.play.ht/v1/tts',
-          websocket_url: 'wss://mock-inference-server.play.ht/v1/tts',
+          http_streaming_url: 'https://mock-inference-server.play.ht/v1/other/tts/stream',
+          websocket_url: 'wss://mock-inference-server.play.ht/v1/other/tts/stream',
         },
         PlayDialogMultilingual: {
-          http_streaming_url: 'https://mock-inference-server.play.ht/v1/tts',
-          websocket_url: 'wss://mock-inference-server.play.ht/v1/tts',
+          http_streaming_url: 'https://mock-inference-server.play.ht/v1/other/tts/stream',
+          websocket_url: 'wss://mock-inference-server.play.ht/v1/other/tts/stream',
         },
         expires_at: new Date(new Date().setHours(new Date().getHours() + 1)).toISOString(), // Expires in 1 hour
       });
@@ -149,32 +142,37 @@ describe('Streaming (Mocked)', () => {
   describe('PlayDialog', () => {
     it('streams as PlayDialog if defaultPlayDialogToPlayDialogTurbo have been specified', async () => {
       // setup:
-      PlayHT.init({
-        userId: 'mock-user-id',
-        apiKey: 'mock-api-key',
-      });
+      try {
+        PlayHT.init({
+          userId: 'mock-user-id',
+          apiKey: 'mock-api-key',
+        });
 
-      // execute:
-      const streamFromText = await PlayHT.stream(
-        'Hey Turbo',
-        {
-          voiceEngine: 'PlayDialog',
-          voiceId: 's3://voice-cloning-zero-shot/24507c14-c743-4943-80db-a1e16248309a/original/manifest.json', // Celeste
-          language: 'english',
-        },
-        // @ts-expect-error experimental settings are not exposed in the public API
-        {
-          settings: {
-            experimental: {
-              // defaultPlayDialogToPlayDialogTurbo --> not specified (default)
+        // execute:
+        const streamFromText = await PlayHT.stream(
+          'Hey Turbo',
+          {
+            voiceEngine: 'PlayDialog',
+            voiceId: 's3://voice-cloning-zero-shot/24507c14-c743-4943-80db-a1e16248309a/original/manifest.json', // Celeste
+            language: 'english',
+          },
+          // @ts-expect-error experimental settings are not exposed in the public API
+          {
+            settings: {
+              experimental: {
+                // defaultPlayDialogToPlayDialogTurbo --> not specified (default)
+              },
             },
           },
-        },
-      );
+        );
 
-      // verify:
-      const audioBuffer = await buffer(streamFromText);
-      expect(audioBuffer).toEqual(playDialogTurboAudioResponse);
+        // verify:
+        const audioBuffer = await buffer(streamFromText);
+        expect(audioBuffer).toEqual(playDialogAudioResponse);
+      } catch (e) {
+        console.log(e);
+        throw e;
+      }
     });
   });
 });
