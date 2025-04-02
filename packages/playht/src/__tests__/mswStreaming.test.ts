@@ -1,13 +1,17 @@
 import { buffer } from 'node:stream/consumers';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from '@jest/globals';
+import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
 import * as PlayHT from '../index';
 import { __createLeasesMwsEndpointHandler } from './helpers/leases/createLeasesMswEndpointHandler';
 
+// Mock audio data for tests
 const playDialogTurboAudioResponse = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt playDialogTurboAudioResponse');
 
 describe('Streaming (Mocked)', () => {
+  // Set longer timeout for all tests in this file
+  jest.setTimeout(30000);
+  
   //#region MSW Server
   const server = setupServer(
     __createLeasesMwsEndpointHandler('mock-user-id', 'mock-api-key'),
@@ -23,6 +27,26 @@ describe('Streaming (Mocked)', () => {
       });
 
       return new HttpResponse(playDialogTurboAudioResponse, { headers: { 'Content-Type': 'audio/wav' } });
+    }),
+    
+    // Mock the inference server endpoint (returned from sdk-auth)
+    http.post('https://mock-inference-server.play.ht/v1/tts', async ({ request }) => {
+      const body = await request.json() as any;
+      
+      // Verify the request parameters for PlayDialog
+      if (body.text === 'Hey Turbo' && 
+          body.voice_id === 'Celeste-PlayAI') {
+        return new HttpResponse(playDialogTurboAudioResponse, {
+          headers: {
+            'Content-Type': 'audio/wav',
+          },
+        });
+      }
+      
+      // If parameters don't match, return an error
+      return new HttpResponse(JSON.stringify({ error: 'Invalid inference server parameters' }), {
+        status: 400,
+      });
     }),
 
     http.post('https://api.play.ht/api/v4/sdk-auth', async ({ request }) => {
