@@ -5,8 +5,7 @@ import { http, HttpResponse } from 'msw';
 import * as PlayHT from '../index';
 import { __createLeasesMwsEndpointHandler } from './helpers/leases/createLeasesMswEndpointHandler';
 
-// Mock audio data - this would normally be binary data
-const mockAudioData = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt mock audio data');
+const playDialogTurboAudioResponse = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt playDialogTurboAudioResponse');
 
 describe('Streaming (Mocked)', () => {
   //#region MSW Server
@@ -23,7 +22,7 @@ describe('Streaming (Mocked)', () => {
         language: 'english',
       });
 
-      return new HttpResponse(mockAudioData, { headers: { 'Content-Type': 'audio/wav' } });
+      return new HttpResponse(playDialogTurboAudioResponse, { headers: { 'Content-Type': 'audio/wav' } });
     }),
 
     http.post('https://api.play.ht/api/v4/sdk-auth', async ({ request }) => {
@@ -90,7 +89,7 @@ describe('Streaming (Mocked)', () => {
 
       // verify:
       const audioBuffer = await buffer(streamFromText);
-      expect(audioBuffer).toEqual(mockAudioData);
+      expect(audioBuffer).toEqual(playDialogTurboAudioResponse);
     });
 
     it('streams if PlayDialog and defaultPlayDialogToPlayDialogTurbo have been specified', async () => {
@@ -120,7 +119,38 @@ describe('Streaming (Mocked)', () => {
 
       // verify:
       const audioBuffer = await buffer(streamFromText);
-      expect(audioBuffer).toEqual(mockAudioData);
+      expect(audioBuffer).toEqual(playDialogTurboAudioResponse);
+    });
+  });
+  describe('PlayDialog', () => {
+    it('streams as PlayDialog if defaultPlayDialogToPlayDialogTurbo have been specified', async () => {
+      // setup:
+      PlayHT.init({
+        userId: 'mock-user-id',
+        apiKey: 'mock-api-key',
+      });
+
+      // execute:
+      const streamFromText = await PlayHT.stream(
+        'Hey Turbo',
+        {
+          voiceEngine: 'PlayDialog',
+          voiceId: 's3://voice-cloning-zero-shot/24507c14-c743-4943-80db-a1e16248309a/original/manifest.json', // Celeste
+          language: 'english',
+        },
+        // @ts-expect-error experimental settings are not exposed in the public API
+        {
+          settings: {
+            experimental: {
+              // defaultPlayDialogToPlayDialogTurbo --> not specified (default)
+            },
+          },
+        },
+      );
+
+      // verify:
+      const audioBuffer = await buffer(streamFromText);
+      expect(audioBuffer).toEqual(playDialogTurboAudioResponse);
     });
   });
 });
