@@ -437,12 +437,12 @@ export type PlayDialogEngineStreamOptions = Omit<
   turnPrefix2?: string;
 
   /**
-   * The prompt to be used for the `PlayDialog` model with `voice`.
+   * @deprecated No longer supported.
    */
   prompt?: string;
 
   /**
-   * The prompt to be used for the `PlayDialog` model with `voiceId2`.
+   * @deprecated No longer supported.
    */
   prompt2?: string;
 
@@ -462,6 +462,58 @@ export type PlayDialogEngineStreamOptions = Omit<
 };
 
 /**
+ * The options available for configuring the PlayDialog-turbo voice engine for streaming.
+ */
+export type PlayDialogTurboEngineStreamOptions = Omit<
+  Play30EngineStreamOptions,
+  | 'voiceEngine'
+  | 'outputFormat'
+  | 'seed'
+  | 'sampleRate'
+  | 'temperature'
+  | 'quality'
+  | 'styleGuidance'
+  | 'textGuidance'
+  | 'voiceGuidance'
+  | 'language'
+> & {
+  /**
+   * The identifier for the PlayDialog-turbo voice engine.
+   */
+  voiceEngine: 'PlayDialog-turbo';
+
+  outputFormat?: 'wav';
+} & (
+    | {
+        language: 'arabic';
+        voiceId: 'Nasser-PlayAI' | 'Khalid-PlayAI' | 'Amira-PlayAI' | 'Ahmad-PlayAI';
+      }
+    | {
+        language?: 'english';
+        voiceId:
+          | 'Arista-PlayAI'
+          | 'Atlas-PlayAI'
+          | 'Basil-PlayAI'
+          | 'Briggs-PlayAI'
+          | 'Calum-PlayAI'
+          | 'Celeste-PlayAI'
+          | 'Cheyenne-PlayAI'
+          | 'Chip-PlayAI'
+          | 'Cillian-PlayAI'
+          | 'Deedee-PlayAI'
+          | 'Fritz-PlayAI'
+          | 'Gail-PlayAI'
+          | 'Indigo-PlayAI'
+          | 'Mamaw-PlayAI'
+          | 'Mason-PlayAI'
+          | 'Mikail-PlayAI'
+          | 'Mitch-PlayAI'
+          | 'Quinn-PlayAI'
+          | 'Thunder-PlayAI';
+      }
+  );
+
+/**
  * The options available for configuring speech synthesis, which include shared options combined with engine-specific
  * options.
  */
@@ -474,6 +526,7 @@ export type SpeechOptions = SharedSpeechOptions &
  */
 export type SpeechStreamOptions = SharedSpeechOptions &
   (
+    | PlayDialogTurboEngineStreamOptions
     | PlayDialogEngineStreamOptions
     | Play30EngineStreamOptions
     | PlayHT20EngineStreamOptions
