@@ -111,7 +111,7 @@ export async function internalGenerateStreamFromString(
       if (
         isPlayDialogTurboSupportedCall(options, reqConfig.settings?.experimental?.defaultPlayDialogToPlayDialogTurbo)
       ) {
-        return await generateV2Stream(input, options.voiceId, options);
+        return await generateV2Stream(input, options.voiceId, { ...options, voiceEngine: 'PlayDialog-turbo' });
       } else {
         return await generateAuthBasedStream(input, options.voiceId, options, reqConfig);
       }
