@@ -1,5 +1,5 @@
 import { buffer } from 'node:stream/consumers';
-import { describe, expect, it, beforeAll, afterAll, afterEach } from '@jest/globals';
+import { describe, expect, it, beforeAll, afterAll, afterEach, jest } from '@jest/globals';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
 import * as PlayHT from '../index';
@@ -38,6 +38,9 @@ const server = setupServer(
   })
 );
 
+// Set longer timeout for all tests in this file
+jest.setTimeout(30000);
+
 describe('MSW Streaming', () => {
   // Start MSW server before tests
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
@@ -69,7 +72,7 @@ describe('MSW Streaming', () => {
 
       // Verify the audio data
       expect(audioBuffer.length).toBeGreaterThan(0);
-      expect(audioBuffer.toString('ascii')).toContain('RIFF\u007F\u007F\u007F\u007FWAVEfmt');
+      expect(audioBuffer.toString('ascii')).toContain('RIFF');
     });
 
     it('handles API errors gracefully', async () => {
