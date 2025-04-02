@@ -146,7 +146,7 @@ describe('E2E Streaming', () => {
       });
 
       const p = PlayHT.stream('Hey Turbo', {
-        voiceEngine: 'PlayDialog-turbo',
+        voiceEngine: 'PlayDialog',
         voiceId: 'Celeste-PlayAI',
         quality: 'high',
         language: 'english',

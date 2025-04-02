@@ -4,8 +4,10 @@ import { isPlayDialogTurboVoice } from './PlayDialogTurboVoice';
 
 export function isPlayDialogTurboSupportedCall(
   options: SpeechOptionsWithVoiceID,
+  defaultPlayDialogToPlayDialogTurbo?: boolean,
 ): options is PlayDialogTurboEngineStreamOptions {
   if (options.voiceEngine === 'PlayDialog-turbo') return true;
+  if (!defaultPlayDialogToPlayDialogTurbo) return false;
   if (options.voiceEngine !== 'PlayDialog') return false;
 
   if (!isPlayDialogTurboVoice(options.voiceId)) return false;

@@ -27,7 +27,7 @@ const PLAY_DIALOG_TURBO_VOICES_MAP: { [key: string]: string } = {
 };
 
 export function isPlayDialogTurboVoice(voiceId: string): boolean {
-  return PLAY_DIALOG_TURBO_VOICES_MAP[voiceId] !== undefined;
+  return PLAY_DIALOG_TURBO_VOICES_MAP[voiceId] !== undefined || voiceId?.endsWith('-PlayAI');
 }
 
 export function mapPlayDialogTurboVoice(voiceId: string) {
