@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { __createLease } from '../createLease';
+import { __createLease } from './createLease';
 
 export function __createLeasesMwsEndpointHandler(expectedUserId: string, expectedApiKey: string) {
   return http.post('https://api.play.ht/api/v2/leases', async ({ request }) => {
