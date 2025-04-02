@@ -11,24 +11,23 @@ const mockAudioData = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt mock audi
 const createMockLeaseData = () => {
   // Create a buffer with mock lease data
   const buffer = Buffer.alloc(256);
-  
+
   // Set EPOCH time (current time + 1 hour in seconds since EPOCH)
   const now = Math.floor(Date.now() / 1000);
-  const oneHourLater = now + 3600;
-  
+
   // Write created time at position 64 (4 bytes)
   buffer.writeUInt32BE(now, 64);
-  
+
   // Write duration at position 68 (4 bytes)
   buffer.writeUInt32BE(3600, 68); // 1 hour in seconds
-  
+
   // Write metadata as JSON at position 72
   const metadata = JSON.stringify({
     inference_address: 'mock-inference-server.play.ht:11045',
-    premium_inference_address: 'mock-premium-inference-server.play.ht:11045'
+    premium_inference_address: 'mock-premium-inference-server.play.ht:11045',
   });
   Buffer.from(metadata).copy(buffer, 72);
-  
+
   return buffer;
 };
 
@@ -39,10 +38,12 @@ const server = setupServer(
     const body = (await request.json()) as any;
 
     // Verify request parameters
-    if (body.voiceId === 'Celeste-PlayAI' &&
-        body.voiceEngine === 'PlayDialog' &&
-        body.quality === 'high' &&
-        body.language === 'english') {
+    if (
+      body.voiceId === 'Celeste-PlayAI' &&
+      body.voiceEngine === 'PlayDialog' &&
+      body.quality === 'high' &&
+      body.language === 'english'
+    ) {
       return new HttpResponse(mockAudioData, {
         headers: {
           'Content-Type': 'audio/wav',
@@ -61,7 +62,7 @@ const server = setupServer(
     // Check for auth headers
     const userId = request.headers.get('x-user-id');
     const authHeader = request.headers.get('authorization');
-    
+
     if (userId === 'mock-user-id' && authHeader === 'Bearer mock-api-key') {
       // Return a mock lease binary response
       return new HttpResponse(createMockLeaseData(), {
@@ -70,7 +71,7 @@ const server = setupServer(
         },
       });
     }
-    
+
     // Return error for invalid credentials
     return new HttpResponse(JSON.stringify({ error: 'Invalid credentials' }), {
       status: 401,
@@ -82,33 +83,33 @@ const server = setupServer(
     // Check for auth headers
     const userId = request.headers.get('x-user-id');
     const authHeader = request.headers.get('authorization');
-    
+
     if (userId === 'mock-user-id' && authHeader === 'Bearer mock-api-key') {
       // Return a mock response with inference addresses
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 1); // Expires in 1 hour
-      
+
       return HttpResponse.json({
-        'PlayDialog': {
-          'http_streaming_url': 'https://mock-inference-server.play.ht/v1/tts',
-          'websocket_url': 'wss://mock-inference-server.play.ht/v1/tts'
+        PlayDialog: {
+          http_streaming_url: 'https://mock-inference-server.play.ht/v1/tts',
+          websocket_url: 'wss://mock-inference-server.play.ht/v1/tts',
         },
         'Play3.0-mini': {
-          'http_streaming_url': 'https://mock-inference-server.play.ht/v1/tts',
-          'websocket_url': 'wss://mock-inference-server.play.ht/v1/tts'
+          http_streaming_url: 'https://mock-inference-server.play.ht/v1/tts',
+          websocket_url: 'wss://mock-inference-server.play.ht/v1/tts',
         },
-        'PlayDialogArabic': {
-          'http_streaming_url': 'https://mock-inference-server.play.ht/v1/tts',
-          'websocket_url': 'wss://mock-inference-server.play.ht/v1/tts'
+        PlayDialogArabic: {
+          http_streaming_url: 'https://mock-inference-server.play.ht/v1/tts',
+          websocket_url: 'wss://mock-inference-server.play.ht/v1/tts',
         },
-        'PlayDialogMultilingual': {
-          'http_streaming_url': 'https://mock-inference-server.play.ht/v1/tts',
-          'websocket_url': 'wss://mock-inference-server.play.ht/v1/tts'
+        PlayDialogMultilingual: {
+          http_streaming_url: 'https://mock-inference-server.play.ht/v1/tts',
+          websocket_url: 'wss://mock-inference-server.play.ht/v1/tts',
         },
-        'expires_at': expiresAt.toISOString()
+        expires_at: expiresAt.toISOString(),
       });
     }
-    
+
     // Return error for invalid credentials
     return new HttpResponse(JSON.stringify({ error: 'Invalid credentials' }), {
       status: 401,
@@ -119,10 +120,10 @@ const server = setupServer(
   http.all('*', async ({ request }) => {
     console.error(`Unhandled ${request.method} request to ${request.url}`);
     return HttpResponse.error();
-  })
+  }),
 );
 
-describe('MSW Streaming', () => {
+describe('Streaming (Mocked)', () => {
   // Start MSW server before tests
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 
@@ -163,12 +164,14 @@ describe('MSW Streaming', () => {
       });
 
       // Use incorrect parameters to trigger an error
-      await expect(PlayHT.stream('Hey Turbo', {
-        voiceEngine: 'PlayDialog',
-        voiceId: 'Wrong-Voice-ID',
-        quality: 'high',
-        language: 'english',
-      })).rejects.toThrow();
+      await expect(
+        PlayHT.stream('Hey Turbo', {
+          voiceEngine: 'PlayDialog',
+          voiceId: 'Wrong-Voice-ID',
+          quality: 'high',
+          language: 'english',
+        }),
+      ).rejects.toThrow();
     });
   });
 });
