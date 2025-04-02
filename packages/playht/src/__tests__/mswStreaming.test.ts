@@ -1,5 +1,5 @@
 import { buffer } from 'node:stream/consumers';
-import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from '@jest/globals';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from '@jest/globals';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
 import * as PlayHT from '../index';
