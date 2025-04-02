@@ -6,4 +6,5 @@ import { V3InternalSettings } from '../tts/v3/V3InternalSettings';
  */
 export type ExperimentalSettings = {
   v3?: V3InternalSettings;
+  defaultPlayDialogToPlayDialogTurbo?: boolean;
 };
