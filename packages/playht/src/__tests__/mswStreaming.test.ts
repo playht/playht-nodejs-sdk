@@ -9,9 +9,6 @@ const playDialogAudioResponse = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt
 const playDialogTurboAudioResponse = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt playDialogTurboAudioResponse');
 
 describe('Streaming (Mocked)', () => {
-  // Set longer timeout for all tests in this file
-  jest.setTimeout(30000);
-
   //#region MSW Server
   const server = setupServer(
     __createLeasesMwsEndpointHandler('mock-user-id', 'mock-api-key'),
