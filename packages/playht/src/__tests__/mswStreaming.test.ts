@@ -7,6 +7,31 @@ import * as PlayHT from '../index';
 // Mock audio data - this would normally be binary data
 const mockAudioData = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt mock audio data');
 
+// Create mock lease data
+const createMockLeaseData = () => {
+  // Create a buffer with mock lease data
+  const buffer = Buffer.alloc(256);
+  
+  // Set EPOCH time (current time + 1 hour in seconds since EPOCH)
+  const now = Math.floor(Date.now() / 1000);
+  const oneHourLater = now + 3600;
+  
+  // Write created time at position 64 (4 bytes)
+  buffer.writeUInt32BE(now, 64);
+  
+  // Write duration at position 68 (4 bytes)
+  buffer.writeUInt32BE(3600, 68); // 1 hour in seconds
+  
+  // Write metadata as JSON at position 72
+  const metadata = JSON.stringify({
+    inference_address: 'mock-inference-server.play.ht:11045',
+    premium_inference_address: 'mock-premium-inference-server.play.ht:11045'
+  });
+  Buffer.from(metadata).copy(buffer, 72);
+  
+  return buffer;
+};
+
 // Set up MSW server
 const server = setupServer(
   // Mock the PlayDialog-turbo API endpoint
@@ -28,6 +53,27 @@ const server = setupServer(
     // If parameters don't match, return an error
     return new HttpResponse(JSON.stringify({ error: 'Invalid parameters' }), {
       status: 400,
+    });
+  }),
+
+  // Mock the leases endpoint
+  http.post('https://api.play.ht/api/v2/leases', async ({ request }) => {
+    // Check for auth headers
+    const userId = request.headers.get('x-user-id');
+    const authHeader = request.headers.get('authorization');
+    
+    if (userId === 'mock-user-id' && authHeader === 'Bearer mock-api-key') {
+      // Return a mock lease binary response
+      return new HttpResponse(createMockLeaseData(), {
+        headers: {
+          'Content-Type': 'application/octet-stream',
+        },
+      });
+    }
+    
+    // Return error for invalid credentials
+    return new HttpResponse(JSON.stringify({ error: 'Invalid credentials' }), {
+      status: 401,
     });
   }),
 
