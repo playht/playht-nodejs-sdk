@@ -31,8 +31,43 @@ const server = setupServer(
     });
   }),
 
-  // "https://api.play.ht/api/v2/leases"
-  // "https://api.play.ht/api/v4/sdk-auth"
+  // Mock the SDK auth endpoint
+  http.post('https://api.play.ht/api/v4/sdk-auth', async ({ request }) => {
+    // Check for auth headers
+    const userId = request.headers.get('x-user-id');
+    const authHeader = request.headers.get('authorization');
+    
+    if (userId === 'mock-user-id' && authHeader === 'Bearer mock-api-key') {
+      // Return a mock response with inference addresses
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 1); // Expires in 1 hour
+      
+      return HttpResponse.json({
+        'PlayDialog': {
+          'http_streaming_url': 'https://mock-inference-server.play.ht/v1/tts',
+          'websocket_url': 'wss://mock-inference-server.play.ht/v1/tts'
+        },
+        'Play3.0-mini': {
+          'http_streaming_url': 'https://mock-inference-server.play.ht/v1/tts',
+          'websocket_url': 'wss://mock-inference-server.play.ht/v1/tts'
+        },
+        'PlayDialogArabic': {
+          'http_streaming_url': 'https://mock-inference-server.play.ht/v1/tts',
+          'websocket_url': 'wss://mock-inference-server.play.ht/v1/tts'
+        },
+        'PlayDialogMultilingual': {
+          'http_streaming_url': 'https://mock-inference-server.play.ht/v1/tts',
+          'websocket_url': 'wss://mock-inference-server.play.ht/v1/tts'
+        },
+        'expires_at': expiresAt.toISOString()
+      });
+    }
+    
+    // Return error for invalid credentials
+    return new HttpResponse(JSON.stringify({ error: 'Invalid credentials' }), {
+      status: 401,
+    });
+  }),
 
   // Catch-all handler for any unhandled requests
   http.all('*', async ({ request }) => {
