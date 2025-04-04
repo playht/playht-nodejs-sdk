@@ -19,6 +19,15 @@ const PLAY_DIALOG_TURBO_VOICES_MAP: { [key: string]: string } = {
   's3://voice-cloning-zero-shot/c14e50f2-c5e3-47d1-8c45-fa4b67803d19/original/manifest.json': 'Mitch-PlayAI',
   's3://voice-cloning-zero-shot/e53b50b7-142b-4d66-922f-1d6410832489/original/manifest.json': 'Quinn-PlayAI',
   's3://voice-cloning-zero-shot/Thunder_-____-____-____-____________/original/manifest.json': 'Thunder-PlayAI',
+  // New English voices
+  's3://voice-cloning-zero-shot/aaliyah-playdialog/original/manifest.json': 'Aaliyah-PlayAI',
+  's3://voice-cloning-zero-shot/adelaide-playdialog/original/manifest.json': 'Adelaide-PlayAI',
+  's3://voice-cloning-zero-shot/angelo-playdialog/original/manifest.json': 'Angelo-PlayAI',
+  's3://voice-cloning-zero-shot/eleanor-playdialog/original/manifest.json': 'Eleanor-PlayAI',
+  's3://voice-cloning-zero-shot/jennifer-playdialog/original/manifest.json': 'Jennifer-PlayAI',
+  's3://voice-cloning-zero-shot/judy-playdialog/original/manifest.json': 'Judy-PlayAI',
+  's3://voice-cloning-zero-shot/nia-playdialog/original/manifest.json': 'Nia-PlayAI',
+  's3://voice-cloning-zero-shot/ruby-playdialog/original/manifest.json': 'Ruby-PlayAI',
   // Arabic voices
   's3://voice-cloning-zero-shot/Nasser__-____-____-____-____________/original/manifest.json': 'Nasser-PlayAI',
   's3://voice-cloning-zero-shot/61FkRDykpefFibpqCMEHl/khalid-arabic/manifest.json': 'Khalid-PlayAI',

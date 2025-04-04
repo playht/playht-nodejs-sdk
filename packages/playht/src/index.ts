@@ -491,6 +491,9 @@ export type PlayDialogTurboEngineStreamOptions = Omit<
     | {
         language?: 'english';
         voiceId:
+          | 'Aaliyah-PlayAI'
+          | 'Adelaide-PlayAI'
+          | 'Angelo-PlayAI'
           | 'Arista-PlayAI'
           | 'Atlas-PlayAI'
           | 'Basil-PlayAI'
@@ -501,14 +504,19 @@ export type PlayDialogTurboEngineStreamOptions = Omit<
           | 'Chip-PlayAI'
           | 'Cillian-PlayAI'
           | 'Deedee-PlayAI'
+          | 'Eleanor-PlayAI'
           | 'Fritz-PlayAI'
           | 'Gail-PlayAI'
           | 'Indigo-PlayAI'
+          | 'Jennifer-PlayAI'
+          | 'Judy-PlayAI'
           | 'Mamaw-PlayAI'
           | 'Mason-PlayAI'
           | 'Mikail-PlayAI'
           | 'Mitch-PlayAI'
+          | 'Nia-PlayAI'
           | 'Quinn-PlayAI'
+          | 'Ruby-PlayAI'
           | 'Thunder-PlayAI';
       }
   );
