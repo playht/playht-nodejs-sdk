@@ -600,9 +600,18 @@ export type APISettingsInput = {
   fallbackEnabled?: boolean;
 
   /**
-   * Turn on debug mode to see additional logs.
+   * Additional settings for debugging purposes.
    */
-  debug?: boolean;
+  debug?: {
+    /**
+     * Whether to enable debugging features.
+     */
+    enabled: boolean;
+    /**
+     * A function to log debug messages. Defaults to console.log.
+     */
+    log?: (message: string) => void;
+  };
 };
 
 /**

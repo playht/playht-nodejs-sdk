@@ -31,7 +31,9 @@ describe('E2E Streaming', () => {
       PlayHT.init({
         userId: E2E_CONFIG.USER_ID,
         apiKey: E2E_CONFIG.API_KEY,
-        debug: true,
+        debug: {
+          enabled: true,
+        },
       });
 
       const streamFromText = await PlayHT.stream('Hello from SDK test.', {
@@ -55,7 +57,9 @@ describe('E2E Streaming', () => {
       PlayHT.init({
         userId: E2E_CONFIG.USER_ID,
         apiKey: E2E_CONFIG.API_KEY,
-        debug: true,
+        debug: {
+          enabled: true,
+        },
       });
 
       const streamFromText = await PlayHT.stream('Host 1: Is this the SDK?\nHost 2: Yes, it is.', {
@@ -86,7 +90,9 @@ describe('E2E Streaming', () => {
       PlayHT.init({
         userId: E2E_CONFIG.USER_ID,
         apiKey: E2E_CONFIG.API_KEY,
-        debug: true,
+        debug: {
+          enabled: true,
+        },
       });
 
       const streamFromText = await PlayHT.stream('Host 1: هل هذا هو SDK؟\nHost 2: نعم، هو.', {
@@ -113,7 +119,9 @@ describe('E2E Streaming', () => {
       PlayHT.init({
         userId: E2E_CONFIG.USER_ID,
         apiKey: E2E_CONFIG.API_KEY,
-        debug: true,
+        debug: {
+          enabled: true,
+        },
       });
 
       const streamFromText = await PlayHT.stream(
