@@ -1,9 +1,6 @@
 import { SDKSettings } from '../../APISettingsStore';
 
-export function debugLog(
-  sdkSettings: Partial<SDKSettings> | undefined,
-  message: string,
-) {
+export function debugLog(sdkSettings: Partial<SDKSettings> | undefined, message: string) {
   const debug = sdkSettings?.debug;
   if (!debug?.enabled) return;
 

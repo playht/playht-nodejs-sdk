@@ -40,15 +40,15 @@ function debugRequest(
   payloadForEngine: any,
   response: AxiosResponse,
 ) {
-    debugLog(
-      sdkSettings,
-      `Request - URL: ${inferenceAddress.replace(
-        /fal_jwt_token=.*/,
-        'fal_jwt_token=<redacted>',
-      )} - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${
-        response.headers['x-fal-request-id']
-      } - Status: ${response.status}`,
-    );
+  debugLog(
+    sdkSettings,
+    `Request - URL: ${inferenceAddress.replace(
+      /fal_jwt_token=.*/,
+      'fal_jwt_token=<redacted>',
+    )} - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${response.headers['x-fal-request-id']} - Status: ${
+      response.status
+    }`,
+  );
 }
 
 const createPayloadForEngine = (
