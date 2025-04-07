@@ -1,6 +1,6 @@
 import { SDKSettings } from '../../APISettingsStore';
 
 export type PlayRequestConfig = {
-  settings?: Partial<SDKSettings>;
+  settings: SDKSettings;
   signal?: AbortSignal;
 };

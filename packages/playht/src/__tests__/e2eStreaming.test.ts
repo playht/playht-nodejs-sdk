@@ -1,10 +1,55 @@
 import { buffer } from 'node:stream/consumers';
 import fs from 'node:fs';
+import { Readable } from 'stream';
 import { describe, expect, it } from '@jest/globals';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as PlayHT from '../index';
+import { SDKSettings } from '../api/APISettingsStore';
 import { E2E_CONFIG } from './e2eTestConfig';
 
-describe('E2E Streaming', () => {
+describe('E2E', () => {
+  describe('tts streaming', () => {
+    describe('Standard', () => {
+      it('streams from text', async () => {
+        PlayHT.init({
+          userId: E2E_CONFIG.USER_ID,
+          apiKey: E2E_CONFIG.API_KEY,
+        });
+
+        const streamFromText = await PlayHT.stream('Hello from SDK test, standard.', {
+          voiceEngine: 'Standard',
+          voiceId: 'en-US-JennyNeural',
+        });
+
+        const audioBuffer = await buffer(streamFromText);
+        fs.writeFileSync('test-output-Standard--no-git.mp3', audioBuffer); // for debugging
+
+        expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
+        expect(audioBuffer.toString('ascii')).toContain('ID3');
+      }, 120_000);
+    });
+
+    describe('PlayHT1.0', () => {
+      it('streams from text', async () => {
+        PlayHT.init({
+          userId: E2E_CONFIG.USER_ID,
+          apiKey: E2E_CONFIG.API_KEY,
+        });
+
+        const streamFromText = await PlayHT.stream('Hello from SDK test, one point oh.', {
+          voiceEngine: 'PlayHT1.0',
+          outputFormat: 'mp3',
+        });
+
+        const audioBuffer = await buffer(streamFromText);
+        fs.writeFileSync('test-output-PlayHT1.0--no-git.mp3', audioBuffer); // for debugging
+
+        expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
+        expect(audioBuffer.toString('ascii')).toContain('ID3');
+      });
+    });
+  });
+
   xdescribe('PlayHT2.0-turbo [DOESNT WORK, BUT HERE FOR TYPE CHECKS]', () => {
     it('streams from text', async () => {
       PlayHT.init({
@@ -171,5 +216,63 @@ describe('E2E Streaming', () => {
       expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
       expect(audioBuffer.toString('ascii')).toContain('RIFF\u007F\u007F\u007F\u007FWAVEfmt');
     }, 120_000);
+  });
+
+  describe('Advanced Config', () => {
+    describe('axiosClient', () => {
+      it('overwrites default axios client for streaming requests', async () => {
+        try {
+          PlayHT.init({
+            userId: E2E_CONFIG.USER_ID,
+            apiKey: E2E_CONFIG.API_KEY,
+          });
+          const audioResponse = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt axiosAudioResponse');
+          const settings: Partial<SDKSettings> = {
+            advanced: {
+              axiosClient: (async (input: AxiosRequestConfig) => {
+                expect(input.headers).toStrictEqual({
+                  accept: 'audio/mpeg',
+                  'content-type': 'application/json',
+                  AUTHORIZATION: E2E_CONFIG.API_KEY,
+                  'X-USER-ID': E2E_CONFIG.USER_ID,
+                });
+
+                expect(input.data).toStrictEqual({
+                  text: 'Hey Turbo',
+                  voice_engine: 'PlayHT1.0',
+                  voice: 's3://voice-cloning-zero-shot/some-voice-afw59j/manifest.json',
+                  quality: 'high',
+                  output_format: 'mp3',
+                  speed: 1,
+                  sample_rate: 24000,
+                });
+
+                return {
+                  data: Readable.from(audioResponse),
+                } as AxiosResponse<any>;
+              }) as typeof axios,
+            },
+          };
+          const p = PlayHT.stream(
+            'Hey Turbo',
+            {
+              voiceEngine: 'PlayHT1.0',
+              voiceId: 's3://voice-cloning-zero-shot/some-voice-afw59j/manifest.json',
+              quality: 'high',
+              language: 'english',
+            },
+            // @ts-expect-error experimental settings are not exposed in the public API
+            settings,
+          );
+          const streamFromText = await p;
+
+          const audioBuffer = await buffer(streamFromText);
+          expect(audioBuffer).toStrictEqual(audioResponse);
+        } catch (e) {
+          console.log(e);
+          throw e;
+        }
+      });
+    });
   });
 });

@@ -1,3 +1,5 @@
+import axios from 'axios';
+import deepmerge from 'deepmerge';
 import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
@@ -599,6 +601,18 @@ export type APISettingsInput = {
    */
   fallbackEnabled?: boolean;
 
+  advanced?: {
+    /**
+     * Provide this if you want to use a custom axios client for streaming requests.
+     *
+     * Defaults to the axios client used by the SDK (`axios` from `import axios from 'axios'`).
+     *
+     * @param request - The axios request configuration.
+     * @returns A promise that resolves to an axios response containing a NodeJS readable stream.
+     */
+    axiosClient?: typeof axios;
+  };
+
   /**
    * Additional settings for debugging purposes.
    */
@@ -623,7 +637,7 @@ export function init(settings: APISettingsInput) {
   APISettingsStore.setSettings(settings);
   // todo: change to isAuthBasedEngine at the same file of the warm upper
   if (settings.defaultVoiceEngine === 'Play3.0-mini' || settings.defaultVoiceEngine === 'PlayDialog') {
-    backgroundWarmUpAuthBasedEngine(settings.defaultVoiceEngine, settings);
+    backgroundWarmUpAuthBasedEngine(settings.defaultVoiceEngine, APISettingsStore.getSettings());
   }
 }
 
@@ -657,7 +671,7 @@ export async function stream(
   const perRequestAdditionalConfig = arguments[2] ?? ({} as PlayRequestConfig);
   const perRequestConfig = {
     ...perRequestAdditionalConfig,
-    settings: { ...APISettingsStore.getSettings(), ...perRequestAdditionalConfig.settings },
+    settings: deepmerge(APISettingsStore.getSettings(), perRequestAdditionalConfig),
   };
   return await commonGenerateStream(input, options, perRequestConfig);
 }

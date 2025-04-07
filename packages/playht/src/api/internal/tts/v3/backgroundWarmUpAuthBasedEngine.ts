@@ -1,6 +1,7 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
+import { getAxiosClient } from '../../config/getAxiosClient';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 import { InternalAuthBasedEngine, PublicAuthBasedEngine } from './V3InternalSettings';
 
@@ -17,7 +18,7 @@ export const backgroundWarmUpAuthBasedEngine = (
       console.log(
         `[PlayHT SDK] Error while warming up SDK (${engine}): ${error.message}`,
         // eslint-disable-next-line no-process-env
-        process.env.DEBUG ? error : '',
+        reqConfigSettings.debug?.enabled ? error : '',
       );
     });
   }
@@ -35,5 +36,5 @@ const warmUp = async (engine: InternalAuthBasedEngine, reqConfigSettings: PlayRe
     httpsAgent: keepAliveHttpsAgent,
   };
   // Trigger call to complete TCP handshake ahead of time
-  return axios(streamOptions);
+  return getAxiosClient(reqConfigSettings)(streamOptions);
 };

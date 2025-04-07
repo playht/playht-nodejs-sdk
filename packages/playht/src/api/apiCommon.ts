@@ -98,7 +98,7 @@ export async function internalGenerateStreamFromString(
     }
     case 'PlayHT1.0': {
       const v2Options = toV2Options(options, false);
-      return await generateV2Stream(input, options.voiceId, v2Options);
+      return await generateV2Stream(input, options.voiceId, v2Options, reqConfig);
     }
     case 'PlayHT2.0':
     case 'PlayHT2.0-turbo': {
@@ -111,7 +111,12 @@ export async function internalGenerateStreamFromString(
       if (
         isPlayDialogTurboSupportedCall(options, reqConfig.settings?.experimental?.defaultPlayDialogToPlayDialogTurbo)
       ) {
-        return await generateV2Stream(input, options.voiceId, { ...options, voiceEngine: 'PlayDialog-turbo' });
+        return await generateV2Stream(
+          input,
+          options.voiceId,
+          { ...options, voiceEngine: 'PlayDialog-turbo' },
+          reqConfig,
+        );
       } else {
         return await generateAuthBasedStream(input, options.voiceId, options, reqConfig);
       }

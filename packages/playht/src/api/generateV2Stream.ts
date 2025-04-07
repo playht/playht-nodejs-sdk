@@ -1,18 +1,18 @@
 import type { AxiosRequestConfig } from 'axios';
 import type { V2ApiOptions } from './apiCommon';
-import axios from 'axios';
-import { type PlayDialogTurboEngineStreamOptions } from '../index';
-import { APISettingsStore } from './APISettingsStore';
+import { type PlayDialogTurboEngineStreamOptions, type PlayRequestConfig } from '../index';
 import { keepAliveHttpsAgent } from './internal/http';
 import { convertError } from './internal/convertError';
 import { mapPlayDialogTurboVoice } from './internal/tts/dialog-turbo/PlayDialogTurboVoice';
+import { getAxiosClient } from './internal/config/getAxiosClient';
 
 export async function generateV2Stream(
   text: string,
   voice: string,
-  options?: V2ApiOptions | PlayDialogTurboEngineStreamOptions,
+  options: V2ApiOptions | PlayDialogTurboEngineStreamOptions,
+  reqConfig: PlayRequestConfig,
 ): Promise<NodeJS.ReadableStream> {
-  const { apiKey, userId } = APISettingsStore.getSettings();
+  const { apiKey, userId } = reqConfig.settings;
 
   const outputFormat = options?.outputFormat || 'mp3';
   const accept = outputFormat === 'mp3' ? 'audio/mpeg' : 'audio/basic';
@@ -51,9 +51,9 @@ export async function generateV2Stream(
     data,
     responseType: 'stream',
     httpsAgent: keepAliveHttpsAgent,
+    signal: reqConfig.signal,
   };
 
-  const response = await axios(streamOptions).catch((error: any) => convertError(error));
-
+  const response = await getAxiosClient(reqConfig.settings)(streamOptions).catch((error: any) => convertError(error));
   return response.data;
 }

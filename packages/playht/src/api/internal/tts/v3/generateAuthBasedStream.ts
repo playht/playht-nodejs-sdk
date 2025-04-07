@@ -1,11 +1,12 @@
 import type { AuthBasedEngineOptions } from '../../../apiCommon';
 import type { Play30EngineStreamOptions, PlayDialogEngineStreamOptions } from '../../../../index';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
 import { SDKSettings } from '../../../APISettingsStore';
 import { debugLog } from '../../debug/debugLog';
+import { getAxiosClient } from '../../config/getAxiosClient';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 import { InternalAuthBasedEngine } from './V3InternalSettings';
 
@@ -26,7 +27,7 @@ export async function generateAuthBasedStream(
     signal: reqConfig.signal,
   };
 
-  const response = await axios(streamOptions).catch((error: any) => {
+  const response = await getAxiosClient(reqConfig.settings)(streamOptions).catch((error: any) => {
     debugRequest(reqConfig.settings, inferenceAddress, payloadForEngine, error.response);
     return convertError(error, { request_id: error?.response?.headers['x-fal-request-id'] });
   });
