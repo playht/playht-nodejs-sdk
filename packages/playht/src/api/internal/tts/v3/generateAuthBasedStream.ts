@@ -1,6 +1,6 @@
 import type { AuthBasedEngineOptions } from '../../../apiCommon';
 import type { Play30EngineStreamOptions, PlayDialogEngineStreamOptions } from '../../../../index';
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfig } from '../../config/PlayRequestConfig';
@@ -18,14 +18,14 @@ export async function generateAuthBasedStream(
 ): Promise<NodeJS.ReadableStream> {
   const inferenceAddress = await createOrGetInferenceAddress(getInternalEngineForEndpoint(options), reqConfig.settings);
   const payloadForEngine = createPayloadForEngine(text, voice, options);
-  const streamOptions: AxiosRequestConfig = {
+  const streamOptions = {
     method: 'POST',
     url: inferenceAddress,
     data: payloadForEngine,
     responseType: 'stream',
     httpsAgent: keepAliveHttpsAgent,
     signal: reqConfig.signal,
-  };
+  } as const satisfies AxiosRequestConfig;
 
   const response = await getAxiosClient(reqConfig.settings)(streamOptions).catch((error: any) => {
     debugRequest(reqConfig.settings, inferenceAddress, payloadForEngine, error.response);
@@ -39,7 +39,7 @@ function debugRequest(
   sdkSettings: Partial<SDKSettings> | undefined,
   inferenceAddress: string,
   payloadForEngine: any,
-  response: AxiosResponse,
+  response: { headers: Record<string, any>; status: number },
 ) {
   debugLog(
     sdkSettings,

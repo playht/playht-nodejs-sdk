@@ -26,7 +26,7 @@ export const backgroundWarmUpAuthBasedEngine = (
 
 const warmUp = async (engine: InternalAuthBasedEngine, reqConfigSettings: PlayRequestConfig['settings']) => {
   const inferenceAddress = await createOrGetInferenceAddress(engine, reqConfigSettings);
-  const streamOptions: AxiosRequestConfig = {
+  const streamOptions = {
     method: 'OPTIONS',
     url: inferenceAddress,
     headers: {
@@ -34,7 +34,7 @@ const warmUp = async (engine: InternalAuthBasedEngine, reqConfigSettings: PlayRe
       'Access-Control-Request-Method': '*',
     },
     httpsAgent: keepAliveHttpsAgent,
-  };
+  } as const satisfies AxiosRequestConfig;
   // Trigger call to complete TCP handshake ahead of time
   return getAxiosClient(reqConfigSettings)(streamOptions);
 };

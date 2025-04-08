@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import deepmerge from 'deepmerge';
 import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
@@ -607,10 +607,17 @@ export type APISettingsInput = {
      *
      * Defaults to the axios client used by the SDK (`axios` from `import axios from 'axios'`).
      *
-     * @param request - The axios request configuration.
-     * @returns A promise that resolves to an axios response containing a NodeJS readable stream.
+     * @param reqConfig - The axios request configuration.
+     * @returns A promise that resolves to an object containing the headers, status, and data of the response.
+     * @throws {AxiosError} If the request fails.
      */
-    axiosClient?: typeof axios;
+    axiosClient?: <T extends AxiosRequestConfig>(
+      reqConfig: T,
+    ) => Promise<{
+      headers: Record<string, string>;
+      status: number;
+      data: T extends { responseType: 'stream' } ? NodeJS.ReadableStream : Record<string, any>;
+    }>;
   };
 
   /**

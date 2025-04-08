@@ -2,7 +2,6 @@ import { buffer } from 'node:stream/consumers';
 import fs from 'node:fs';
 import { Readable } from 'stream';
 import { describe, expect, it } from '@jest/globals';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as PlayHT from '../index';
 import { SDKSettings } from '../api/APISettingsStore';
 import { E2E_CONFIG } from './e2eTestConfig';
@@ -229,7 +228,7 @@ describe('E2E', () => {
           const audioResponse = Buffer.from('RIFF\u007F\u007F\u007F\u007FWAVEfmt axiosAudioResponse');
           const settings: Partial<SDKSettings> = {
             advanced: {
-              axiosClient: (async (input: AxiosRequestConfig) => {
+              axiosClient: async (input) => {
                 expect(input.headers).toStrictEqual({
                   accept: 'audio/mpeg',
                   'content-type': 'application/json',
@@ -249,8 +248,10 @@ describe('E2E', () => {
 
                 return {
                   data: Readable.from(audioResponse),
-                } as AxiosResponse<any>;
-              }) as typeof axios,
+                  headers: {},
+                  status: 200,
+                };
+              },
             },
           };
           const p = PlayHT.stream(

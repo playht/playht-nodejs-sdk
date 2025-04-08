@@ -39,7 +39,7 @@ export async function generateV2Stream(
           style_guidance: options?.styleGuidance,
         }),
   };
-  const streamOptions: AxiosRequestConfig = {
+  const streamOptions = {
     method: 'POST',
     url: 'https://api.play.ht/api/v2/tts/stream',
     headers: {
@@ -52,7 +52,7 @@ export async function generateV2Stream(
     responseType: 'stream',
     httpsAgent: keepAliveHttpsAgent,
     signal: reqConfig.signal,
-  };
+  } as const satisfies AxiosRequestConfig;
 
   const response = await getAxiosClient(reqConfig.settings)(streamOptions).catch((error: any) => convertError(error));
   return response.data;
