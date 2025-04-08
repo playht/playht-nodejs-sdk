@@ -6,6 +6,8 @@ import { convertError } from './internal/convertError';
 import { mapPlayDialogTurboVoice } from './internal/tts/dialog-turbo/PlayDialogTurboVoice';
 import { getAxiosClient } from './internal/config/getAxiosClient';
 import { PlayRequestConfigWithDefaults } from './internal/config/PlayRequestConfig';
+import { debugLog } from './internal/debug/debugLog';
+import { SDKSettings } from './APISettingsStore';
 
 export async function generateV2Stream(
   text: string,
@@ -55,6 +57,23 @@ export async function generateV2Stream(
     signal: reqConfig.signal,
   } as const satisfies AxiosRequestConfig;
 
-  const response = await getAxiosClient(reqConfig.settings)(streamOptions).catch((error: any) => convertError(error));
+  const response = await getAxiosClient(reqConfig.settings)(streamOptions).catch((error: any) => {
+    debugRequest(reqConfig.settings, data, response);
+    return convertError(error);
+  });
+  debugRequest(reqConfig.settings, data, response);
   return response.data;
+}
+
+function debugRequest(
+  sdkSettings: Partial<SDKSettings> | undefined,
+  payloadForEngine: any,
+  response: { headers: Record<string, any>; status: number },
+) {
+  debugLog(
+    sdkSettings,
+    `Request - URL: v2/tts/stream - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${
+      response.headers['x-play-request-id']
+    } - Status: ${response.status}`,
+  );
 }
