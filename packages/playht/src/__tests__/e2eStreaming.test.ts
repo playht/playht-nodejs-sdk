@@ -243,6 +243,12 @@ describe('E2E', () => {
                   output_format: 'mp3',
                   speed: 1,
                   sample_rate: 24000,
+                  seed: undefined,
+                  emotion: undefined,
+                  style_guidance: undefined,
+                  temperature: undefined,
+                  text_guidance: undefined,
+                  voice_guidance: undefined,
                 });
 
                 return {
