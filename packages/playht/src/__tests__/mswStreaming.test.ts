@@ -124,6 +124,9 @@ describe('Streaming (Mocked)', () => {
         // @ts-expect-error experimental settings are not exposed in the public API
         {
           settings: {
+            debug: {
+              enabled: true,
+            },
             experimental: {
               defaultPlayDialogToPlayDialogTurbo: true,
             },
