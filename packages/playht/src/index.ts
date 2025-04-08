@@ -484,7 +484,7 @@ export type PlayDialogTurboEngineStreamOptions = Omit<
    */
   voiceEngine: 'PlayDialog-turbo';
 
-  outputFormat?: 'wav';
+  outputFormat?: ['wav', 'mp3'];
 } & (
     | {
         language: 'arabic';
@@ -609,7 +609,6 @@ export type APISettingsInput = {
      *
      * @param reqConfig - The axios request configuration.
      * @returns A promise that resolves to an object containing the headers, status, and data of the response.
-     * @throws {AxiosError} If the request fails.
      */
     axiosClient?: <T extends AxiosRequestConfig>(
       reqConfig: T,
