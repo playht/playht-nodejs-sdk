@@ -678,7 +678,7 @@ export async function stream(
   const perRequestAdditionalConfig = arguments[2] ?? ({} as PlayRequestConfig);
   const perRequestConfig = {
     ...perRequestAdditionalConfig,
-    settings: deepmerge(APISettingsStore.getSettings(), perRequestAdditionalConfig),
+    settings: deepmerge(APISettingsStore.getSettings(), perRequestAdditionalConfig.settings ?? {}),
   };
   return await commonGenerateStream(input, options, perRequestConfig);
 }

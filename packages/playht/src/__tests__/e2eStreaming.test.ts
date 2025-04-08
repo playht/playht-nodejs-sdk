@@ -268,7 +268,7 @@ describe('E2E', () => {
               language: 'english',
             },
             // @ts-expect-error experimental settings are not exposed in the public API
-            settings,
+            { settings },
           );
           const streamFromText = await p;
 
