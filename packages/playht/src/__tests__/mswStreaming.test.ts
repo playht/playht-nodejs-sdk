@@ -91,6 +91,7 @@ describe('Streaming (Mocked)', () => {
           voiceId: 'Celeste-PlayAI',
           language: 'english',
         },
+        // @ts-expect-error experimental settings are not exposed in the public API
         {
           settings: {
             experimental: {
@@ -120,6 +121,7 @@ describe('Streaming (Mocked)', () => {
           voiceId: 's3://voice-cloning-zero-shot/24507c14-c743-4943-80db-a1e16248309a/original/manifest.json', // Celeste
           language: 'english',
         },
+        // @ts-expect-error experimental settings are not exposed in the public API
         {
           settings: {
             experimental: {
@@ -151,6 +153,7 @@ describe('Streaming (Mocked)', () => {
             voiceId: 's3://voice-cloning-zero-shot/24507c14-c743-4943-80db-a1e16248309a/original/manifest.json', // Celeste
             language: 'english',
           },
+          // @ts-expect-error experimental settings are not exposed in the public API
           {
             settings: {
               experimental: {
