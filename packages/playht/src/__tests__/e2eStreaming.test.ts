@@ -265,9 +265,7 @@ describe('E2E', () => {
               voiceEngine: 'PlayHT1.0',
               voiceId: 's3://voice-cloning-zero-shot/some-voice-afw59j/manifest.json',
               quality: 'high',
-              language: 'english',
             },
-            // @ts-expect-error experimental settings are not exposed in the public API
             { settings },
           );
           const streamFromText = await p;

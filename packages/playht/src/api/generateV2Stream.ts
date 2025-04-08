@@ -1,16 +1,17 @@
 import type { AxiosRequestConfig } from 'axios';
 import type { V2ApiOptions } from './apiCommon';
-import { type PlayDialogTurboEngineStreamOptions, type PlayRequestConfig } from '../index';
+import { type PlayDialogTurboEngineStreamOptions } from '../index';
 import { keepAliveHttpsAgent } from './internal/http';
 import { convertError } from './internal/convertError';
 import { mapPlayDialogTurboVoice } from './internal/tts/dialog-turbo/PlayDialogTurboVoice';
 import { getAxiosClient } from './internal/config/getAxiosClient';
+import { PlayRequestConfigWithDefaults } from './internal/config/PlayRequestConfig';
 
 export async function generateV2Stream(
   text: string,
   voice: string,
   options: V2ApiOptions | PlayDialogTurboEngineStreamOptions,
-  reqConfig: PlayRequestConfig,
+  reqConfig: PlayRequestConfigWithDefaults,
 ): Promise<NodeJS.ReadableStream> {
   const { apiKey, userId } = reqConfig.settings;
 

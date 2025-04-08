@@ -673,13 +673,10 @@ export async function stream(
   options?: SpeechStreamOptions,
 ): Promise<NodeJS.ReadableStream> {
   // The per-call SDK Settings is "hidden" from the Public API because this feature is still alpha, meaning
-  // not everything supports on-the-fly settings right now.
+  // not all streaming engines support on-the-fly settings right now.
   // eslint-disable-next-line prefer-rest-params
-  const perRequestAdditionalConfig = arguments[2] ?? ({} as PlayRequestConfig);
-  const perRequestConfig = {
-    ...perRequestAdditionalConfig,
-    settings: deepmerge(APISettingsStore.getSettings(), perRequestAdditionalConfig.settings ?? {}),
-  };
+  const experimentalPerRequestConfig = arguments[2] ?? ({} as PlayRequestConfig);
+  const perRequestConfig = deepmerge({ settings: APISettingsStore.getSettings() }, experimentalPerRequestConfig);
   return await commonGenerateStream(input, options, perRequestConfig);
 }
 

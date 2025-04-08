@@ -1,13 +1,13 @@
 import { AxiosRequestConfig } from 'axios';
 import { keepAliveHttpsAgent } from '../../http';
-import { PlayRequestConfig } from '../../config/PlayRequestConfig';
+import { PlayRequestConfigWithDefaults } from '../../config/PlayRequestConfig';
 import { getAxiosClient } from '../../config/getAxiosClient';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 import { InternalAuthBasedEngine, PublicAuthBasedEngine } from './V3InternalSettings';
 
 export const backgroundWarmUpAuthBasedEngine = (
   selectedEngine: PublicAuthBasedEngine,
-  reqConfigSettings: PlayRequestConfig['settings'],
+  reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
 ) => {
   const engines =
     selectedEngine === 'Play3.0-mini'
@@ -17,14 +17,16 @@ export const backgroundWarmUpAuthBasedEngine = (
     warmUp(engine, reqConfigSettings).catch((error: any) => {
       console.log(
         `[PlayHT SDK] Error while warming up SDK (${engine}): ${error.message}`,
-        // eslint-disable-next-line no-process-env
         reqConfigSettings.debug?.enabled ? error : '',
       );
     });
   }
 };
 
-const warmUp = async (engine: InternalAuthBasedEngine, reqConfigSettings: PlayRequestConfig['settings']) => {
+const warmUp = async (
+  engine: InternalAuthBasedEngine,
+  reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
+) => {
   const inferenceAddress = await createOrGetInferenceAddress(engine, reqConfigSettings);
   const streamOptions = {
     method: 'OPTIONS',
