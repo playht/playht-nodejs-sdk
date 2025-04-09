@@ -4,7 +4,7 @@ import { type PlayDialogTurboEngineStreamOptions } from '../index';
 import { keepAliveHttpsAgent } from './internal/http';
 import { convertError } from './internal/convertError';
 import { mapPlayDialogTurboVoice } from './internal/tts/dialog-turbo/PlayDialogTurboVoice';
-import { getAxiosClient } from './internal/config/getAxiosClient';
+import { extractErrorHeadersAndStatusIfTheyExist, getAxiosClient } from './internal/config/getAxiosClient';
 import { PlayRequestConfigWithDefaults } from './internal/config/PlayRequestConfig';
 import { debugLog } from './internal/debug/debugLog';
 import { SDKSettings } from './APISettingsStore';
@@ -57,8 +57,8 @@ export async function generateV2Stream(
     signal: reqConfig.signal,
   } as const satisfies AxiosRequestConfig;
 
-  const response = await getAxiosClient(reqConfig.settings)(streamOptions).catch((error: any) => {
-    debugRequest(reqConfig.settings, data, response);
+  const response = await getAxiosClient(reqConfig.settings)(streamOptions).catch((error: unknown) => {
+    debugRequest(reqConfig.settings, data, extractErrorHeadersAndStatusIfTheyExist(error));
     return convertError(error);
   });
   debugRequest(reqConfig.settings, data, response);

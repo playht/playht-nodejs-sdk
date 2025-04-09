@@ -6,7 +6,7 @@ import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfigWithDefaults } from '../../config/PlayRequestConfig';
 import { SDKSettings } from '../../../APISettingsStore';
 import { debugLog } from '../../debug/debugLog';
-import { getAxiosClient } from '../../config/getAxiosClient';
+import { extractErrorHeadersAndStatusIfTheyExist, getAxiosClient } from '../../config/getAxiosClient';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 import { InternalAuthBasedEngine } from './V3InternalSettings';
 
@@ -28,7 +28,12 @@ export async function generateAuthBasedStream(
   } as const satisfies AxiosRequestConfig;
 
   const response = await getAxiosClient(reqConfig.settings)(streamOptions).catch((error: any) => {
-    debugRequest(reqConfig.settings, inferenceAddress, payloadForEngine, error.response);
+    debugRequest(
+      reqConfig.settings,
+      inferenceAddress,
+      payloadForEngine,
+      extractErrorHeadersAndStatusIfTheyExist(error),
+    );
     return convertError(error, { request_id: error?.response?.headers['x-fal-request-id'] });
   });
   debugRequest(reqConfig.settings, inferenceAddress, payloadForEngine, response);
