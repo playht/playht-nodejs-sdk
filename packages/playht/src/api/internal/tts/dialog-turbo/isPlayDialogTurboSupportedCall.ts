@@ -12,10 +12,10 @@ export function isPlayDialogTurboSupportedCall(
   if (!defaultPlayDialogToPlayDialogTurbo) return false;
   if (options.voiceEngine !== 'PlayDialog') return false;
 
-  if (!isPlayDialogTurboVoice(options.voiceId)) return false;
-
   const isSupportedLanguage = !options.language || options.language === 'english' || options.language === 'arabic';
   if (!isSupportedLanguage) return false;
+
+  if (!isPlayDialogTurboVoice(options.voiceId, (options.language ?? 'english') as 'english' | 'arabic')) return false;
 
   // Is turbo call if none of the unsupported parameters are provided
   // ignored: seed, quality

@@ -1,5 +1,5 @@
-const PLAY_DIALOG_TURBO_VOICES_MAP: { [key: string]: string } = {
-  // English voices
+// English voices
+const PLAY_DIALOG_TURBO_ENGLISH_VOICES_MAP: { [key: string]: string } = {
   's3://voice-cloning-zero-shot/f6c4ed76-1b55-4cd9-8896-31f7535f6cdb/original/manifest.json': 'Aaliyah-PlayAI',
   's3://voice-cloning-zero-shot/f9bf96ae-19ef-491f-ae69-644448800566/original/manifest.json': 'Adelaide-PlayAI',
   's3://voice-cloning-zero-shot/baf1ef41-36b6-428c-9bdf-50ba54682bd8/original/manifest.json': 'Angelo-PlayAI',
@@ -27,17 +27,20 @@ const PLAY_DIALOG_TURBO_VOICES_MAP: { [key: string]: string } = {
   's3://voice-cloning-zero-shot/e53b50b7-142b-4d66-922f-1d6410832489/original/manifest.json': 'Quinn-PlayAI',
   's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json': 'Ruby-PlayAI',
   's3://voice-cloning-zero-shot/0db14b28-878d-4ebb-a8a5-e3c49e073ac9/original/manifest.json': 'Thunder-PlayAI',
-  // Arabic voices
+};
+// Arabic voices
+const PLAY_DIALOG_TURBO_ARABIC_VOICES_MAP: { [key: string]: string } = {
   's3://voice-cloning-zero-shot/Nasser__-____-____-____-____________/original/manifest.json': 'Nasser-PlayAI',
   's3://voice-cloning-zero-shot/61FkRDykpefFibpqCMEHl/khalid-arabic/manifest.json': 'Khalid-PlayAI',
   's3://voice-cloning-zero-shot/mzC-mRcDq38LCRzodkM-Z/amira-arabic/manifest.json': 'Amira-PlayAI',
   's3://voice-cloning-zero-shot/uLCIZjJAz3iMqA5cK4ObF/ahmad-arabic/manifest.json': 'Ahmad-PlayAI',
 };
 
-export function isPlayDialogTurboVoice(voiceId: string): boolean {
-  return PLAY_DIALOG_TURBO_VOICES_MAP[voiceId] !== undefined || voiceId?.endsWith('-PlayAI');
+export function isPlayDialogTurboVoice(voiceId: string, language: 'english' | 'arabic'): boolean {
+  const voicesMap = language === 'english' ? PLAY_DIALOG_TURBO_ENGLISH_VOICES_MAP : PLAY_DIALOG_TURBO_ARABIC_VOICES_MAP;
+  return voicesMap[voiceId] !== undefined || voiceId?.endsWith('-PlayAI');
 }
 
 export function mapPlayDialogTurboVoice(voiceId: string) {
-  return PLAY_DIALOG_TURBO_VOICES_MAP[voiceId] ?? voiceId;
+  return PLAY_DIALOG_TURBO_ENGLISH_VOICES_MAP[voiceId] ?? PLAY_DIALOG_TURBO_ARABIC_VOICES_MAP[voiceId] ?? voiceId;
 }
