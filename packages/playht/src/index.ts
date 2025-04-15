@@ -630,7 +630,7 @@ export type APISettingsInput = {
     /**
      * A function to log debug messages. Defaults to console.log.
      */
-    log?: (message: string) => void;
+    log?: (...data: Array<any>) => void;
   };
 };
 
