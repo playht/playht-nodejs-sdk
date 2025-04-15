@@ -10,9 +10,16 @@ export function getAxiosClient(
 
 export function extractErrorHeadersAndStatusIfTheyExist(error: unknown) {
   return {
+    errorMessage: extractMessageFromError(error),
     headers: extractFromErrorResponse<Record<string, any>>(error, 'headers', {}),
     status: extractFromErrorResponse(error, 'status', -1),
   };
+}
+
+function extractMessageFromError(error: any) {
+  if (error && typeof error === 'object' && 'message' in error && typeof error.response === 'string')
+    return error.message;
+  return undefined;
 }
 
 function extractFromErrorResponse<T>(error: any, fieldName: string, defaultValue: T) {

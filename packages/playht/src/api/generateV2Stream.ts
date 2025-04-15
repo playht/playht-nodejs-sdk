@@ -68,12 +68,12 @@ export async function generateV2Stream(
 function debugRequest(
   sdkSettings: Partial<SDKSettings> | undefined,
   payloadForEngine: any,
-  response: { headers: Record<string, any>; status: number },
+  response: { headers: Record<string, any>; status: number; errorMessage?: string },
 ) {
   debugLog(
     sdkSettings,
     `Request - URL: v2/tts/stream - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${
       response.headers['x-play-request-id']
-    } - Status: ${response.status}`,
+    } - Status: ${response.status}${response.errorMessage ? ` - Error: ${response.errorMessage}` : ''}`,
   );
 }

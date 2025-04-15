@@ -44,7 +44,7 @@ function debugRequest(
   sdkSettings: Partial<SDKSettings> | undefined,
   inferenceAddress: string,
   payloadForEngine: any,
-  response: { headers: Record<string, any>; status: number },
+  response: { headers: Record<string, any>; status: number; errorMessage?: string },
 ) {
   debugLog(
     sdkSettings,
@@ -53,7 +53,7 @@ function debugRequest(
       'fal_jwt_token=<redacted>',
     )} - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${response.headers['x-fal-request-id']} - Status: ${
       response.status
-    }`,
+    }${response.errorMessage ? ` - Error: ${response.errorMessage}` : ''}`,
   );
 }
 
