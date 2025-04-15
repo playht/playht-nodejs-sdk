@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { convertError } from '../../convertError';
 import { keepAliveHttpsAgent } from '../../http';
-import { PlayRequestConfig } from '../../config/PlayRequestConfig';
+import { PlayRequestConfigWithDefaults } from '../../config/PlayRequestConfig';
 import { APISettingsStore } from '../../../APISettingsStore';
 import { UserId } from '../../types';
 import { getSetting } from '../../settings/getSetting';
@@ -67,7 +67,7 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
 
 const createInferenceCoordinates = async (
   voiceEngine: InternalAuthBasedEngine,
-  reqConfigSettings?: PlayRequestConfig['settings'],
+  reqConfigSettings?: PlayRequestConfigWithDefaults['settings'],
   attemptNo = 0,
 ): Promise<InferenceCoordinatesEntry> => {
   const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
@@ -126,7 +126,7 @@ const inferenceCoordinatesCreationPromise: Record<UserId, Promise<InferenceCoord
 
 export const createOrGetInferenceAddress = async (
   voiceEngine: InternalAuthBasedEngine,
-  reqConfigSettings?: PlayRequestConfig['settings'],
+  reqConfigSettings?: PlayRequestConfigWithDefaults['settings'],
 ): Promise<string> => {
   const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
   const inferenceCoordinatesEntry = inferenceCoordinatesStores[voiceEngine][userId];

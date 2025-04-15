@@ -13,6 +13,7 @@ type GenerationStatusResponse = {
   transcriped?: boolean;
   converted?: boolean;
   message?: string;
+  error?: string;
 };
 
 type GenerationJobResponse = {
@@ -90,7 +91,14 @@ export async function generateV1Speech(
             statusMessage: error.response?.statusMessage,
           };
         });
-      const { audioUrl, message, transcriped, converted } = generationStatus;
+      const { audioUrl, message, transcriped, converted, error } = generationStatus;
+      if (error) {
+        throw {
+          message: 'Audio generation error. Please wait a few moments and try again or contact support.',
+          code: 'GENERATION_ERROR',
+          timestamp: new Date().toISOString(),
+        };
+      }
       if (transcriped || converted) {
         const url = Array.isArray(audioUrl) ? audioUrl[0] : audioUrl;
         return {
@@ -105,6 +113,7 @@ export async function generateV1Speech(
     throw {
       message: 'Audio generation error. Max status check retries reached.',
       code: 'MAX_STATUS_CHECK_RETRIES_REACHED',
+      timestamp: new Date().toISOString(),
     };
   })();
 }

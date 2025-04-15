@@ -1,6 +1,6 @@
 {
   "name": "playht",
-  "version": "0.17.2-alpha.0",
+  "version": "0.17.2-alpha.2",
   "description": "NodeJS SDK for PlayHT generative AI text-to-speech APIs",
   "files": [
     "dist/**/*",
@@ -50,6 +50,7 @@
     "@grpc/grpc-js": "^1.9.4",
     "axios": "^1.4.0",
     "cross-fetch": "^4.0.0",
+    "deepmerge": "^4.3.1",
     "file-type": "^18.5.0",
     "protobufjs": "^7.2.5",
     "tslib": "^2.1.0"

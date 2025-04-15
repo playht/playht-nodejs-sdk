@@ -1,3 +1,5 @@
+import { AxiosRequestConfig } from 'axios';
+import deepmerge from 'deepmerge';
 import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
@@ -482,7 +484,7 @@ export type PlayDialogTurboEngineStreamOptions = Omit<
    */
   voiceEngine: 'PlayDialog-turbo';
 
-  outputFormat?: 'wav';
+  outputFormat?: ['wav', 'mp3'];
 } & (
     | {
         language: 'arabic';
@@ -599,6 +601,24 @@ export type APISettingsInput = {
    */
   fallbackEnabled?: boolean;
 
+  advanced?: {
+    /**
+     * Provide this if you want to use a custom axios client for streaming requests.
+     *
+     * Defaults to the axios client used by the SDK (`axios` from `import axios from 'axios'`).
+     *
+     * @param reqConfig - The axios request configuration.
+     * @returns A promise that resolves to an object containing the headers, status, and data of the response.
+     */
+    axiosClient?: <T extends AxiosRequestConfig>(
+      reqConfig: T,
+    ) => Promise<{
+      headers: Record<string, string>;
+      status: number;
+      data: T extends { responseType: 'stream' } ? NodeJS.ReadableStream : Record<string, any>;
+    }>;
+  };
+
   /**
    * Additional settings for debugging purposes.
    */
@@ -623,7 +643,7 @@ export function init(settings: APISettingsInput) {
   APISettingsStore.setSettings(settings);
   // todo: change to isAuthBasedEngine at the same file of the warm upper
   if (settings.defaultVoiceEngine === 'Play3.0-mini' || settings.defaultVoiceEngine === 'PlayDialog') {
-    backgroundWarmUpAuthBasedEngine(settings.defaultVoiceEngine, settings);
+    backgroundWarmUpAuthBasedEngine(settings.defaultVoiceEngine, APISettingsStore.getSettings());
   }
 }
 
@@ -652,13 +672,10 @@ export async function stream(
   options?: SpeechStreamOptions,
 ): Promise<NodeJS.ReadableStream> {
   // The per-call SDK Settings is "hidden" from the Public API because this feature is still alpha, meaning
-  // not everything supports on-the-fly settings right now.
+  // not all streaming engines support on-the-fly settings right now.
   // eslint-disable-next-line prefer-rest-params
-  const perRequestAdditionalConfig = arguments[2] ?? ({} as PlayRequestConfig);
-  const perRequestConfig = {
-    ...perRequestAdditionalConfig,
-    settings: { ...APISettingsStore.getSettings(), ...perRequestAdditionalConfig.settings },
-  };
+  const experimentalPerRequestConfig = arguments[2] ?? ({} as PlayRequestConfig);
+  const perRequestConfig = deepmerge({ settings: APISettingsStore.getSettings() }, experimentalPerRequestConfig);
   return await commonGenerateStream(input, options, perRequestConfig);
 }
 

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect } from '@jest/globals';
 import { UserId } from '../../types';
 import { expectToBeDateCloseToNow } from '../../../../__tests__/helpers/expectToBeDateCloseToNow';
-import { APISettingsStore } from '../../../APISettingsStore';
+import { APISettingsStore, SDKSettings } from '../../../APISettingsStore';
 import {
   _inspectInferenceCoordinatesStoreForUser,
   clearInferenceCoordinatesStoreForUser,
@@ -32,9 +32,11 @@ describe('createOrGetInferenceAddress', () => {
       forcedError?: Error;
       coordinatesAheadOfTimeAutoRefresh?: boolean;
     } = {},
-  ) => ({
+  ): SDKSettings => ({
     userId,
     apiKey: 'test-api-key',
+    defaultVoiceId: 'foo-default-voice-id',
+    defaultVoiceEngine: 'Standard',
     experimental: {
       v3: {
         customInferenceCoordinatesGenerator: async (_: InternalAuthBasedEngine, u: string) => {

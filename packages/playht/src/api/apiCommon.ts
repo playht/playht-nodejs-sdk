@@ -20,7 +20,7 @@ import { generateV2Stream } from './generateV2Stream';
 import { textStreamToSentences } from './textStreamToSentences';
 import { generateGRpcStream } from './generateGRpcStream';
 import { generateAuthBasedStream } from './internal/tts/v3/generateAuthBasedStream';
-import { PlayRequestConfig } from './internal/config/PlayRequestConfig';
+import { PlayRequestConfigWithDefaults } from './internal/config/PlayRequestConfig';
 import { isPlayDialogTurboSupportedCall } from './internal/tts/dialog-turbo/isPlayDialogTurboSupportedCall';
 
 export type V1ApiOptions = {
@@ -75,7 +75,7 @@ export async function commonGenerateSpeech(input: string, optionsInput?: SpeechO
 export async function commonGenerateStream(
   input: string | NodeJS.ReadableStream,
   optionsInput: SpeechStreamOptions | undefined,
-  reqConfig: PlayRequestConfig,
+  reqConfig: PlayRequestConfigWithDefaults,
 ): Promise<NodeJS.ReadableStream> {
   if (typeof input === 'string') {
     return await internalGenerateStreamFromString(input, optionsInput, reqConfig);
@@ -87,7 +87,7 @@ export async function commonGenerateStream(
 export async function internalGenerateStreamFromString(
   input: string,
   optionsInput: SpeechStreamOptions | undefined,
-  reqConfig: PlayRequestConfig,
+  reqConfig: PlayRequestConfigWithDefaults,
 ): Promise<NodeJS.ReadableStream> {
   const options = addDefaultOptions(optionsInput);
 
@@ -98,7 +98,7 @@ export async function internalGenerateStreamFromString(
     }
     case 'PlayHT1.0': {
       const v2Options = toV2Options(options, false);
-      return await generateV2Stream(input, options.voiceId, v2Options);
+      return await generateV2Stream(input, options.voiceId, v2Options, reqConfig);
     }
     case 'PlayHT2.0':
     case 'PlayHT2.0-turbo': {
@@ -111,7 +111,12 @@ export async function internalGenerateStreamFromString(
       if (
         isPlayDialogTurboSupportedCall(options, reqConfig.settings?.experimental?.defaultPlayDialogToPlayDialogTurbo)
       ) {
-        return await generateV2Stream(input, options.voiceId, { ...options, voiceEngine: 'PlayDialog-turbo' });
+        return await generateV2Stream(
+          input,
+          options.voiceId,
+          { ...options, voiceEngine: 'PlayDialog-turbo' },
+          reqConfig,
+        );
       } else {
         return await generateAuthBasedStream(input, options.voiceId, options, reqConfig);
       }
@@ -122,7 +127,7 @@ export async function internalGenerateStreamFromString(
 export async function internalGenerateStreamFromInputStream(
   inputStream: NodeJS.ReadableStream,
   optionsInput: SpeechStreamOptions | undefined,
-  reqConfig: PlayRequestConfig,
+  reqConfig: PlayRequestConfigWithDefaults,
 ): Promise<NodeJS.ReadableStream> {
   const sentencesStream = textStreamToSentences(inputStream);
   const passThrough = new PassThrough();
@@ -223,7 +228,7 @@ async function audioStreamFromSentences(
   sentencesStream: NodeJS.ReadableStream,
   writableStream: NodeJS.WritableStream,
   optionsInput: SpeechStreamOptions | undefined,
-  reqConfig: PlayRequestConfig,
+  reqConfig: PlayRequestConfigWithDefaults,
 ) {
   // Create a stream for promises
   const promiseStream = new Readable({

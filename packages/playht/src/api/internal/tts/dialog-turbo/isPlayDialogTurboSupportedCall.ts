@@ -2,6 +2,8 @@ import type { PlayDialogTurboEngineStreamOptions } from '../../../../index';
 import type { SpeechOptionsWithVoiceID } from '../../../apiCommon';
 import { isPlayDialogTurboVoice } from './PlayDialogTurboVoice';
 
+const PLAYDIALOG_TURBO_SUPPORTED_OUTPUT_FORMATS = ['wav', 'mp3'];
+
 export function isPlayDialogTurboSupportedCall(
   options: SpeechOptionsWithVoiceID,
   defaultPlayDialogToPlayDialogTurbo?: boolean,
@@ -18,7 +20,7 @@ export function isPlayDialogTurboSupportedCall(
   // Is turbo call if none of the unsupported parameters are provided
   // ignored: seed, quality
   return (
-    !options.sampleRate &&
+    (!options.sampleRate || options.sampleRate === 48_000) &&
     !options.temperature &&
     !options.voiceId2 &&
     !options.turnPrefix &&
@@ -26,6 +28,6 @@ export function isPlayDialogTurboSupportedCall(
     !options.voiceConditioningSeconds &&
     !options.voiceConditioningSeconds2 &&
     (!options.speed || options.speed === 1) &&
-    (!options.outputFormat || options.outputFormat === 'wav')
+    (!options.outputFormat || PLAYDIALOG_TURBO_SUPPORTED_OUTPUT_FORMATS.includes(options.outputFormat))
   );
 }
