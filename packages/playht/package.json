@@ -1,6 +1,6 @@
 {
   "name": "playht",
-  "version": "0.17.2-alpha.2",
+  "version": "0.17.2-alpha.3",
   "description": "NodeJS SDK for PlayHT generative AI text-to-speech APIs",
   "files": [
     "dist/**/*",
@@ -9,7 +9,10 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "typings": "dist/index.d.ts",
-  "repository": "https://github.com/playht/playht-nodejs-sdk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/playht/playht-nodejs-sdk.git"
+  },
   "license": "MIT",
   "scripts": {
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outdir=dist/cjs",
