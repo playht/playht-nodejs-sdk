@@ -6,7 +6,11 @@ export type PublicAuthBasedEngine = 'Play3.0-mini' | 'PlayDialog';
 /**
  * "Internal" because these are the engines we use internally to determine the inference address (the HTTP endpoint).
  */
-export type InternalAuthBasedEngine = PublicAuthBasedEngine | 'PlayDialogArabic' | 'PlayDialogMultilingual';
+export type InternalAuthBasedEngine =
+  | PublicAuthBasedEngine
+  | 'PlayDialogArabic'
+  | 'PlayDialogHindi'
+  | 'PlayDialogMultilingual';
 
 export type V3InternalSettings = {
   // If the SDK should automatically try to refresh the coordinates before they expire (default: true)
