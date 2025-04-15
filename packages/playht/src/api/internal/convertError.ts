@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-export const convertError = async (error: any) => {
+export const convertError = async (error: any, extra?: object) => {
   const body = await bodyAsString(error);
   return Promise.reject({
     message: body?.error_message || error.message,
@@ -8,6 +8,7 @@ export const convertError = async (error: any) => {
     statusCode: error.response?.status ?? error.response?.statusCode,
     statusMessage: error.response?.statusText ?? error.response?.statusMessage,
     body: body,
+    ...extra,
   });
 };
 

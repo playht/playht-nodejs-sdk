@@ -598,6 +598,20 @@ export type APISettingsInput = {
    * (configured with "customAddr" above) to the standard PlayHT address.
    */
   fallbackEnabled?: boolean;
+
+  /**
+   * Additional settings for debugging purposes.
+   */
+  debug?: {
+    /**
+     * Whether to enable debugging features.
+     */
+    enabled: boolean;
+    /**
+     * A function to log debug messages. Defaults to console.log.
+     */
+    log?: (...data: Array<any>) => void;
+  };
 };
 
 /**
@@ -640,7 +654,11 @@ export async function stream(
   // The per-call SDK Settings is "hidden" from the Public API because this feature is still alpha, meaning
   // not everything supports on-the-fly settings right now.
   // eslint-disable-next-line prefer-rest-params
-  const perRequestConfig = arguments[2] ?? ({} as PlayRequestConfig);
+  const perRequestAdditionalConfig = arguments[2] ?? ({} as PlayRequestConfig);
+  const perRequestConfig = {
+    ...perRequestAdditionalConfig,
+    settings: { ...APISettingsStore.getSettings(), ...perRequestAdditionalConfig.settings },
+  };
   return await commonGenerateStream(input, options, perRequestConfig);
 }
 
