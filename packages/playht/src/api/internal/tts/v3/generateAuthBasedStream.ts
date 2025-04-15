@@ -103,6 +103,7 @@ export const getInternalEngineForEndpoint = (options: AuthBasedEngineOptions): I
       return 'Play3.0-mini';
     case 'PlayDialog':
       if (options.language === 'arabic') return 'PlayDialogArabic';
+      if (options.language === 'hindi') return 'PlayDialogHindi';
       if (options.language && options.language !== 'english') return 'PlayDialogMultilingual';
       return 'PlayDialog';
   }

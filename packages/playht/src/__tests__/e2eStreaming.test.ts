@@ -150,7 +150,36 @@ describe('E2E', () => {
       });
 
       const audioBuffer = await buffer(streamFromText);
-      fs.writeFileSync('test-output-PlayDialog.mp3', audioBuffer); // for debugging
+      fs.writeFileSync('test-output-PlayDialog-arabic.mp3', audioBuffer); // for debugging
+
+      expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
+      expect(audioBuffer.toString('ascii')).toContain('ID3');
+    }, 120_000);
+  });
+
+  describe('PlayDialogHindi', () => {
+    it('streams from text', async () => {
+      PlayHT.init({
+        userId: E2E_CONFIG.USER_ID,
+        apiKey: E2E_CONFIG.API_KEY,
+        debug: {
+          enabled: true,
+        },
+      });
+
+      const streamFromText = await PlayHT.stream('Host 1: क्या यह SDK है?\nHost 2: हाँ, यह है।', {
+        voiceEngine: 'PlayDialog',
+        outputFormat: 'mp3',
+        temperature: 1.2,
+        quality: 'high',
+        voiceId2: 's3://voice-cloning-zero-shot/775ae416-49bb-4fb6-bd45-740f205d20a1/jennifersaad/manifest.json',
+        turnPrefix: 'Host 1:',
+        turnPrefix2: 'Host 2:',
+        language: 'hindi',
+      });
+
+      const audioBuffer = await buffer(streamFromText);
+      fs.writeFileSync('test-output-PlayDialog-hindi.mp3', audioBuffer); // for debugging
 
       expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
       expect(audioBuffer.toString('ascii')).toContain('ID3');

@@ -12,6 +12,7 @@ const inferenceCoordinatesStores: Record<InternalAuthBasedEngine, Record<UserId,
   'Play3.0-mini': {},
   PlayDialog: {},
   PlayDialogArabic: {},
+  PlayDialogHindi: {},
   PlayDialogMultilingual: {},
 };
 
