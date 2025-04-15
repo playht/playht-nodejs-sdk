@@ -91,7 +91,6 @@ export async function generateV1Speech(
             statusMessage: error.response?.statusMessage,
           };
         });
-      console.log('generationStatus', generationStatus);
       const { audioUrl, message, transcriped, converted, error } = generationStatus;
       if (error) {
         throw {
