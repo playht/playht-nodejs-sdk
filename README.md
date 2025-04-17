@@ -122,6 +122,7 @@ For example, to use the default settings to convert text into an audio stream an
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Create a file stream
 const fileStream = fs.createWriteStream('hello-playht.mp3');
@@ -130,7 +131,7 @@ const fileStream = fs.createWriteStream('hello-playht.mp3');
 const stream = await PlayHT.stream('This sounds very realistic.');
 
 // Pipe stream into file
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 
@@ -141,6 +142,7 @@ For example, to convert a text stream into an audio file using the default setti
 import * as PlayHT from 'playht';
 import { Readable } from 'stream';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Create a test stream
 const textStream = new Readable({
@@ -157,7 +159,7 @@ const stream = await PlayHT.stream(textStream);
 
 // Create a file stream
 const fileStream = fs.createWriteStream('hello-playht.mp3');
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 For a full example of using the streaming speech from input stream API, see our [ChatGPT Integration Example](packages/gpt-example/README.md).
@@ -181,6 +183,7 @@ To stream using the `PlayDialog` model in English:
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Create a file stream
 const fileStream = fs.createWriteStream('play_3.mp3');
@@ -193,7 +196,7 @@ const stream = await PlayHT.stream('Stream realistic voices that say what you wa
 });
 
 // Pipe stream into file
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 Here's an example using `PlayDialog` with an Arabic voice:
@@ -201,6 +204,7 @@ Here's an example using `PlayDialog` with an Arabic voice:
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Create a file stream
 const fileStream = fs.createWriteStream('play_dialog_arabic.mp3');
@@ -213,7 +217,7 @@ const stream = await PlayHT.stream('مرحبا بالعالم', {
 });
 
 // Pipe stream into file
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 Here's an example using `PlayDialog` with a Hindi voice:
@@ -221,6 +225,7 @@ Here's an example using `PlayDialog` with a Hindi voice:
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Create a file stream
 const fileStream = fs.createWriteStream('play_dialog_hindi.mp3');
@@ -233,7 +238,7 @@ const stream = await PlayHT.stream('नमस्ते दुनिया', {
 });
 
 // Pipe stream into file
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 ### PlayHT 2.0 Voices
@@ -270,6 +275,7 @@ To stream using the `PlayHT2.0-turbo` model:
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Create a file stream
 const fileStream = fs.createWriteStream('turbo-playht.mp3');
@@ -284,7 +290,7 @@ const stream = await PlayHT.stream('Stream realistic voices that say what you wa
 });
 
 // Pipe stream into file
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 ### PlayHT 1.0 Voices
@@ -377,6 +383,7 @@ You can use the `clone()` method to create a cloned voice from audio data. The c
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Load an audio file
 const fileBlob = fs.readFileSync('voice-to-clone.mp3');
@@ -393,7 +400,7 @@ const stream = await PlayHT.stream('Cloned voices sound realistic too.', {
   voiceEngine: clonedVoice.voiceEngine,
   voiceId: clonedVoice.id,
 });
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 The `clone()` method can also take in a URL string as input:
@@ -401,6 +408,7 @@ The `clone()` method can also take in a URL string as input:
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Audio file url
 const fileUrl = 'https://peregrine-samples.s3.amazonaws.com/peregrine-voice-cloning/Neil-DeGrasse-Tyson-sample.wav';
@@ -417,7 +425,7 @@ const stream = await PlayHT.stream('Cloned voices are pure science.', {
   voiceEngine: clonedVoice.voiceEngine,
   voiceId: clonedVoice.id,
 });
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 ### Deleting a Cloned Voice
