@@ -275,9 +275,10 @@ console.log('The url for the audio file is', audioUrl);
 
 ### Standard Voices
 
-For multilingual text-to speech generations, changing pitches, and adding pauses. Voices with reliable outputs and support for Speech Synthesis Markup Language (SSML). Supports 100+ languages.
+Ideal for multilingual text-to-speech, changing pitch, adding pauses, and using Speech Synthesis Markup Language (SSML).
+These voices offer reliable output and support over 100 languages.
 
-And an example with standard voice in Spanish:
+Here's an example using a standard voice in Spanish:
 
 ```javascript
 import * as PlayHT from 'playht';
