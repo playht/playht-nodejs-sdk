@@ -208,7 +208,27 @@ const fileStream = fs.createWriteStream('play_dialog_arabic.mp3');
 // Stream audio from text
 const stream = await PlayHT.stream('مرحبا بالعالم', {
   voiceEngine: 'PlayDialog',
-  voiceId: 's3://voice-cloning-zero-shot/mzC-mRcDq38LCRzodkM-Z/amira-arabic/manifest.json', // Example Arabic-optimized voice
+  voiceId: 's3://voice-cloning-zero-shot/mzC-mRcDq38LCRzodkM-Z/amira-arabic/manifest.json',
+  outputFormat: 'mp3',
+});
+
+// Pipe stream into file
+stream.pipe(fileStream);
+```
+
+Here's an example using `PlayDialog` with a Hindi voice:
+
+```javascript
+import * as PlayHT from 'playht';
+import fs from 'fs';
+
+// Create a file stream
+const fileStream = fs.createWriteStream('play_dialog_hindi.mp3');
+
+// Stream audio from text
+const stream = await PlayHT.stream('नमस्ते दुनिया', {
+  voiceEngine: 'PlayDialog',
+  voiceId: 's3://voice-cloning-zero-shot/831bd330-85c6-4333-b2b4-10c476ea3491/original/manifest.json',
   outputFormat: 'mp3',
 });
 
