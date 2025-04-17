@@ -133,25 +133,6 @@ const stream = await PlayHT.stream('This sounds very realistic.');
 stream.pipe(fileStream);
 ```
 
-Here's an example using `PlayDialog` with an Arabic voice:
-
-```javascript
-import * as PlayHT from 'playht';
-import fs from 'fs';
-
-// Create a file stream
-const fileStream = fs.createWriteStream('play_dialog_arabic.mp3');
-
-// Stream audio from text
-const stream = await PlayHT.stream('مرحبا بالعالم', { // "Hello World" in Arabic
-  voiceEngine: 'PlayDialog',
-  voiceId: 's3://voice-cloning-zero-shot/mzC-mRcDq38LCRzodkM-Z/amira-arabic/manifest.json', // Example Arabic voice ID
-  outputFormat: 'mp3',
-});
-
-// Pipe stream into file
-stream.pipe(fileStream);
-```
 
 The `stream()` method also allows you to stream audio from a text stream input.
 For example, to convert a text stream into an audio file using the default settings:
@@ -208,6 +189,26 @@ const fileStream = fs.createWriteStream('play_3.mp3');
 const stream = await PlayHT.stream('Stream realistic voices that say what you want!', {
   voiceEngine: 'PlayDialog',
   voiceId: 's3://voice-cloning-zero-shot/831bd330-85c6-4333-b2b4-10c476ea3491/original/manifest.json',
+  outputFormat: 'mp3',
+});
+
+// Pipe stream into file
+stream.pipe(fileStream);
+```
+
+Here's an example using `PlayDialog` with an Arabic voice:
+
+```javascript
+import * as PlayHT from 'playht';
+import fs from 'fs';
+
+// Create a file stream
+const fileStream = fs.createWriteStream('play_dialog_arabic.mp3');
+
+// Stream audio from text
+const stream = await PlayHT.stream('مرحبا بالعالم', {
+  voiceEngine: 'PlayDialog',
+  voiceId: 's3://voice-cloning-zero-shot/mzC-mRcDq38LCRzodkM-Z/amira-arabic/manifest.json', // Example Arabic-optimized voice
   outputFormat: 'mp3',
 });
 
