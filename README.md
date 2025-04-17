@@ -85,7 +85,7 @@ import * as PlayHT from 'playht';
 PlayHT.init({
   apiKey: '<YOUR API KEY>',
   userId: '<YOUR API KEY>',
-  defaultVoiceId: 's3://peregrine-voices/oliver_narrative2_parrot_saad/manifest.json',
+  defaultVoiceId: 's3://voice-cloning-zero-shot/831bd330-85c6-4333-b2b4-10c476ea3491/original/manifest.json',
   defaultVoiceEngine: 'PlayDialog',
 });
 ```
@@ -157,7 +157,9 @@ For a full example of using the streaming speech from input stream API, see our 
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options).
 
-**_Note: For the lowest possible latency, use the streaming API with the `PlayDialog` model._**
+**_Note: For the lowest possible latency, use the streaming API with the `Play3.0-mini` model._**
+For everything else, we recommend `PlayDialog`:
+our flagship model with the best quality and multi-turn dialogue capabilities.
 
 ## Generating Speech Options
 
