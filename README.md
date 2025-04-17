@@ -60,9 +60,12 @@ yarn add playht
 
 ## Initializing the library
 
-Before using the SDK, you need to initialize the library with your credentials. You will need your API Secret Key and your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/studio/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
+Before using the SDK, you need to initialize it with your credentials.
+You will need your **API Secret Key** and your **User ID**.
+If you have a PlayHT account, you can find both on the [API access page](https://play.ht/studio/api-access).
+For more details, [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
 
-_**Important:** Keep your API Secret Key confidential. Do not share it with anyone or include it in publicly accessible code repositories._
+_**Important:** Keep your API Secret Key confidential. Do not share it or include it in publicly accessible code repositories._
 
 Import methods from the library and call `init()` with your credentials to set up the SDK:
 
@@ -70,8 +73,8 @@ Import methods from the library and call `init()` with your credentials to set u
 import * as PlayHT from 'playht';
 
 PlayHT.init({
-  apiKey: '<YOUR API KEY>',
-  userId: '<YOUR API KEY>',
+  apiKey: '<YOUR_API_KEY>',
+  userId: '<YOUR_USER_ID>',
 });
 ```
 
@@ -83,10 +86,10 @@ When initializing the library, you can also set a default voice and default voic
 import * as PlayHT from 'playht';
 
 PlayHT.init({
-  apiKey: '<YOUR API KEY>',
-  userId: '<YOUR API KEY>',
-  defaultVoiceId: 's3://peregrine-voices/oliver_narrative2_parrot_saad/manifest.json',
-  defaultVoiceEngine: 'Play3.0-mini',
+  apiKey: '<YOUR_API_KEY>',
+  userId: '<YOUR_USER_ID>',
+  defaultVoiceId: 's3://voice-cloning-zero-shot/831bd330-85c6-4333-b2b4-10c476ea3491/original/manifest.json',
+  defaultVoiceEngine: 'PlayDialog',
 });
 ```
 
@@ -106,17 +109,20 @@ const { audioUrl } = generated;
 console.log('The url for the audio file is', audioUrl);
 ```
 
-The output also contains a `generationId` field and an optional `message` field. `generationId` is a unique identifier for the generation request, which can be used for tracking and referencing the specific generation job. The optional `message` field gives additional information about the generation such as status or error messages.
+The output also contains a `generationId` field and an optional `message` field. `generationId` is a unique identifier for the generation request, which can be used for tracking and referencing the specific generation job.
+The optional `message` field gives additional information about the generation such as status or error messages.
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options) below.
 
 ## Streaming Speech
 
-The `stream()` method streams audio from a text. It returns a readable stream where the audio bytes will flow to as soon as they're ready. For example, to use the default settings to convert text into an audio stream and write it into a file:
+The `stream()` method streams audio from a text. It returns a readable stream where the audio bytes will flow to as soon as they're ready.
+For example, to use the default settings to convert text into an audio stream and write it into a file:
 
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Create a file stream
 const fileStream = fs.createWriteStream('hello-playht.mp3');
@@ -125,15 +131,18 @@ const fileStream = fs.createWriteStream('hello-playht.mp3');
 const stream = await PlayHT.stream('This sounds very realistic.');
 
 // Pipe stream into file
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
-The `stream()` method also allows you to stream audio from a text stream input. For example, to convert a text stream into an audio file using the default settings:
+
+The `stream()` method also allows you to stream audio from a text stream input.
+For example, to convert a text stream into an audio file using the default settings:
 
 ```javascript
 import * as PlayHT from 'playht';
 import { Readable } from 'stream';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Create a test stream
 const textStream = new Readable({
@@ -150,43 +159,86 @@ const stream = await PlayHT.stream(textStream);
 
 // Create a file stream
 const fileStream = fs.createWriteStream('hello-playht.mp3');
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 For a full example of using the streaming speech from input stream API, see our [ChatGPT Integration Example](packages/gpt-example/README.md).
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options).
 
-**_Note: For the lowest possible latency, use the streaming API with the `Play3.0-mini` model._**
+**_Note: For the lowest possible latency, use the streaming API with the `Play3.0-mini` model. For the best overall quality and multi-turn dialogue capabilities, we recommend our flagship model, `PlayDialog`._**
 
 ## Generating Speech Options
 
 All text-to-speech methods above accept an optional `options` parameter. You can use it to generate audio with different voices, AI models, output file formats and much more.
 
-The options available will depend on the AI model that synthesizes the selected voice. PlayHT API supports different types of models: `Play3.0-mini`, `PlayHT2.0`, `PlayHT2.0-turbo`, `PlayHT1.0` and `Standard`. For all available options, see the TypeScript type definitions [in the code](packages/playht/src/index.ts).
+The options available will depend on the AI model that synthesizes the selected voice. PlayHT API supports different types of models: `PlayDialog`, `Play3.0-mini`, `PlayHT2.0`, `PlayHT2.0-turbo`, `PlayHT1.0` and `Standard`. For all available options, see the TypeScript type definitions [in the code](packages/playht/src/index.ts).
 
-### Play3.0-mini Voices (Recommended)
+### PlayDialog Voices (Recommended)
 
-Our newest conversational voice AI model with added languages, lowest latency, and instant cloning. Compatible with `PlayHT2.0` and `PlayHT2.0-turbo`, our most reliable and fastest model for streaming.
+Our flagship conversational voice AI model, offering the best quality, multi-turn dialogue capabilities, multilingual support, and instant cloning. It's highly reliable and fast for streaming across various languages.
 
-To stream using the `Play3.0-mini` model:
+To stream using the `PlayDialog` model in English:
 
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Create a file stream
 const fileStream = fs.createWriteStream('play_3.mp3');
 
 // Stream audio from text
 const stream = await PlayHT.stream('Stream realistic voices that say what you want!', {
-  voiceEngine: 'Play3.0-mini',
-  voiceId: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
+  voiceEngine: 'PlayDialog',
+  voiceId: 's3://voice-cloning-zero-shot/831bd330-85c6-4333-b2b4-10c476ea3491/original/manifest.json',
   outputFormat: 'mp3',
 });
 
 // Pipe stream into file
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
+```
+
+Here's an example using `PlayDialog` with an Arabic voice:
+
+```javascript
+import * as PlayHT from 'playht';
+import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
+
+// Create a file stream
+const fileStream = fs.createWriteStream('play_dialog_arabic.mp3');
+
+// Stream audio from text
+const stream = await PlayHT.stream('مرحبا بالعالم', {
+  voiceEngine: 'PlayDialog',
+  voiceId: 's3://voice-cloning-zero-shot/mzC-mRcDq38LCRzodkM-Z/amira-arabic/manifest.json',
+  outputFormat: 'mp3',
+});
+
+// Pipe stream into file
+await pipeline(stream, fileStream);
+```
+
+Here's an example using `PlayDialog` with a Hindi voice:
+
+```javascript
+import * as PlayHT from 'playht';
+import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
+
+// Create a file stream
+const fileStream = fs.createWriteStream('play_dialog_hindi.mp3');
+
+// Stream audio from text
+const stream = await PlayHT.stream('नमस्ते दुनिया', {
+  voiceEngine: 'PlayDialog',
+  voiceId: 's3://voice-cloning-zero-shot/831bd330-85c6-4333-b2b4-10c476ea3491/original/manifest.json',
+  outputFormat: 'mp3',
+});
+
+// Pipe stream into file
+await pipeline(stream, fileStream);
 ```
 
 ### PlayHT 2.0 Voices
@@ -223,6 +275,7 @@ To stream using the `PlayHT2.0-turbo` model:
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Create a file stream
 const fileStream = fs.createWriteStream('turbo-playht.mp3');
@@ -237,7 +290,7 @@ const stream = await PlayHT.stream('Stream realistic voices that say what you wa
 });
 
 // Pipe stream into file
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 ### PlayHT 1.0 Voices
@@ -269,9 +322,10 @@ console.log('The url for the audio file is', audioUrl);
 
 ### Standard Voices
 
-For multilingual text-to speech generations, changing pitches, and adding pauses. Voices with reliable outputs and support for Speech Synthesis Markup Language (SSML). Supports 100+ languages.
+Ideal for multilingual text-to-speech, changing pitch, adding pauses, and using Speech Synthesis Markup Language (SSML).
+These voices offer reliable output and support over 100 languages.
 
-And an example with standard voice in Spanish:
+Here's an example using a standard voice in Spanish:
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -329,6 +383,7 @@ You can use the `clone()` method to create a cloned voice from audio data. The c
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Load an audio file
 const fileBlob = fs.readFileSync('voice-to-clone.mp3');
@@ -345,7 +400,7 @@ const stream = await PlayHT.stream('Cloned voices sound realistic too.', {
   voiceEngine: clonedVoice.voiceEngine,
   voiceId: clonedVoice.id,
 });
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 The `clone()` method can also take in a URL string as input:
@@ -353,6 +408,7 @@ The `clone()` method can also take in a URL string as input:
 ```javascript
 import * as PlayHT from 'playht';
 import fs from 'fs';
+import { pipeline } from 'node:stream/promises';
 
 // Audio file url
 const fileUrl = 'https://peregrine-samples.s3.amazonaws.com/peregrine-voice-cloning/Neil-DeGrasse-Tyson-sample.wav';
@@ -369,7 +425,7 @@ const stream = await PlayHT.stream('Cloned voices are pure science.', {
   voiceEngine: clonedVoice.voiceEngine,
   voiceId: clonedVoice.id,
 });
-stream.pipe(fileStream);
+await pipeline(stream, fileStream);
 ```
 
 ### Deleting a Cloned Voice
