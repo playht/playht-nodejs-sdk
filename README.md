@@ -60,7 +60,10 @@ yarn add playht
 
 ## Initializing the library
 
-Before using the SDK, you need to initialize it with your credentials. You will need your **API Secret Key** and your **User ID**. If you have a PlayHT account, you can find both on the [API access page](https://play.ht/studio/api-access). For more details, [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
+Before using the SDK, you need to initialize it with your credentials.
+You will need your **API Secret Key** and your **User ID**.
+If you have a PlayHT account, you can find both on the [API access page](https://play.ht/studio/api-access).
+For more details, [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
 
 _**Important:** Keep your API Secret Key confidential. Do not share it or include it in publicly accessible code repositories._
 
@@ -106,13 +109,15 @@ const { audioUrl } = generated;
 console.log('The url for the audio file is', audioUrl);
 ```
 
-The output also contains a `generationId` field and an optional `message` field. `generationId` is a unique identifier for the generation request, which can be used for tracking and referencing the specific generation job. The optional `message` field gives additional information about the generation such as status or error messages.
+The output also contains a `generationId` field and an optional `message` field. `generationId` is a unique identifier for the generation request, which can be used for tracking and referencing the specific generation job.
+The optional `message` field gives additional information about the generation such as status or error messages.
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options) below.
 
 ## Streaming Speech
 
-The `stream()` method streams audio from a text. It returns a readable stream where the audio bytes will flow to as soon as they're ready. For example, to use the default settings to convert text into an audio stream and write it into a file:
+The `stream()` method streams audio from a text. It returns a readable stream where the audio bytes will flow to as soon as they're ready.
+For example, to use the default settings to convert text into an audio stream and write it into a file:
 
 ```javascript
 import * as PlayHT from 'playht';
@@ -128,7 +133,8 @@ const stream = await PlayHT.stream('This sounds very realistic.');
 stream.pipe(fileStream);
 ```
 
-The `stream()` method also allows you to stream audio from a text stream input. For example, to convert a text stream into an audio file using the default settings:
+The `stream()` method also allows you to stream audio from a text stream input.
+For example, to convert a text stream into an audio file using the default settings:
 
 ```javascript
 import * as PlayHT from 'playht';
