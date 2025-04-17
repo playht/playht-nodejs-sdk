@@ -34,7 +34,7 @@ export class APISettingsStore {
   private static getInstance(): APISettingsStore {
     if (!APISettingsStore._instance) {
       throw new Error(
-        'Initialise the PlayHT API first by calling init() with your API key and user ID. Please refer to https://docs.play.ht/reference/api-authentication for more info.',
+        'Initialize the PlayHT API first by calling init() with your API key and user ID. Please refer to https://docs.play.ht/reference/api-authentication for more info.',
       );
     }
     return APISettingsStore._instance;
