@@ -60,9 +60,9 @@ yarn add playht
 
 ## Initializing the library
 
-Before using the SDK, you need to initialize the library with your credentials. You will need your API Secret Key and your User ID. If you already have a PlayHT account, navigate to the [API access page](https://play.ht/studio/api-access). For more details [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
+Before using the SDK, you need to initialize it with your credentials. You will need your **API Secret Key** and your **User ID**. If you have a PlayHT account, you can find both on the [API access page](https://play.ht/studio/api-access). For more details, [see the API documentation](https://docs.play.ht/reference/api-authentication#generating-your-api-secret-key-and-obtaining-your-user-id).
 
-_**Important:** Keep your API Secret Key confidential. Do not share it with anyone or include it in publicly accessible code repositories._
+_**Important:** Keep your API Secret Key confidential. Do not share it or include it in publicly accessible code repositories._
 
 Import methods from the library and call `init()` with your credentials to set up the SDK:
 
@@ -70,8 +70,8 @@ Import methods from the library and call `init()` with your credentials to set u
 import * as PlayHT from 'playht';
 
 PlayHT.init({
-  apiKey: '<YOUR API KEY>',
-  userId: '<YOUR API KEY>',
+  apiKey: '<YOUR_API_KEY>',
+  userId: '<YOUR_USER_ID>',
 });
 ```
 
@@ -83,8 +83,8 @@ When initializing the library, you can also set a default voice and default voic
 import * as PlayHT from 'playht';
 
 PlayHT.init({
-  apiKey: '<YOUR API KEY>',
-  userId: '<YOUR API KEY>',
+  apiKey: '<YOUR_API_KEY>',
+  userId: '<YOUR_USER_ID>',
   defaultVoiceId: 's3://voice-cloning-zero-shot/831bd330-85c6-4333-b2b4-10c476ea3491/original/manifest.json',
   defaultVoiceEngine: 'PlayDialog',
 });
@@ -157,9 +157,7 @@ For a full example of using the streaming speech from input stream API, see our 
 
 For more speech generation options, see [Generating Speech Options](#generating-speech-options).
 
-**_Note: For the lowest possible latency, use the streaming API with the `Play3.0-mini` model._**
-For everything else, we recommend `PlayDialog`:
-our flagship model with the best quality and multi-turn dialogue capabilities.
+**_Note: For the lowest possible latency, use the streaming API with the `Play3.0-mini` model. For the best overall quality and multi-turn dialogue capabilities, we recommend our flagship model, `PlayDialog`._**
 
 ## Generating Speech Options
 
@@ -169,7 +167,7 @@ The options available will depend on the AI model that synthesizes the selected 
 
 ### PlayDialog Voices (Recommended)
 
-Our newest conversational voice AI model with added languages, lowest latency, and instant cloning. This is our most reliable and fastest model for streaming.
+Our flagship conversational voice AI model, offering the best quality, multi-turn dialogue capabilities, added languages, and instant cloning. It's highly reliable and fast for streaming.
 
 To stream using the `PlayDialog` model:
 
