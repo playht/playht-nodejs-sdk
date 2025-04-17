@@ -181,7 +181,7 @@ const fileStream = fs.createWriteStream('play_3.mp3');
 // Stream audio from text
 const stream = await PlayHT.stream('Stream realistic voices that say what you want!', {
   voiceEngine: 'PlayDialog',
-  voiceId: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
+  voiceId: 's3://voice-cloning-zero-shot/831bd330-85c6-4333-b2b4-10c476ea3491/original/manifest.json',
   outputFormat: 'mp3',
 });
 
