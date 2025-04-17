@@ -72,7 +72,7 @@ function debugRequest(
 ) {
   debugLog(
     sdkSettings,
-    `Request - URL: v2/tts/stream - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${
+    `Request - Inference Backend: v2-tts-stream - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${
       response.headers['x-play-request-id']
     } - Status: ${response.status}${response.errorMessage ? ` - Error: ${response.errorMessage}` : ''}`,
   );
