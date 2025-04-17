@@ -25,13 +25,12 @@ The PlayHT SDK provides easy to use methods to wrap the [PlayHT API](https://doc
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-**Table of Contents**
-
 - [Usage](#usage)
   - [Initializing the library](#initializing-the-library)
   - [Generating Speech](#generating-speech)
   - [Streaming Speech](#streaming-speech)
   - [Generating Speech Options](#generating-speech-options)
+    - [PlayDialog Voices (Recommended)](#playdialog-voices-recommended)
     - [PlayHT 2.0 Voices](#playht-20-voices)
     - [PlayHT 1.0 Voices](#playht-10-voices)
     - [Standard Voices](#standard-voices)
