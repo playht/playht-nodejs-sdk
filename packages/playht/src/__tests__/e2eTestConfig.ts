@@ -22,4 +22,6 @@ export const E2E_CONFIG = {
   USER_ID: process.env.USER_ID!,
   // eslint-disable-next-line no-process-env
   API_KEY: process.env.API_KEY!,
+  // eslint-disable-next-line no-process-env
+  HFVC_VOICE: process.env.HFVC_VOICE!,
 };

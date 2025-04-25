@@ -16,7 +16,10 @@ export async function generateAuthBasedStream(
   options: AuthBasedEngineOptions,
   reqConfig: PlayRequestConfigWithDefaults,
 ): Promise<NodeJS.ReadableStream> {
-  const inferenceAddress = await createOrGetInferenceAddress(getInternalEngineForEndpoint(options), reqConfig.settings);
+  const inferenceAddress = await createOrGetInferenceAddress(
+    getInternalEngineForEndpoint({ voice, ...options }),
+    reqConfig.settings,
+  );
   const payloadForEngine = createPayloadForEngine(text, voice, options);
   const streamOptions = {
     method: 'POST',
@@ -95,8 +98,15 @@ const createPayloadForEngine = (
   }
 };
 
+const HFVC_VOICE_ID_PREFIX = 's3://play-fal/ldm-lora-training';
+
 // visible for test
-export const getInternalEngineForEndpoint = (options: AuthBasedEngineOptions): InternalAuthBasedEngine => {
+export const getInternalEngineForEndpoint = (
+  options: { voice: string } & AuthBasedEngineOptions,
+): InternalAuthBasedEngine => {
+  if (options.voice.startsWith(HFVC_VOICE_ID_PREFIX)) {
+    return 'PlayDialogLora';
+  }
   switch (options.voiceEngine) {
     case 'Play3.0-mini':
       return 'Play3.0-mini';
