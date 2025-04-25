@@ -10,6 +10,7 @@ export type InternalAuthBasedEngine =
   | PublicAuthBasedEngine
   | 'PlayDialogArabic'
   | 'PlayDialogHindi'
+  | 'PlayDialogLora'
   | 'PlayDialogMultilingual';
 
 export type V3InternalSettings = {

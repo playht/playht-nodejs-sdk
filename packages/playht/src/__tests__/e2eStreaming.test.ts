@@ -245,6 +245,30 @@ describe('E2E', () => {
     }, 120_000);
   });
 
+  describe('PlayDialogLora', () => {
+    it('streams from text', async () => {
+      PlayHT.init({
+        userId: E2E_CONFIG.USER_ID,
+        apiKey: E2E_CONFIG.API_KEY,
+        debug: {
+          enabled: true,
+        },
+      });
+
+      const p = PlayHT.stream('Hey Lora', {
+        voiceEngine: 'PlayDialog',
+        voiceId: E2E_CONFIG.HFVC_VOICE,
+      });
+      const streamFromText = await p;
+
+      const audioBuffer = await buffer(streamFromText);
+      fs.writeFileSync('test-output-PlayDialogLora--no-git.wav', audioBuffer); // for debugging
+
+      expect(audioBuffer.length).toBeGreaterThan(30_000); // errors would result in smaller payloads
+      expect(audioBuffer.toString('ascii')).toContain('RIFF\u007F\u007F\u007F\u007FWAVEfmt');
+    }, 120_000);
+  });
+
   describe('Advanced Config', () => {
     describe('axiosClient', () => {
       it('overwrites default axios client for streaming requests', async () => {
