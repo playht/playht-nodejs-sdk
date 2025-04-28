@@ -312,6 +312,7 @@ describe('E2E', () => {
               },
             },
           };
+          const perRequestConfig: PlayHT.PlayRequestConfig = { settings, signal: new AbortController().signal };
           const p = PlayHT.stream(
             'Hey Turbo',
             {
@@ -320,7 +321,7 @@ describe('E2E', () => {
               quality: 'high',
             },
             // @ts-expect-error experimental settings are not exposed in the public API
-            { settings },
+            perRequestConfig,
           );
           const streamFromText = await p;
 
