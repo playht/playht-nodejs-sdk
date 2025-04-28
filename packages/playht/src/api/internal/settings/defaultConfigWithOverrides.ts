@@ -9,8 +9,10 @@ import { PlayRequestConfig, PlayRequestConfigWithDefaults } from '../config/Play
  * @param overrides - The overrides to merge with the default settings.
  * @returns The merged configuration object.
  */
-export function defaultConfigWithOverrides(overrides: PlayRequestConfig | undefined | null): PlayRequestConfigWithDefaults {
+export function defaultConfigWithOverrides(
+  overrides: PlayRequestConfig | undefined | null,
+): PlayRequestConfigWithDefaults {
   return deepmerge({ settings: APISettingsStore.getSettings() }, overrides ?? {}, {
     isMergeableObject: isPlainObject,
-  })
+  });
 }
