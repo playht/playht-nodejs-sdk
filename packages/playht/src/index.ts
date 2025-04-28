@@ -1,5 +1,4 @@
 import { AxiosRequestConfig } from 'axios';
-import deepmerge from 'deepmerge';
 import { APISettingsStore } from './api/APISettingsStore';
 import { commonGenerateSpeech, commonGenerateStream } from './api/apiCommon';
 import { commonGetAllVoices } from './api/commonGetAllVoices';
@@ -7,6 +6,7 @@ import { commonInstantClone, internalDeleteClone } from './api/instantCloneInter
 import { PlayRequestConfig } from './api/internal/config/PlayRequestConfig';
 import { backgroundWarmUpAuthBasedEngine } from './api/internal/tts/v3/backgroundWarmUpAuthBasedEngine';
 import { clearInferenceCoordinatesStoreForUser } from './api/internal/tts/v3/createOrGetInferenceAddress';
+import { defaultConfigWithOverrides } from './api/internal/settings/defaultConfigWithOverrides';
 
 /**
  * The various voice engines that can be used for speech synthesis.
@@ -675,7 +675,7 @@ export async function stream(
   // not all streaming engines support on-the-fly settings right now.
   // eslint-disable-next-line prefer-rest-params
   const experimentalPerRequestConfig = arguments[2] ?? ({} as PlayRequestConfig);
-  const perRequestConfig = deepmerge({ settings: APISettingsStore.getSettings() }, experimentalPerRequestConfig);
+  const perRequestConfig = defaultConfigWithOverrides(experimentalPerRequestConfig);
   return await commonGenerateStream(input, options, perRequestConfig);
 }
 
