@@ -8,17 +8,8 @@ import {
 } from './V3InternalSettings';
 import { resolveV3Settings } from './resolveV3Settings';
 
-const inferenceCoordinatesCreationPromiseStores: Record<
-  InternalAuthBasedEngine,
-  Record<UserId, Promise<InferenceCoordinatesEntry>>
-> = {
-  'Play3.0-mini': {},
-  PlayDialog: {},
-  PlayDialogArabic: {},
-  PlayDialogHindi: {},
-  PlayDialogLora: {},
-  PlayDialogMultilingual: {},
-};
+const inferenceCoordinatesCreationPromiseStores: Record<`${UserId}:${InternalAuthBasedEngine}`, Promise<InferenceCoordinatesEntry>> = {};
+
 const inferenceCoordinatesStores: Record<InternalAuthBasedEngine, Record<UserId, InferenceCoordinatesEntry>> = {
   'Play3.0-mini': {},
   PlayDialog: {},
@@ -27,32 +18,22 @@ const inferenceCoordinatesStores: Record<InternalAuthBasedEngine, Record<UserId,
   PlayDialogLora: {},
   PlayDialogMultilingual: {},
 };
-const inferenceCoordinatesInFlightGenerations: Record<InternalAuthBasedEngine, Record<UserId, AbortController>> = {
-  'Play3.0-mini': {},
-  PlayDialog: {},
-  PlayDialogArabic: {},
-  PlayDialogHindi: {},
-  PlayDialogLora: {},
-  PlayDialogMultilingual: {},
+type UserAndEngine = {
+  userId: UserId;
+  engine: InternalAuthBasedEngine;
 };
-const inferenceCoordinatesRefreshTimers: Record<InternalAuthBasedEngine, Record<UserId, NodeJS.Timeout>> = {
-  'Play3.0-mini': {},
-  PlayDialog: {},
-  PlayDialogArabic: {},
-  PlayDialogHindi: {},
-  PlayDialogLora: {},
-  PlayDialogMultilingual: {},
-};
+const inferenceCoordinatesInFlightGenerations: Record<`${UserId}:${InternalAuthBasedEngine}`, AbortController> = {};
+const inferenceCoordinatesRefreshTimers: Record<`${UserId}:${InternalAuthBasedEngine}`, NodeJS.Timeout> = {};
 
 export const clearInferenceCoordinatesStoreForUser = (userId: UserId): void => {
-  for (const engine in inferenceCoordinatesStores) {
-    delete inferenceCoordinatesCreationPromiseStores[engine as keyof typeof inferenceCoordinatesCreationPromiseStores][
-      userId
-    ];
-    delete inferenceCoordinatesStores[engine as keyof typeof inferenceCoordinatesStores][userId];
-    clearTimeout(inferenceCoordinatesRefreshTimers[engine as keyof typeof inferenceCoordinatesRefreshTimers][userId]);
-    delete inferenceCoordinatesRefreshTimers[engine as keyof typeof inferenceCoordinatesRefreshTimers][userId];
-    abortOngoingGeneration(engine as InternalAuthBasedEngine, userId);
+  for (const engine of Object.keys(inferenceCoordinatesStores) as Array<InternalAuthBasedEngine>) {
+    delete inferenceCoordinatesCreationPromiseStores[`${userId}:${engine}`];
+    delete inferenceCoordinatesStores[engine][userId];
+
+    clearTimeout(inferenceCoordinatesRefreshTimers[`${userId}:${engine}`]);
+    delete inferenceCoordinatesRefreshTimers[`${userId}:${engine}`];
+
+    abortInFlightGeneration(`${userId}:${engine}`);
   }
 };
 
@@ -76,11 +57,11 @@ export const _inspectInferenceCoordinatesStoreForUser = (userId: UserId) => {
   return result;
 };
 
-function abortOngoingGeneration(voiceEngine: InternalAuthBasedEngine, userId: UserId) {
-  const previousGeneration = inferenceCoordinatesInFlightGenerations[voiceEngine][userId];
+function abortInFlightGeneration(userAndEngine: `${UserId}:${InternalAuthBasedEngine}`) {
+  const previousGeneration = inferenceCoordinatesInFlightGenerations[userAndEngine];
   if (previousGeneration) {
-    previousGeneration.abort('abortOngoingGeneration');
-    delete inferenceCoordinatesInFlightGenerations[voiceEngine][userId];
+    previousGeneration.abort('abortInFlightGeneration');
+    delete inferenceCoordinatesInFlightGenerations[userAndEngine];
   }
 }
 
@@ -94,9 +75,9 @@ const createInferenceCoordinates = async (
   const apiKey = reqConfigSettings.apiKey;
 
   try {
-    abortOngoingGeneration(voiceEngine, userId);
+    abortInFlightGeneration(`${userId}:${voiceEngine}`);
     const currentGenerationController = new AbortController();
-    inferenceCoordinatesInFlightGenerations[voiceEngine][userId] = currentGenerationController;
+    inferenceCoordinatesInFlightGenerations[`${userId}:${voiceEngine}`] = currentGenerationController;
     const newInferenceCoordinatesEntry = await v3Settings.customInferenceCoordinatesGenerator(
       voiceEngine,
       userId,
@@ -105,19 +86,8 @@ const createInferenceCoordinates = async (
     // if generation was canceled, doesn't update cache or schedule refresh
     if (currentGenerationController.signal.aborted) return newInferenceCoordinatesEntry;
 
-    // schedule the next refresh, if configured to do so
     if (v3Settings.coordinatesAheadOfTimeAutoRefresh) {
-      clearTimeout(inferenceCoordinatesRefreshTimers[voiceEngine][userId]);
-      inferenceCoordinatesRefreshTimers[voiceEngine][userId] = setTimeout(
-        () => {
-          // notice in this case no one is waiting for the promise to resolve, so we catch eventual errors
-          // since if we just let the error bubble up it will be unhandled.
-          createInferenceCoordinates(voiceEngine, v3Settings, reqConfigSettings).catch((error) =>
-            logGivenUpRefreshingCredentials(voiceEngine, v3Settings, reqConfigSettings, error, userId),
-          );
-        },
-        calculateRefreshDelay(v3Settings, newInferenceCoordinatesEntry.expiresAtMs),
-      ).unref();
+      scheduleAutoRefresh(v3Settings, voiceEngine, userId, reqConfigSettings, newInferenceCoordinatesEntry);
     }
 
     inferenceCoordinatesStores[voiceEngine][userId] = newInferenceCoordinatesEntry;
@@ -127,13 +97,33 @@ const createInferenceCoordinates = async (
 
     logFailedObtainingCredentials(voiceEngine, v3Settings, reqConfigSettings, error, userId, attemptNo);
     return new Promise((resolve) => {
-      clearTimeout(inferenceCoordinatesRefreshTimers[voiceEngine][userId]);
-      inferenceCoordinatesRefreshTimers[voiceEngine][userId] = setTimeout(() => {
+      clearTimeout(inferenceCoordinatesRefreshTimers[`${userId}:${voiceEngine}`]);
+      inferenceCoordinatesRefreshTimers[`${userId}:${voiceEngine}`] = setTimeout(() => {
         resolve(createInferenceCoordinates(voiceEngine, v3Settings, reqConfigSettings, attemptNo + 1));
       }, v3Settings.customRetryDelay(attemptNo)).unref();
     });
   }
 };
+
+function scheduleAutoRefresh(
+  v3Settings: V3InternalSettingsWithDefaults,
+  voiceEngine: InternalAuthBasedEngine,
+  userId: UserId,
+  reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
+  newInferenceCoordinatesEntry: InferenceCoordinatesEntry,
+) {
+  clearTimeout(inferenceCoordinatesRefreshTimers[`${userId}:${voiceEngine}`]);
+  inferenceCoordinatesRefreshTimers[`${userId}:${voiceEngine}`] = setTimeout(
+    () => {
+      // notice in this case no one is waiting for the promise to resolve, so we catch eventual errors
+      // since if we just let the error bubble up it will be unhandled.
+      createInferenceCoordinates(voiceEngine, v3Settings, reqConfigSettings).catch((error) =>
+        logGivenUpRefreshingCredentials(voiceEngine, v3Settings, reqConfigSettings, error, userId),
+      );
+    },
+    calculateRefreshDelay(v3Settings, newInferenceCoordinatesEntry.expiresAtMs),
+  ).unref();
+}
 
 function calculateRefreshDelay(
   v3Settings: V3InternalSettingsWithDefaults,
@@ -162,9 +152,9 @@ export const createOrGetInferenceAddress = async (
 
   if (inferenceCoordinatesEntry) delete inferenceCoordinatesStores[voiceEngine][userId]; // clear expired entry
 
-  // we already have a previous request in-flight, piggyback on it
-  if (!(userId in inferenceCoordinatesCreationPromiseStores[voiceEngine])) {
-    inferenceCoordinatesCreationPromiseStores[voiceEngine][userId] = createInferenceCoordinates(
+  // we don't have a previous in-flight to piggyback on, so we have to dispatch a new one
+  if (!(`${userId}:${voiceEngine}` in inferenceCoordinatesCreationPromiseStores)) {
+    inferenceCoordinatesCreationPromiseStores[`${userId}:${voiceEngine}`] = createInferenceCoordinates(
       voiceEngine,
       v3Settings,
       reqConfigSettings,
@@ -172,10 +162,10 @@ export const createOrGetInferenceAddress = async (
   }
 
   try {
-    const newInferenceCoordinatesEntry = (await inferenceCoordinatesCreationPromiseStores[voiceEngine][userId])!;
+    const newInferenceCoordinatesEntry = (await inferenceCoordinatesCreationPromiseStores[`${userId}:${voiceEngine}`])!;
     return newInferenceCoordinatesEntry.inferenceAddress;
   } finally {
-    delete inferenceCoordinatesCreationPromiseStores[voiceEngine][userId];
+    delete inferenceCoordinatesCreationPromiseStores[`${userId}:${voiceEngine}`];
   }
 };
 
