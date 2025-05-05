@@ -10,22 +10,22 @@ import { resolveV3Settings } from './resolveV3Settings';
 
 type UserAndEngine = `${UserId}:${InternalAuthBasedEngine}`;
 
-const inferenceCoordinatesStores: Record<UserAndEngine, InferenceCoordinatesEntry> = {};
-const inferenceCoordinatesCreationPromiseStores: Record<UserAndEngine, Promise<InferenceCoordinatesEntry>> = {};
-const inferenceCoordinatesInFlightGenerations: Record<UserAndEngine, AbortController> = {};
-const inferenceCoordinatesRefreshTimers: Record<UserAndEngine, NodeJS.Timeout> = {};
+const cachedCoordinates: Record<UserAndEngine, InferenceCoordinatesEntry> = {};
+const coordinatesCreationPromises: Record<UserAndEngine, Promise<InferenceCoordinatesEntry>> = {};
+const inFlightRefreshes: Record<UserAndEngine, AbortController> = {};
+const delayedRefreshTimers: Record<UserAndEngine, NodeJS.Timeout> = {};
 
 export const clearInferenceCoordinatesStoreForUser = (userToClear: UserId): void => {
-  for (const [userAndEngine] of Object.entries(inferenceCoordinatesStores) as Array<
+  for (const [userAndEngine] of Object.entries(cachedCoordinates) as Array<
     [UserAndEngine, InferenceCoordinatesEntry]
   >) {
     const [userId] = userAndEngine.split(':') as [UserId];
     if (userId !== userToClear) continue;
-    delete inferenceCoordinatesCreationPromiseStores[userAndEngine];
-    delete inferenceCoordinatesStores[userAndEngine];
+    delete coordinatesCreationPromises[userAndEngine];
+    delete cachedCoordinates[userAndEngine];
 
-    clearTimeout(inferenceCoordinatesRefreshTimers[userAndEngine]);
-    delete inferenceCoordinatesRefreshTimers[userAndEngine];
+    clearTimeout(delayedRefreshTimers[userAndEngine]);
+    delete delayedRefreshTimers[userAndEngine];
 
     abortInFlightGeneration(userAndEngine);
   }
@@ -33,7 +33,7 @@ export const clearInferenceCoordinatesStoreForUser = (userToClear: UserId): void
 
 // visible for tests
 export function __clearInferenceCoordinatesStoreForAllUsers() {
-  for (const icse of Object.entries(inferenceCoordinatesStores) as Array<[UserAndEngine, InferenceCoordinatesEntry]>) {
+  for (const icse of Object.entries(cachedCoordinates) as Array<[UserAndEngine, InferenceCoordinatesEntry]>) {
     const userId = icse[0].split(':')[0] as UserId;
     clearInferenceCoordinatesStoreForUser(userId);
   }
@@ -42,7 +42,7 @@ export function __clearInferenceCoordinatesStoreForAllUsers() {
 // visible for tests
 export const _inspectInferenceCoordinatesStoreForUser = (selectedUserId: UserId) => {
   const result: Record<InternalAuthBasedEngine, InferenceCoordinatesEntry | null> = {} as any;
-  for (const icse of Object.entries(inferenceCoordinatesStores) as Array<[UserAndEngine, InferenceCoordinatesEntry]>) {
+  for (const icse of Object.entries(cachedCoordinates) as Array<[UserAndEngine, InferenceCoordinatesEntry]>) {
     const [userId, typedEngine] = icse[0].split(':') as [UserId, InternalAuthBasedEngine];
     if (userId == selectedUserId) result[typedEngine] = icse[1];
   }
@@ -50,10 +50,10 @@ export const _inspectInferenceCoordinatesStoreForUser = (selectedUserId: UserId)
 };
 
 function abortInFlightGeneration(userAndEngine: `${UserId}:${InternalAuthBasedEngine}`) {
-  const previousGeneration = inferenceCoordinatesInFlightGenerations[userAndEngine];
+  const previousGeneration = inFlightRefreshes[userAndEngine];
   if (previousGeneration) {
     previousGeneration.abort('abortInFlightGeneration');
-    delete inferenceCoordinatesInFlightGenerations[userAndEngine];
+    delete inFlightRefreshes[userAndEngine];
   }
 }
 
@@ -70,7 +70,7 @@ const createInferenceCoordinates = async (
   try {
     abortInFlightGeneration(userAndEngine);
     const currentGenerationController = new AbortController();
-    inferenceCoordinatesInFlightGenerations[userAndEngine] = currentGenerationController;
+    inFlightRefreshes[userAndEngine] = currentGenerationController;
     const newInferenceCoordinatesEntry = await v3Settings.customInferenceCoordinatesGenerator(
       voiceEngine,
       userId,
@@ -80,18 +80,18 @@ const createInferenceCoordinates = async (
     if (currentGenerationController.signal.aborted) return newInferenceCoordinatesEntry;
 
     if (v3Settings.coordinatesAheadOfTimeAutoRefresh) {
-      scheduleAutoRefresh(v3Settings, voiceEngine, userId, reqConfigSettings, newInferenceCoordinatesEntry);
+      scheduleAutoRefresh(voiceEngine, userId, v3Settings, reqConfigSettings, newInferenceCoordinatesEntry);
     }
 
-    inferenceCoordinatesStores[userAndEngine] = newInferenceCoordinatesEntry;
+    cachedCoordinates[userAndEngine] = newInferenceCoordinatesEntry;
     return newInferenceCoordinatesEntry;
   } catch (error) {
     if (attemptNo >= v3Settings.coordinatesGetApiCallMaxRetries) throw error;
 
-    logFailedObtainingCredentials(voiceEngine, v3Settings, reqConfigSettings, error, userId, attemptNo);
+    logFailedObtainingCredentials(voiceEngine, userId, v3Settings, reqConfigSettings, error, attemptNo);
     return new Promise((resolve) => {
-      clearTimeout(inferenceCoordinatesRefreshTimers[userAndEngine]);
-      inferenceCoordinatesRefreshTimers[userAndEngine] = setTimeout(() => {
+      clearTimeout(delayedRefreshTimers[userAndEngine]);
+      delayedRefreshTimers[userAndEngine] = setTimeout(() => {
         resolve(createInferenceCoordinates(voiceEngine, v3Settings, reqConfigSettings, attemptNo + 1));
       }, v3Settings.customRetryDelay(attemptNo)).unref();
     });
@@ -99,14 +99,14 @@ const createInferenceCoordinates = async (
 };
 
 function scheduleAutoRefresh(
-  v3Settings: V3InternalSettingsWithDefaults,
   voiceEngine: InternalAuthBasedEngine,
   userId: UserId,
+  v3Settings: V3InternalSettingsWithDefaults,
   reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
   newInferenceCoordinatesEntry: InferenceCoordinatesEntry,
 ) {
-  clearTimeout(inferenceCoordinatesRefreshTimers[`${userId}:${voiceEngine}`]);
-  inferenceCoordinatesRefreshTimers[`${userId}:${voiceEngine}`] = setTimeout(
+  clearTimeout(delayedRefreshTimers[`${userId}:${voiceEngine}`]);
+  delayedRefreshTimers[`${userId}:${voiceEngine}`] = setTimeout(
     () => {
       // notice in this case no one is waiting for the promise to resolve, so we catch eventual errors
       // since if we just let the error bubble up it will be unhandled.
@@ -133,7 +133,8 @@ export const createOrGetInferenceAddress = async (
   reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
 ): Promise<string> => {
   const userId = reqConfigSettings.userId as UserId;
-  const inferenceCoordinatesEntry = inferenceCoordinatesStores[`${userId}:${voiceEngine}`];
+  const userAndEngine = `${userId}:${voiceEngine}` as const;
+  const inferenceCoordinatesEntry = cachedCoordinates[userAndEngine];
 
   const v3Settings = resolveV3Settings(reqConfigSettings.experimental?.v3);
 
@@ -143,31 +144,27 @@ export const createOrGetInferenceAddress = async (
 
   if (entryExistsAndIsNotExpired) return inferenceCoordinatesEntry.inferenceAddress;
 
-  if (inferenceCoordinatesEntry) delete inferenceCoordinatesStores[`${userId}:${voiceEngine}`]; // clear expired entry
+  if (inferenceCoordinatesEntry) delete cachedCoordinates[userAndEngine]; // clear expired entry
 
   // we don't have a previous in-flight to piggyback on, so we have to dispatch a new one
-  if (!(`${userId}:${voiceEngine}` in inferenceCoordinatesCreationPromiseStores)) {
-    inferenceCoordinatesCreationPromiseStores[`${userId}:${voiceEngine}`] = createInferenceCoordinates(
-      voiceEngine,
-      v3Settings,
-      reqConfigSettings,
-    );
+  if (!(userAndEngine in coordinatesCreationPromises)) {
+    coordinatesCreationPromises[userAndEngine] = createInferenceCoordinates(voiceEngine, v3Settings, reqConfigSettings);
   }
 
   try {
-    const newInferenceCoordinatesEntry = (await inferenceCoordinatesCreationPromiseStores[`${userId}:${voiceEngine}`])!;
+    const newInferenceCoordinatesEntry = (await coordinatesCreationPromises[userAndEngine])!;
     return newInferenceCoordinatesEntry.inferenceAddress;
   } finally {
-    delete inferenceCoordinatesCreationPromiseStores[`${userId}:${voiceEngine}`];
+    delete coordinatesCreationPromises[userAndEngine];
   }
 };
 
 function logFailedObtainingCredentials(
   voiceEngine: InternalAuthBasedEngine,
+  userId: UserId,
   v3Settings: V3InternalSettingsWithDefaults,
   reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
   error: unknown,
-  userId: UserId,
   attemptNo: number,
 ) {
   debugWarn(
