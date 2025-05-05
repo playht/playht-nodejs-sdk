@@ -4,9 +4,7 @@ import { expectToBeDateCloseToNow } from '../../../../__tests__/helpers/expectTo
 import { APISettingsStore, SDKSettings } from '../../../APISettingsStore';
 import {
   __clearInferenceCoordinatesStoreForAllUsers,
-  __inspectInferenceCoordinatesStoreForUser,
-  AUTO_CLEANUP_UNUSED_COORDINATES_AFTER_MS,
-  AUTO_CLEANUP_WORKER_INTERVAL_MS,
+  _inspectInferenceCoordinatesStoreForUser,
   clearInferenceCoordinatesStoreForUser,
   createOrGetInferenceAddress,
 } from './createOrGetInferenceAddress';
@@ -39,8 +37,6 @@ describe('createOrGetInferenceAddress', () => {
       coordinatesAheadOfTimeAutoRefresh?: boolean;
       customInferenceCoordinatesGenerator?: V3InternalSettings['customInferenceCoordinatesGenerator'];
       customRetryDelay?: V3InternalSettings['customRetryDelay'];
-      coordinatesUsableThresholdTimeMs?: number;
-      autoCleanupUnusedCoordinates?: boolean;
     } = {},
   ): SDKSettings => ({
     userId,
@@ -67,7 +63,6 @@ describe('createOrGetInferenceAddress', () => {
         coordinatesGetApiCallMaxRetries: 0,
         coordinatesUsableThresholdTimeMs: 56_123,
         customRetryDelay: options.customRetryDelay,
-        autoCleanupUnusedCoordinates: options.autoCleanupUnusedCoordinates ?? false,
       },
     },
     debug: {
@@ -109,6 +104,7 @@ describe('createOrGetInferenceAddress', () => {
   });
 
   describe('clearInferenceCoordinatesStoreForUser', () => {
+
     afterEach(() => {
       __clearInferenceCoordinatesStoreForAllUsers();
     });
@@ -116,56 +112,25 @@ describe('createOrGetInferenceAddress', () => {
     it('clears the inference coordinates store for the given user', async () => {
       const userId = 'tc-user-333' as UserId;
       await createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(userId));
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
         'Play3.0-mini': {
-          coordinates: {
-            expiresAtMs: expectToBeDateCloseToNow(),
-            inferenceAddress: 'call tc-user-333 #1',
-          },
-          autoCleanupIfUnused: false,
-          lastUsedAt: expectToBeDateCloseToNow(),
+          expiresAtMs: expectToBeDateCloseToNow(),
+          inferenceAddress: 'call tc-user-333 #1',
         },
       });
       await createOrGetInferenceAddress('PlayDialogArabic', reqConfigSettings(userId));
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
         'Play3.0-mini': {
-          coordinates: {
-            expiresAtMs: expectToBeDateCloseToNow(),
-            inferenceAddress: 'call tc-user-333 #1',
-          },
-          autoCleanupIfUnused: false,
-          lastUsedAt: expectToBeDateCloseToNow(),
+          expiresAtMs: expectToBeDateCloseToNow(),
+          inferenceAddress: 'call tc-user-333 #1',
         },
         PlayDialogArabic: {
-          coordinates: {
-            expiresAtMs: expectToBeDateCloseToNow(),
-            inferenceAddress: 'call tc-user-333 #2',
-          },
-          autoCleanupIfUnused: false,
-          lastUsedAt: expectToBeDateCloseToNow(),
+          expiresAtMs: expectToBeDateCloseToNow(),
+          inferenceAddress: 'call tc-user-333 #2',
         },
       });
       clearInferenceCoordinatesStoreForUser(userId);
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({});
-    });
-
-    it('updates lastUsedAt on cache hit', async () => {
-      const userId = 'lastUsed-user-test' as UserId;
-      const config = reqConfigSettings(userId, { expirationDiffMs: 1_000_000 });
-
-      // Initial call - caches
-      await createOrGetInferenceAddress('Play3.0-mini', config);
-      const initialCache = (__inspectInferenceCoordinatesStoreForUser(userId) as any)['Play3.0-mini']; // Need access to internal structure
-      const initialLastUsed = initialCache.lastUsedAt.getTime();
-
-      await sleep(20);
-
-      // Second call - cache hit
-      await createOrGetInferenceAddress('Play3.0-mini', config);
-      const updatedCache = (__inspectInferenceCoordinatesStoreForUser(userId) as any)['Play3.0-mini'];
-      const updatedLastUsed = updatedCache.lastUsedAt.getTime();
-
-      expect(updatedLastUsed).toBeGreaterThan(initialLastUsed);
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({});
     });
 
     it('honors expiration threshold', async () => {
@@ -183,14 +148,10 @@ describe('createOrGetInferenceAddress', () => {
         }),
       );
       expect(r1).toBe('call threshold-user-444 #1'); // first call, still
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
         PlayDialog: {
-          coordinates: {
-            expiresAtMs: expectToBeDateCloseToNow(56_123 + paddingMs),
-            inferenceAddress: 'call threshold-user-444 #1',
-          },
-          autoCleanupIfUnused: false,
-          lastUsedAt: expectToBeDateCloseToNow(),
+          expiresAtMs: expectToBeDateCloseToNow(56_123 + paddingMs),
+          inferenceAddress: 'call threshold-user-444 #1',
         },
       });
 
@@ -208,10 +169,11 @@ describe('createOrGetInferenceAddress', () => {
       );
       await expect(r3Promise).rejects.toThrow('should attempt to refresh and fail');
       // attempt above, which found the token expired, should have cleared the store
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({});
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({});
     });
 
     it('refreshes ahead of time', async () => {
+      console.log('now creating user 555');
       const paddingMs = 2; // typically the time you'd expect these functions to run (1ms is already A LOT!)
       const userId = 'ahead-user-555' as UserId;
       const r0 = await createOrGetInferenceAddress(
@@ -222,20 +184,17 @@ describe('createOrGetInferenceAddress', () => {
       expect(r0).toBe('call ahead-user-555 #1'); // first call
       await sleep(20); // leave some time for the auto-refresh interval to kick in
       // now verify that the inference address has changed on its own, even though we never called createOrGetInferenceAddress ourselves
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
+      expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
         PlayDialog: {
-          coordinates: {
-            expiresAtMs: expectToBeDateCloseToNow(9999999),
-            inferenceAddress: 'call ahead-user-555 #2',
-          },
-          autoCleanupIfUnused: false,
-          lastUsedAt: expectToBeDateCloseToNow(),
+          expiresAtMs: expectToBeDateCloseToNow(9999999),
+          inferenceAddress: 'call ahead-user-555 #2',
         },
       });
     });
   });
 
   describe('failures', () => {
+
     afterEach(() => {
       __clearInferenceCoordinatesStoreForAllUsers();
     });
@@ -268,6 +227,7 @@ describe('createOrGetInferenceAddress', () => {
       });
       let callNo = 0;
       configSettings.experimental!.v3!.coordinatesGetApiCallMaxRetries = 3;
+      configSettings.debug!.log = jest.fn();
       configSettings.debug!.info = jest.fn();
       configSettings.debug!.warn = jest.fn();
       configSettings.debug!.error = jest.fn();
@@ -275,103 +235,22 @@ describe('createOrGetInferenceAddress', () => {
       const req = createOrGetInferenceAddress('Play3.0-mini', configSettings);
       await sleep(100);
 
-      const logInfoCalls = (configSettings.debug!.info as jest.Mock).mock.calls;
-      const logWarnCalls = (configSettings.debug!.warn as jest.Mock).mock.calls;
-      const logErrorCalls = (configSettings.debug!.error as jest.Mock).mock.calls;
+      console.log((configSettings.debug!.log as jest.Mock).mock.calls);
+      console.log((configSettings.debug!.info as jest.Mock).mock.calls);
+      const warnCalls = (configSettings.debug!.warn as jest.Mock).mock.calls;
+      console.log(warnCalls);
+      const errorCalls = (configSettings.debug!.error as jest.Mock).mock.calls;
+      console.log(errorCalls);
+      expect(warnCalls).toHaveLength(2);
+      expect((warnCalls[0]![1] as any).event).toBe('failed-obtaining-credentials');
+      expect((warnCalls[0]![1] as any).error.message).toBe(`non-first call error #2`);
+      expect((warnCalls[1]![1] as any).event).toBe('failed-obtaining-credentials');
+      expect((warnCalls[1]![1] as any).error.message).toBe(`non-first call error #3`);
+      expect(errorCalls).toHaveLength(1);
+      expect((errorCalls[0]![1] as any).event).toBe('given-up-obtaining-credentials');
+      expect((errorCalls[0]![1] as any).error.message).toBe(`non-first call error #4`);
 
-      expect(logInfoCalls).toHaveLength(0);
-      expect(logWarnCalls).toHaveLength(2);
-      expect((logWarnCalls[0]![1] as any).event).toBe('failed-obtaining-credentials');
-      expect((logWarnCalls[0]![1] as any).error.message).toBe(`non-first call error #2`);
-      expect((logWarnCalls[1]![1] as any).event).toBe('failed-obtaining-credentials');
-      expect((logWarnCalls[1]![1] as any).error.message).toBe(`non-first call error #3`);
-      expect(logErrorCalls).toHaveLength(1);
-      expect((logErrorCalls[0]![1] as any).event).toBe('given-up-obtaining-credentials');
-      expect((logErrorCalls[0]![1] as any).error.message).toBe(`non-first call error #4`);
-
-      await expect(req).resolves.toBe('first-call successful');
-    });
-  });
-
-  describe('auto-cleanup', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
-    afterEach(() => {
-      jest.clearAllTimers();
-      jest.useRealTimers();
-      __clearInferenceCoordinatesStoreForAllUsers();
-    });
-
-    const autoCleanupConfig: Parameters<typeof reqConfigSettings>[1] = {
-      coordinatesAheadOfTimeAutoRefresh: false,
-      autoCleanupUnusedCoordinates: true,
-      customInferenceCoordinatesGenerator: async () => ({
-        inferenceAddress: 'dummy',
-        expiresAtMs: Date.now() + 999_999_999, // some time in the very distant future
-      }),
-    };
-    it('clears unused coordinates after 2 hours if enabled', async () => {
-      const userId = 'cleanup-user-888-1' as UserId;
-      const config = reqConfigSettings(userId, autoCleanupConfig);
-
-      // this call will start the cleanup worker
-      await createOrGetInferenceAddress('Play3.0-mini', config);
-      // at this point we should have some coordinates cached
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)['Play3.0-mini']).not.toBeNull();
-
-      // advance time just past the cleanup threshold + interval check, and then run cleanup
-      jest.advanceTimersByTime(AUTO_CLEANUP_UNUSED_COORDINATES_AFTER_MS + AUTO_CLEANUP_WORKER_INTERVAL_MS + 1);
-      jest.runOnlyPendingTimers();
-
-      // verify it has been cleared
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({});
-    });
-
-    it('does NOT clear coordinates if autoCleanupUnusedCoordinates is false', async () => {
-      const userId = 'cleanup-user-888-2' as UserId;
-      const config = reqConfigSettings(userId, {
-        ...autoCleanupConfig,
-        autoCleanupUnusedCoordinates: false,
-      });
-
-      await createOrGetInferenceAddress('Play3.0-mini', config);
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)['Play3.0-mini']).not.toBeNull();
-
-      jest.advanceTimersByTime(AUTO_CLEANUP_UNUSED_COORDINATES_AFTER_MS + AUTO_CLEANUP_WORKER_INTERVAL_MS + 1);
-      jest.runOnlyPendingTimers();
-
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)).not.toStrictEqual({});
-    });
-
-    it('does NOT clear recently used coordinates even if autoClear is enabled', async () => {
-      const userId = 'cleanup-user-888-3' as UserId;
-      const config = reqConfigSettings(userId, autoCleanupConfig);
-
-      await createOrGetInferenceAddress('Play3.0-mini', config);
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)['Play3.0-mini']).not.toBeNull();
-
-      // advance time, but not enough to trigger cleanup
-      const threshold = 10000;
-      jest.advanceTimersByTime(AUTO_CLEANUP_UNUSED_COORDINATES_AFTER_MS - threshold);
-
-      // trigger a cache hit to update lastUsedAt
-      await createOrGetInferenceAddress('Play3.0-mini', config);
-
-      // advance time past the original cleanup threshold + interval check, and run cleanup
-      jest.advanceTimersByTime(threshold + AUTO_CLEANUP_WORKER_INTERVAL_MS + 1);
-      jest.runOnlyPendingTimers();
-
-      // should still exist because it was used recently
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)).not.toStrictEqual({});
-
-      // advance time well past the cleanup threshold + interval check, and run cleanup function
-      jest.advanceTimersByTime(AUTO_CLEANUP_UNUSED_COORDINATES_AFTER_MS + AUTO_CLEANUP_WORKER_INTERVAL_MS + 1);
-      jest.runOnlyPendingTimers();
-
-      // this time it should be cleared
-      expect(__inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({});
+      await expect(req).resolves.toBe('first-call successful')
     });
   });
 });

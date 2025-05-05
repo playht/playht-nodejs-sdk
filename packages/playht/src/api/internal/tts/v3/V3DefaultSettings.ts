@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { keepAliveHttpsAgent } from '../../http';
 import { convertError } from '../../convertError';
-import { PLAY_SDK_VERSION } from '../../sdkVersion';
 import {
   InferenceCoordinatesEntry,
   InternalAuthBasedEngine,
@@ -21,9 +20,8 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
       {},
       {
         headers: {
-          authorization: `Bearer ${apiKey}`,
           'x-user-id': userId,
-          'x-play-sdk-version': PLAY_SDK_VERSION,
+          authorization: `Bearer ${apiKey}`,
         },
         httpsAgent: keepAliveHttpsAgent,
       },
@@ -58,12 +56,9 @@ export const V3_DEFAULT_SETTINGS: V3InternalSettingsWithDefaults = {
   coordinatesUsableThresholdTimeMs: 30_000, // 30 seconds
   // Custom function to generate inference coordinates
   customInferenceCoordinatesGenerator: defaultInferenceCoordinatesGenerator,
-  // Use exponential backoff
   customRetryDelay: (attemptNo) => {
     const calculatedDelay = 3 ** attemptNo * 500;
     const randomSum = calculatedDelay * 0.2 * Math.random(); // 0-20% of the delay
     return calculatedDelay + randomSum;
   },
-  // For the general user, always keep the coordinates
-  autoCleanupUnusedCoordinates: false,
 };
