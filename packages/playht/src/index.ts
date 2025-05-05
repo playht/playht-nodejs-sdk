@@ -628,28 +628,20 @@ export type APISettingsInput = {
      */
     enabled: boolean;
     /**
+     * A function to log debug messages. Defaults to console.log.
+     */
+    log?: (...data: Array<any>) => void;
+
+    /**
      * A function to log info debug messages.
      * Defaults to console.log.
      *
-     * @param infoMessage - The info message, for simple logging.
-     * @param logData - Full rich log data, for structured logging.
+     * @param infoMessage - The info message to log.
+     * @param logData - Objects for structured logging.
      */
-    info?: (
-      infoMessage: string,
-      logData: {
-        event: 'request-successful';
-        inferenceBackend: string;
-        requestId: string;
-        backendPayload: Record<string, string | number>;
-        responseStatus: number | '<NONE>';
-      },
-    ) => void;
+    info?: (infoMessage: string, logData: Record<string, any>) => void;
     /**
-     * A function to log warn debug messages.
-     * Defaults to `console.warn`.
-     *
-     * @param warnMessage - The warn message, for simple logging.
-     * @param logData - Full rich log data, for structured logging.
+     * A function to log warn debug messages. Defaults to console.warn.
      */
     warn?: (
       warnMessage: string,
@@ -663,30 +655,17 @@ export type APISettingsInput = {
       },
     ) => void;
     /**
-     * A function to log error debug messages.
-     * Defaults to `console.error`.
-     *
-     * @param errorMessage - The error message, for simple logging.
-     * @param logData - Full rich log data, for structured logging.
+     * A function to log error debug messages. Defaults to console.error.
      */
     error?: (
       errorMessage: string,
-      logData: { error: unknown } & (
-        | {
-            event: 'given-up-obtaining-credentials';
-            userId: string;
-            voiceEngine: string;
-            maxRetries: number;
-          }
-        | {
-            event: 'request-failed';
-            inferenceBackend: string;
-            requestId: string;
-            backendPayload: Record<string, string | number>;
-            responseStatus: number | '<NONE>';
-            responseErrorMessage?: string;
-          }
-      ),
+      logData: {
+        event: 'given-up-obtaining-credentials';
+        error: unknown;
+        userId: string;
+        voiceEngine: string;
+        maxRetries: number;
+      },
     ) => void;
   };
 };
