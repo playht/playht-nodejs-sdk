@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import { PlayRequestConfigWithDefaults } from '../../config/PlayRequestConfig';
 import { UserId } from '../../types';
 import { debugError, debugWarn } from '../../debug/debugLog';
@@ -91,9 +90,7 @@ const createInferenceCoordinates = async (
   reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
   attemptNo = 1,
 ): Promise<InferenceCoordinatesEntry> => {
-  const execution = crypto.randomUUID();
   const userId = reqConfigSettings.userId as UserId;
-  console.log(`createInferenceCoordinates CALLED for ${userId} -- ${execution}`);
   const apiKey = reqConfigSettings.apiKey;
 
   try {
@@ -110,12 +107,9 @@ const createInferenceCoordinates = async (
 
     // schedule the next refresh, if configured to do so
     if (v3Settings.coordinatesAheadOfTimeAutoRefresh) {
-      const prevTimerId = inferenceCoordinatesRefreshTimers[voiceEngine][userId];
-      console.log(execution, 'clearing timer, loc: 222, id: ', +(prevTimerId ?? -1), ' user:', userId);
-      clearTimeout(prevTimerId);
-      const timerId = setTimeout(
+      clearTimeout(inferenceCoordinatesRefreshTimers[voiceEngine][userId]);
+      inferenceCoordinatesRefreshTimers[voiceEngine][userId] = setTimeout(
         () => {
-          console.log(execution, 'timer triggered, loc: 111, id: ', +timerId, ' user:', userId);
           // notice in this case no one is waiting for the promise to resolve, so we catch eventual errors
           // since if we just let the error bubble up it will be unhandled.
           createInferenceCoordinates(voiceEngine, v3Settings, reqConfigSettings).catch((error) =>
@@ -124,8 +118,6 @@ const createInferenceCoordinates = async (
         },
         calculateRefreshDelay(v3Settings, newInferenceCoordinatesEntry.expiresAtMs),
       ).unref();
-      inferenceCoordinatesRefreshTimers[voiceEngine][userId] = timerId;
-      console.log(execution, 'timer started, loc: 111, id: ', +timerId, ' user:', userId);
     }
 
     inferenceCoordinatesStores[voiceEngine][userId] = newInferenceCoordinatesEntry;
@@ -135,15 +127,10 @@ const createInferenceCoordinates = async (
 
     logFailedObtainingCredentials(voiceEngine, v3Settings, reqConfigSettings, error, userId, attemptNo);
     return new Promise((resolve) => {
-      const prevTimerId = inferenceCoordinatesRefreshTimers[voiceEngine][userId];
-      console.log(execution, 'clearing timer, loc: 222, id: ', +(prevTimerId ?? 0), ' user:', userId);
-      clearTimeout(prevTimerId);
-      const timerId = setTimeout(() => {
-        console.log(execution, 'timer triggered, loc: 222, id: ', +timerId, ' user:', userId);
+      clearTimeout(inferenceCoordinatesRefreshTimers[voiceEngine][userId]);
+      inferenceCoordinatesRefreshTimers[voiceEngine][userId] = setTimeout(() => {
         resolve(createInferenceCoordinates(voiceEngine, v3Settings, reqConfigSettings, attemptNo + 1));
       }, v3Settings.customRetryDelay(attemptNo)).unref();
-      inferenceCoordinatesRefreshTimers[voiceEngine][userId] = timerId;
-      console.log(execution, 'timer started, loc: 222, id: ', +timerId, ' user:', userId);
     });
   }
 };
@@ -177,7 +164,6 @@ export const createOrGetInferenceAddress = async (
 
   // we already have a previous request in-flight, piggyback on it
   if (!(userId in inferenceCoordinatesCreationPromiseStores[voiceEngine])) {
-    console.log('call not via timer for user', userId);
     inferenceCoordinatesCreationPromiseStores[voiceEngine][userId] = createInferenceCoordinates(
       voiceEngine,
       v3Settings,
