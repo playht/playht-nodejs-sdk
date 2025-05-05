@@ -11,5 +11,8 @@ import { deepMergeMaintainingDefaults } from '../utils/deepMergeMaintainingDefau
 export function defaultConfigWithOverrides(
   overrides: PlayRequestConfig | undefined | null,
 ): PlayRequestConfigWithDefaults {
-  return deepMergeMaintainingDefaults<PlayRequestConfigWithDefaults>({ settings: APISettingsStore.getSettings() }, overrides);
+  return deepMergeMaintainingDefaults<PlayRequestConfigWithDefaults>(
+    { settings: APISettingsStore.getSettings() },
+    overrides,
+  );
 }
