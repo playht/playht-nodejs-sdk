@@ -631,6 +631,42 @@ export type APISettingsInput = {
      * A function to log debug messages. Defaults to console.log.
      */
     log?: (...data: Array<any>) => void;
+
+    /**
+     * A function to log info debug messages.
+     * Defaults to console.log.
+     *
+     * @param infoMessage - The info message to log.
+     * @param logData - Objects for structured logging.
+     */
+    info?: (infoMessage: string, logData: Record<string, any>) => void;
+    /**
+     * A function to log warn debug messages. Defaults to console.warn.
+     */
+    warn?: (
+      warnMessage: string,
+      logData: {
+        event: 'failed-obtaining-credentials';
+        error: unknown;
+        userId: string;
+        voiceEngine: string;
+        attemptNo: number;
+        maxRetries: number;
+      },
+    ) => void;
+    /**
+     * A function to log error debug messages. Defaults to console.error.
+     */
+    error?: (
+      errorMessage: string,
+      logData: {
+        event: 'given-up-obtaining-credentials';
+        error: unknown;
+        userId: string;
+        voiceEngine: string;
+        maxRetries: number;
+      },
+    ) => void;
   };
 };
 

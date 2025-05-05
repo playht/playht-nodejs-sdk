@@ -1,13 +1,14 @@
-import { beforeEach, describe, expect } from '@jest/globals';
+import { beforeEach, describe, expect, jest } from '@jest/globals';
 import { UserId } from '../../types';
 import { expectToBeDateCloseToNow } from '../../../../__tests__/helpers/expectToBeDateCloseToNow';
 import { APISettingsStore, SDKSettings } from '../../../APISettingsStore';
 import {
+  __clearInferenceCoordinatesStoreForAllUsers,
   _inspectInferenceCoordinatesStoreForUser,
   clearInferenceCoordinatesStoreForUser,
   createOrGetInferenceAddress,
 } from './createOrGetInferenceAddress';
-import { InternalAuthBasedEngine } from './V3InternalSettings';
+import { InternalAuthBasedEngine, V3InternalSettings } from './V3InternalSettings';
 
 async function sleep(timeout: number) {
   await new Promise((resolve) => setTimeout(resolve, timeout));
@@ -19,6 +20,9 @@ describe('createOrGetInferenceAddress', () => {
     APISettingsStore.setSettings({
       userId: 'not-used',
       apiKey: 'not-used',
+      debug: {
+        enabled: true,
+      },
     });
   });
   let callSequenceNumber: number;
@@ -31,6 +35,8 @@ describe('createOrGetInferenceAddress', () => {
       expirationDiffMs?: number;
       forcedError?: Error;
       coordinatesAheadOfTimeAutoRefresh?: boolean;
+      customInferenceCoordinatesGenerator?: V3InternalSettings['customInferenceCoordinatesGenerator'];
+      customRetryDelay?: V3InternalSettings['customRetryDelay'];
     } = {},
   ): SDKSettings => ({
     userId,
@@ -39,73 +45,88 @@ describe('createOrGetInferenceAddress', () => {
     defaultVoiceEngine: 'Standard',
     experimental: {
       v3: {
-        customInferenceCoordinatesGenerator: async (_: InternalAuthBasedEngine, u: string) => {
-          await sleep(10); // simulate a delay
-          if (options.forcedError) {
-            throw options.forcedError;
-          }
-          return {
-            inferenceAddress: `call ${u} #${++callSequenceNumber}`,
-            expiresAtMs: Date.now() + (options.expirationDiffMs ?? 1_000_000),
-          };
-        },
+        customInferenceCoordinatesGenerator:
+          options.customInferenceCoordinatesGenerator ??
+          (async (_: InternalAuthBasedEngine, u: string) => {
+            await sleep(10); // simulate a delay
+            if (options.forcedError) {
+              throw options.forcedError;
+            }
+            return {
+              inferenceAddress: `call ${u} #${++callSequenceNumber}`,
+              expiresAtMs: Date.now() + (options.expirationDiffMs ?? 1_000_000),
+            };
+          }),
         coordinatesAheadOfTimeAutoRefresh: options.coordinatesAheadOfTimeAutoRefresh ?? false,
         coordinatesExpirationMinimalFrequencyMs: 0,
         coordinatesExpirationAdvanceRefreshTimeMs: 0,
         coordinatesGetApiCallMaxRetries: 0,
         coordinatesUsableThresholdTimeMs: 56_123,
+        customRetryDelay: options.customRetryDelay,
       },
     },
+    debug: {
+      enabled: true,
+    },
+  });
+
+  afterEach(() => {
+    __clearInferenceCoordinatesStoreForAllUsers();
   });
 
   it('serializes concurrent calls for the same user', async () => {
     const numberOfTestCalls = 15;
     const calls = Array.from({ length: numberOfTestCalls }, () =>
-      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings('test-user')),
+      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings('test-user-111')),
     );
 
     // Expect all calls to return 'call #1', not 'call #1', 'call #2', 'call #3', etc.
-    expect(await Promise.all(calls)).toEqual(Array(numberOfTestCalls).fill('call test-user #1'));
+    expect(await Promise.all(calls)).toEqual(Array(numberOfTestCalls).fill('call test-user-111 #1'));
   });
 
   it('doesnt serialize calls for different users', async () => {
     const numberOfTestCalls = 3;
     const callsOne = Array.from({ length: numberOfTestCalls }, (_, i) =>
-      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(`test-user#${i}`)),
+      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(`test-user-222#${i}`)),
     );
     const callsTwo = Array.from({ length: numberOfTestCalls }, (_, i) =>
-      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(`test-user#${i}`)),
+      createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(`test-user-222#${i}`)),
     );
 
     expect(await Promise.all([...callsOne, ...callsTwo])).toEqual([
-      'call test-user#0 #1',
-      'call test-user#1 #2',
-      'call test-user#2 #3',
-      'call test-user#0 #1',
-      'call test-user#1 #2',
-      'call test-user#2 #3',
+      'call test-user-222#0 #1',
+      'call test-user-222#1 #2',
+      'call test-user-222#2 #3',
+      'call test-user-222#0 #1',
+      'call test-user-222#1 #2',
+      'call test-user-222#2 #3',
     ]);
   });
 
   describe('clearInferenceCoordinatesStoreForUser', () => {
+
+    afterEach(() => {
+      __clearInferenceCoordinatesStoreForAllUsers();
+    });
+
     it('clears the inference coordinates store for the given user', async () => {
-      const userId = 'tc-user' as UserId;
+      const userId = 'tc-user-333' as UserId;
       await createOrGetInferenceAddress('Play3.0-mini', reqConfigSettings(userId));
       expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
         'Play3.0-mini': {
           expiresAtMs: expectToBeDateCloseToNow(),
-          inferenceAddress: 'call tc-user #1',
+          inferenceAddress: 'call tc-user-333 #1',
         },
       });
       await createOrGetInferenceAddress('PlayDialogArabic', reqConfigSettings(userId));
       expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
         'Play3.0-mini': {
           expiresAtMs: expectToBeDateCloseToNow(),
-          inferenceAddress: 'call tc-user #1',
+          inferenceAddress: 'call tc-user-333 #1',
         },
         PlayDialogArabic: {
           expiresAtMs: expectToBeDateCloseToNow(),
-          inferenceAddress: 'call tc-user #2',
+          inferenceAddress: 'call tc-user-333 #2',
         },
       });
       clearInferenceCoordinatesStoreForUser(userId);
@@ -114,23 +135,23 @@ describe('createOrGetInferenceAddress', () => {
 
     it('honors expiration threshold', async () => {
       const paddingMs = 2; // typically the time you'd expect these functions to run (1ms is already A LOT!)
-      const userId = 'threshold-user' as UserId;
+      const userId = 'threshold-user-444' as UserId;
       const r0 = await createOrGetInferenceAddress(
         'PlayDialog',
         reqConfigSettings(userId, { expirationDiffMs: -56_123 + paddingMs }),
       );
-      expect(r0).toBe('call threshold-user #1'); // first call
+      expect(r0).toBe('call threshold-user-444 #1'); // first call
       const r1 = await createOrGetInferenceAddress(
         'PlayDialog',
         reqConfigSettings(userId, {
           forcedError: new Error('should not have been called because previous auth hasnt expired'),
         }),
       );
-      expect(r1).toBe('call threshold-user #1'); // first call, still
+      expect(r1).toBe('call threshold-user-444 #1'); // first call, still
       expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
         PlayDialog: {
           expiresAtMs: expectToBeDateCloseToNow(56_123 + paddingMs),
-          inferenceAddress: 'call threshold-user #1',
+          inferenceAddress: 'call threshold-user-444 #1',
         },
       });
 
@@ -140,7 +161,7 @@ describe('createOrGetInferenceAddress', () => {
         'PlayDialog',
         reqConfigSettings(userId, { expirationDiffMs: -56_123 - paddingMs }),
       );
-      expect(r2).toBe('call threshold-user #2'); // second call, but token should be expired next
+      expect(r2).toBe('call threshold-user-444 #2'); // second call, but token should be expired next
 
       const r3Promise = createOrGetInferenceAddress(
         'PlayDialog',
@@ -152,22 +173,84 @@ describe('createOrGetInferenceAddress', () => {
     });
 
     it('refreshes ahead of time', async () => {
+      console.log('now creating user 555');
       const paddingMs = 2; // typically the time you'd expect these functions to run (1ms is already A LOT!)
-      const userId = 'ahead-user' as UserId;
+      const userId = 'ahead-user-555' as UserId;
       const r0 = await createOrGetInferenceAddress(
         'PlayDialog',
         // notice that this generates a token that will be VERY EXPIRED :D
         reqConfigSettings(userId, { expirationDiffMs: -999999 + paddingMs, coordinatesAheadOfTimeAutoRefresh: true }),
       );
-      expect(r0).toBe('call ahead-user #1'); // first call
+      expect(r0).toBe('call ahead-user-555 #1'); // first call
       await sleep(20); // leave some time for the auto-refresh interval to kick in
       // now verify that the inference address has changed on its own, even though we never called createOrGetInferenceAddress ourselves
       expect(_inspectInferenceCoordinatesStoreForUser(userId)).toStrictEqual({
         PlayDialog: {
           expiresAtMs: expectToBeDateCloseToNow(9999999),
-          inferenceAddress: 'call ahead-user #2',
+          inferenceAddress: 'call ahead-user-555 #2',
         },
       });
+    });
+  });
+
+  describe('failures', () => {
+
+    afterEach(() => {
+      __clearInferenceCoordinatesStoreForAllUsers();
+    });
+
+    it('surfaces errors if it is from first call', async () => {
+      const configSettings = reqConfigSettings('test-user-666', {
+        customRetryDelay: () => 10,
+      });
+      configSettings.experimental!.v3!.customInferenceCoordinatesGenerator = async (_, u) => {
+        throw new Error(`first call error for ${u}`);
+      };
+      const req = createOrGetInferenceAddress('Play3.0-mini', configSettings);
+
+      await expect(req).rejects.toThrow('first call error for test-user-666');
+    });
+    it('logs errors if it is from other calls', async () => {
+      const configSettings = reqConfigSettings('test-user-777', {
+        coordinatesAheadOfTimeAutoRefresh: true,
+        customInferenceCoordinatesGenerator: async () => {
+          callNo++;
+          if (callNo === 1) {
+            return {
+              inferenceAddress: 'first-call successful',
+              expiresAtMs: Date.now(), // can refresh right away
+            };
+          }
+          throw new Error(`non-first call error #${callNo}`);
+        },
+        customRetryDelay: () => 10,
+      });
+      let callNo = 0;
+      configSettings.experimental!.v3!.coordinatesGetApiCallMaxRetries = 3;
+      configSettings.debug!.log = jest.fn();
+      configSettings.debug!.info = jest.fn();
+      configSettings.debug!.warn = jest.fn();
+      configSettings.debug!.error = jest.fn();
+
+      const req = createOrGetInferenceAddress('Play3.0-mini', configSettings);
+      await sleep(100);
+
+      console.log((configSettings.debug!.log as jest.Mock).mock.calls);
+      console.log((configSettings.debug!.info as jest.Mock).mock.calls);
+      const warnCalls = (configSettings.debug!.warn as jest.Mock).mock.calls;
+      console.log(warnCalls);
+      const errorCalls = (configSettings.debug!.error as jest.Mock).mock.calls;
+      console.log(errorCalls);
+      expect(warnCalls).toHaveLength(2);
+      expect((warnCalls[0]![1] as any).event).toBe('failed-obtaining-credentials');
+      expect((warnCalls[0]![1] as any).error.message).toBe(`non-first call error #2`);
+      expect((warnCalls[1]![1] as any).event).toBe('failed-obtaining-credentials');
+      expect((warnCalls[1]![1] as any).error.message).toBe(`non-first call error #3`);
+      expect(errorCalls).toHaveLength(1);
+      expect((errorCalls[0]![1] as any).event).toBe('given-up-obtaining-credentials');
+      expect((errorCalls[0]![1] as any).error.message).toBe(`non-first call error #4`);
+
+      await expect(req).resolves.toBe('first-call successful')
     });
   });
 });

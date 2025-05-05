@@ -1,7 +1,6 @@
-import deepmerge from 'deepmerge';
-import { isPlainObject } from 'is-plain-object';
 import { APISettingsStore } from '../../APISettingsStore';
 import { PlayRequestConfig, PlayRequestConfigWithDefaults } from '../config/PlayRequestConfig';
+import { deepMergeMaintainingDefaults } from '../utils/deepMergeMaintainingDefaults';
 
 /**
  * Returns a configuration object with default settings merged with any provided overrides.
@@ -12,7 +11,5 @@ import { PlayRequestConfig, PlayRequestConfigWithDefaults } from '../config/Play
 export function defaultConfigWithOverrides(
   overrides: PlayRequestConfig | undefined | null,
 ): PlayRequestConfigWithDefaults {
-  return deepmerge({ settings: APISettingsStore.getSettings() }, overrides ?? {}, {
-    isMergeableObject: isPlainObject,
-  });
+  return deepMergeMaintainingDefaults<PlayRequestConfigWithDefaults>({ settings: APISettingsStore.getSettings() }, overrides);
 }

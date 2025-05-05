@@ -30,7 +30,17 @@ export type V3InternalSettings = {
     userId: string,
     apiKey: string,
   ) => Promise<InferenceCoordinatesEntry>;
+  customRetryDelay?: (attemptNo: number) => number;
 };
+
+export interface V3InternalSettingsWithDefaults extends V3InternalSettings {
+  coordinatesExpirationAdvanceRefreshTimeMs: number;
+  coordinatesExpirationMinimalFrequencyMs: number;
+  coordinatesGetApiCallMaxRetries: number;
+  coordinatesUsableThresholdTimeMs: number;
+  customInferenceCoordinatesGenerator: NonNullable<V3InternalSettings['customInferenceCoordinatesGenerator']>;
+  customRetryDelay: NonNullable<V3InternalSettings['customRetryDelay']>;
+}
 
 export type InferenceCoordinatesEntry = {
   inferenceAddress: string;
