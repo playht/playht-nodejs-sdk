@@ -10,9 +10,5 @@ import { V3InternalSettings } from './V3InternalSettings';
  * @returns The merged configuration object.
  */
 export function resolveV3Settings(overrides: V3InternalSettings | undefined | null) {
-  return deepMergeMaintainingDefaults(
-    V3_DEFAULT_SETTINGS,
-    APISettingsStore.getSettings().experimental?.v3,
-    overrides,
-  ) ;
+  return deepMergeMaintainingDefaults(V3_DEFAULT_SETTINGS, APISettingsStore.getSettings().experimental?.v3, overrides);
 }

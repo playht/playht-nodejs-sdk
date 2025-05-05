@@ -104,7 +104,6 @@ describe('createOrGetInferenceAddress', () => {
   });
 
   describe('clearInferenceCoordinatesStoreForUser', () => {
-
     afterEach(() => {
       __clearInferenceCoordinatesStoreForAllUsers();
     });
@@ -194,7 +193,6 @@ describe('createOrGetInferenceAddress', () => {
   });
 
   describe('failures', () => {
-
     afterEach(() => {
       __clearInferenceCoordinatesStoreForAllUsers();
     });
@@ -250,7 +248,7 @@ describe('createOrGetInferenceAddress', () => {
       expect((errorCalls[0]![1] as any).event).toBe('given-up-obtaining-credentials');
       expect((errorCalls[0]![1] as any).error.message).toBe(`non-first call error #4`);
 
-      await expect(req).resolves.toBe('first-call successful')
+      await expect(req).resolves.toBe('first-call successful');
     });
   });
 });
