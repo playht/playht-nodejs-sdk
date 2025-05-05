@@ -9,7 +9,6 @@ import {
 } from './V3InternalSettings';
 import { resolveV3Settings } from './resolveV3Settings';
 
-
 const inferenceCoordinatesCreationPromiseStores: Record<
   InternalAuthBasedEngine,
   Record<UserId, Promise<InferenceCoordinatesEntry>>
