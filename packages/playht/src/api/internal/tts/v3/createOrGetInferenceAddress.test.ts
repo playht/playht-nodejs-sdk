@@ -172,7 +172,6 @@ describe('createOrGetInferenceAddress', () => {
     });
 
     it('refreshes ahead of time', async () => {
-      console.log('now creating user 555');
       const paddingMs = 2; // typically the time you'd expect these functions to run (1ms is already A LOT!)
       const userId = 'ahead-user-555' as UserId;
       const r0 = await createOrGetInferenceAddress(
@@ -233,20 +232,19 @@ describe('createOrGetInferenceAddress', () => {
       const req = createOrGetInferenceAddress('Play3.0-mini', configSettings);
       await sleep(100);
 
-      console.log((configSettings.debug!.log as jest.Mock).mock.calls);
-      console.log((configSettings.debug!.info as jest.Mock).mock.calls);
-      const warnCalls = (configSettings.debug!.warn as jest.Mock).mock.calls;
-      console.log(warnCalls);
-      const errorCalls = (configSettings.debug!.error as jest.Mock).mock.calls;
-      console.log(errorCalls);
-      expect(warnCalls).toHaveLength(2);
-      expect((warnCalls[0]![1] as any).event).toBe('failed-obtaining-credentials');
-      expect((warnCalls[0]![1] as any).error.message).toBe(`non-first call error #2`);
-      expect((warnCalls[1]![1] as any).event).toBe('failed-obtaining-credentials');
-      expect((warnCalls[1]![1] as any).error.message).toBe(`non-first call error #3`);
-      expect(errorCalls).toHaveLength(1);
-      expect((errorCalls[0]![1] as any).event).toBe('given-up-obtaining-credentials');
-      expect((errorCalls[0]![1] as any).error.message).toBe(`non-first call error #4`);
+      const debugInfoCalls = (configSettings.debug!.info as jest.Mock).mock.calls;
+      const debugWarnCalls = (configSettings.debug!.warn as jest.Mock).mock.calls;
+      const debugErrorCalls = (configSettings.debug!.error as jest.Mock).mock.calls;
+
+      expect(debugInfoCalls).toHaveLength(0);
+      expect(debugWarnCalls).toHaveLength(2);
+      expect((debugWarnCalls[0]![1] as any).event).toBe('failed-obtaining-credentials');
+      expect((debugWarnCalls[0]![1] as any).error.message).toBe(`non-first call error #2`);
+      expect((debugWarnCalls[1]![1] as any).event).toBe('failed-obtaining-credentials');
+      expect((debugWarnCalls[1]![1] as any).error.message).toBe(`non-first call error #3`);
+      expect(debugErrorCalls).toHaveLength(1);
+      expect((debugErrorCalls[0]![1] as any).event).toBe('given-up-obtaining-credentials');
+      expect((debugErrorCalls[0]![1] as any).error.message).toBe(`non-first call error #4`);
 
       await expect(req).resolves.toBe('first-call successful');
     });
