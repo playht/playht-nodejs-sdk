@@ -30,17 +30,13 @@ export type V3InternalSettings = {
     userId: string,
     apiKey: string,
   ) => Promise<InferenceCoordinatesEntry>;
+  // How long to wait before retrying to get new coordinates
   customRetryDelay?: (attemptNo: number) => number;
+  // If the SDK should automatically clear coordinates that haven't been used for a while
+  autoCleanupUnusedCoordinates?: boolean;
 };
 
-export interface V3InternalSettingsWithDefaults extends V3InternalSettings {
-  coordinatesExpirationAdvanceRefreshTimeMs: number;
-  coordinatesExpirationMinimalFrequencyMs: number;
-  coordinatesGetApiCallMaxRetries: number;
-  coordinatesUsableThresholdTimeMs: number;
-  customInferenceCoordinatesGenerator: NonNullable<V3InternalSettings['customInferenceCoordinatesGenerator']>;
-  customRetryDelay: NonNullable<V3InternalSettings['customRetryDelay']>;
-}
+export type V3InternalSettingsWithDefaults = Required<V3InternalSettings>;
 
 export type InferenceCoordinatesEntry = {
   inferenceAddress: string;
