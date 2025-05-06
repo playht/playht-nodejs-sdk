@@ -24,7 +24,7 @@ export function generateV2Speech(text: string, voice: string, options?: V2ApiOpt
     port: apiUrl.port,
     headers: {
       accept: 'text/event-stream',
-      'Content-Type': 'application/json',
+      'content-type': 'application/json',
       authorization: `Bearer ${apiKey}`,
       'x-user-id': userId,
       'x-play-sdk-version': PLAY_SDK_VERSION,
