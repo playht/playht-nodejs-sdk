@@ -1,6 +1,7 @@
 import type { VoiceInfo } from '..';
 import axios from 'axios';
 import { APISettingsStore } from './APISettingsStore';
+import { PLAY_SDK_VERSION } from './internal/sdkVersion';
 
 type V1APIVoiceInfo = {
   value: string;
@@ -28,8 +29,9 @@ export async function availableV1Voices(): Promise<Array<VoiceInfo>> {
     url: 'https://api.play.ht/api/v1/getVoices',
     headers: {
       accept: 'application/json',
-      AUTHORIZATION: apiKey,
-      'X-USER-ID': userId,
+      authorization: apiKey,
+      'x-user-id': userId,
+      'x-play-sdk-version': PLAY_SDK_VERSION,
     },
   };
 
