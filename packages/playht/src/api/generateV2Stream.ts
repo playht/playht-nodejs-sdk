@@ -7,7 +7,6 @@ import { mapPlayDialogTurboVoice } from './internal/tts/dialog-turbo/PlayDialogT
 import { getAxiosClient } from './internal/config/getAxiosClient';
 import { PlayRequestConfigWithDefaults } from './internal/config/PlayRequestConfig';
 import { logRequest } from './internal/debug/logRequest';
-import { PLAY_SDK_VERSION } from './internal/sdkVersion';
 
 export async function generateV2Stream(
   text: string,
@@ -48,9 +47,8 @@ export async function generateV2Stream(
     headers: {
       accept,
       'content-type': 'application/json',
-      authorization: apiKey,
-      'x-user-id': userId,
-      'x-play-sdk-version': PLAY_SDK_VERSION,
+      AUTHORIZATION: apiKey,
+      'X-USER-ID': userId,
     },
     data,
     responseType: 'stream',
