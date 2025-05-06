@@ -268,7 +268,6 @@ describe('createOrGetInferenceAddress', () => {
       });
       let callNo = 0;
       configSettings.experimental!.v3!.coordinatesGetApiCallMaxRetries = 3;
-      configSettings.debug!.log = jest.fn();
       configSettings.debug!.info = jest.fn();
       configSettings.debug!.warn = jest.fn();
       configSettings.debug!.error = jest.fn();
