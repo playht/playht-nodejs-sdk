@@ -21,7 +21,7 @@
     "clean": "rm -rf ./dist && rm -f src/grpc-client/protos/*.js src/grpc-client/protos/*.d.ts",
     "build": "yarn clean && yarn build:protobufs && tsc -p tsconfig.json --emitDeclarationOnly --outdir dist && yarn build:cjs && yarn build:esm",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
-    "lint": "prettier --write . && eslint --ext .ts ./src --fix",
+    "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit",
     "verify": "yarn check && yarn test",
     "check": "yarn build:protobufs && tsc -p tsconfig.json --noEmit && prettier --check . && eslint --ext .ts ./src",
     "release": "yarn && yarn verify && yarn build && cp ../../README.md . && npm publish || true && rm README.md",
