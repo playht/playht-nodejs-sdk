@@ -6,6 +6,7 @@ import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfigWithDefaults } from '../../config/PlayRequestConfig';
 import { getAxiosClient } from '../../config/getAxiosClient';
 import { logRequest } from '../../debug/logRequest';
+import { PLAY_SDK_VERSION } from '../../sdkVersion';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 import { InternalAuthBasedEngine } from './V3InternalSettings';
 
@@ -25,6 +26,9 @@ export async function generateAuthBasedStream(
     url: inferenceAddress,
     data: payloadForEngine,
     responseType: 'stream',
+    headers: {
+      'x-play-sdk-version': PLAY_SDK_VERSION,
+    },
     httpsAgent: keepAliveHttpsAgent,
     signal: reqConfig.signal,
   } as const satisfies AxiosRequestConfig;

@@ -2,6 +2,7 @@ import { AxiosRequestConfig } from 'axios';
 import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfigWithDefaults } from '../../config/PlayRequestConfig';
 import { getAxiosClient } from '../../config/getAxiosClient';
+import { PLAY_SDK_VERSION } from '../../sdkVersion';
 import { createOrGetInferenceAddress } from './createOrGetInferenceAddress';
 import { InternalAuthBasedEngine, PublicAuthBasedEngine } from './V3InternalSettings';
 
@@ -32,8 +33,9 @@ const warmUp = async (
     method: 'OPTIONS',
     url: inferenceAddress,
     headers: {
-      Origin: 'https://play.ht',
-      'Access-Control-Request-Method': '*',
+      origin: 'https://play.ht',
+      'access-control-request-method': '*',
+      'x-play-sdk-version': PLAY_SDK_VERSION,
     },
     httpsAgent: keepAliveHttpsAgent,
   } as const satisfies AxiosRequestConfig;

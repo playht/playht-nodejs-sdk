@@ -1,5 +1,6 @@
-import { credentials, Client as GrpcClient } from '@grpc/grpc-js';
+import { Client as GrpcClient, credentials } from '@grpc/grpc-js';
 import fetch from 'cross-fetch';
+import { PLAY_SDK_VERSION } from '../api/internal/sdkVersion';
 import apiProto from './protos/api';
 import { Lease } from './lease';
 import { ReadableStream } from './readable-stream';
@@ -74,8 +75,9 @@ export class Client {
     this.apiUrl = 'https://api.play.ht/api';
     const authHeader = options.apiKey.startsWith('Bearer ') ? options.apiKey : `Bearer ${options.apiKey}`;
     this.apiHeaders = {
-      'X-User-Id': options.userId,
-      Authorization: authHeader,
+      authorization: authHeader,
+      'x-user-id': options.userId,
+      'x-play-sdk-version': PLAY_SDK_VERSION,
     };
     this.options = options;
     (async () => {
