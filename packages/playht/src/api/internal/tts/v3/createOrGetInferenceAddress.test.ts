@@ -52,12 +52,10 @@ describe('createOrGetInferenceAddress', () => {
         customInferenceCoordinatesGenerator:
           options.customInferenceCoordinatesGenerator ??
           (async (_: InternalAuthBasedEngine, u: string) => {
-            console.log('customInferenceCoordinatesGenerator aaa');
             await sleep(10); // simulate a delay
             if (options.forcedError) {
               throw options.forcedError;
             }
-            console.log('customInferenceCoordinatesGenerator bbbb');
             return {
               inferenceAddress: `call ${u} #${++callSequenceNumber}`,
               expiresAtMs: Date.now() + (options.expirationDiffMs ?? 1_000_000),
