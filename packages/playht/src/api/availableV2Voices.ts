@@ -1,6 +1,7 @@
 import type { VoiceAgeGroup, VoiceEngine, VoiceInfo } from '..';
 import axios from 'axios';
 import { APISettingsStore } from './APISettingsStore';
+import { PLAY_SDK_VERSION } from './internal/sdkVersion';
 
 export type V2APIVoiceInfo = {
   id: string;
@@ -32,8 +33,9 @@ export async function availableV2Voices(): Promise<Array<VoiceInfo>> {
     url: 'https://api.play.ht/api/v2/voices',
     headers: {
       accept: 'application/json',
-      AUTHORIZATION: apiKey,
-      'X-USER-ID': userId,
+      authorization: apiKey,
+      'x-user-id': userId,
+      'x-play-sdk-version': PLAY_SDK_VERSION,
     },
   };
 

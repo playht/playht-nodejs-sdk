@@ -1,6 +1,7 @@
 import type { V1ApiOptions } from './apiCommon';
 import axios from 'axios';
 import { APISettingsStore } from './APISettingsStore';
+import { PLAY_SDK_VERSION } from './internal/sdkVersion';
 
 export type V1SpeechResult = {
   transcriptionId: string;
@@ -38,8 +39,9 @@ export async function generateV1Speech(
     headers: {
       accept: 'application/json',
       'content-type': 'application/json',
-      AUTHORIZATION: apiKey,
-      'X-USER-ID': userId,
+      authorization: apiKey,
+      'x-user-id': userId,
+      'x-play-sdk-version': PLAY_SDK_VERSION,
     },
     data: {
       content: [content],
@@ -70,8 +72,9 @@ export async function generateV1Speech(
     url: `https://api.play.ht/api/v1/articleStatus?transcriptionId=${transcriptionId}`,
     headers: {
       accept: 'application/json',
-      AUTHORIZATION: apiKey,
-      'X-USER-ID': userId,
+      authorization: apiKey,
+      'x-user-id': userId,
+      'x-play-sdk-version': PLAY_SDK_VERSION,
     },
   };
 
