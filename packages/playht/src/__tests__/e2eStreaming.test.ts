@@ -4,6 +4,7 @@ import { Readable } from 'stream';
 import { describe, expect, it } from '@jest/globals';
 import * as PlayHT from '../index';
 import { SDKSettings } from '../api/APISettingsStore';
+import { PLAY_SDK_VERSION } from '../api/internal/sdkVersion';
 import { E2E_CONFIG } from './e2eTestConfig';
 
 describe('E2E', () => {
@@ -284,8 +285,9 @@ describe('E2E', () => {
                 expect(input.headers).toStrictEqual({
                   accept: 'audio/mpeg',
                   'content-type': 'application/json',
-                  AUTHORIZATION: E2E_CONFIG.API_KEY,
-                  'X-USER-ID': E2E_CONFIG.USER_ID,
+                  authorization: E2E_CONFIG.API_KEY,
+                  'x-user-id': E2E_CONFIG.USER_ID,
+                  'x-play-sdk-version': PLAY_SDK_VERSION,
                 });
 
                 expect(input.data).toStrictEqual({
