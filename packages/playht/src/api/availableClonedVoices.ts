@@ -1,6 +1,7 @@
 import type { VoiceEngine, VoiceInfo } from '..';
 import axios from 'axios';
 import { APISettingsStore } from './APISettingsStore';
+import { PLAY_SDK_VERSION } from './internal/sdkVersion';
 
 type ClonedAPIVoiceInfo = {
   id: string;
@@ -26,8 +27,9 @@ export async function availableClonedVoices(): Promise<Array<VoiceInfo>> {
     url: 'https://api.play.ht/api/v2/cloned-voices',
     headers: {
       accept: 'application/json',
-      AUTHORIZATION: apiKey,
-      'X-USER-ID': userId,
+      authorization: apiKey,
+      'x-user-id': userId,
+      'x-play-sdk-version': PLAY_SDK_VERSION,
     },
   };
 

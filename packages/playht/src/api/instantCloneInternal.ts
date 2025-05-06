@@ -3,6 +3,7 @@ import axios from 'axios';
 import { fileTypeFromBuffer } from 'file-type';
 import { APISettingsStore } from './APISettingsStore';
 import { convertResponseToVoiceInfo } from './availableClonedVoices';
+import { PLAY_SDK_VERSION } from './internal/sdkVersion';
 
 const CLONE_API_URL = 'https://api.play.ht/api/v2/cloned-voices/instant';
 const DELETE_API_URL = 'https://api.play.ht/api/v2/cloned-voices';
@@ -58,9 +59,10 @@ async function internalInstantClone(
     .post(CLONE_API_URL, formData, {
       headers: {
         accept: 'application/json',
-        AUTHORIZATION: apiKey,
-        'X-USER-ID': userId,
         'content-type': 'multipart/form-data',
+        authorization: apiKey,
+        'x-user-id': userId,
+        'x-play-sdk-version': PLAY_SDK_VERSION,
       },
     })
     .then(({ data }) => convertResponseToVoiceInfo(data))
@@ -81,9 +83,10 @@ export async function internalDeleteClone(voiceId: string): Promise<string> {
     .delete(DELETE_API_URL, {
       headers: {
         accept: 'application/json',
-        AUTHORIZATION: apiKey,
-        'X-USER-ID': userId,
         'content-type': 'application/json',
+        authorization: apiKey,
+        'x-user-id': userId,
+        'x-play-sdk-version': PLAY_SDK_VERSION,
       },
       data: {
         voice_id: voiceId,
