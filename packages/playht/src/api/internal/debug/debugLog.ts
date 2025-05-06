@@ -1,11 +1,18 @@
 import { SDKSettings } from '../../APISettingsStore';
 
-export function debugLog(sdkSettings: Partial<SDKSettings> | undefined, ...data: Array<any>) {
+export function debugInfo(
+  sdkSettings: Partial<SDKSettings> | undefined,
+  infoMessage: string,
+  logData: Parameters<NonNullable<NonNullable<SDKSettings['debug']>['info']>>[1],
+) {
   const debug = sdkSettings?.debug;
   if (!debug?.enabled) return;
 
-  const logFunction = debug.log || console.log;
-  logFunction(`[PlaySDK][${sdkSettings!.userId}]`, ...data);
+  if (debug.info) {
+    debug.info(`[PlaySDK][${sdkSettings!.userId}] ${infoMessage}`, logData);
+  } else {
+    console.info(`[PlaySDK][${sdkSettings!.userId}] ${infoMessage}`);
+  }
 }
 
 export function debugWarn(

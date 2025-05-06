@@ -12,7 +12,7 @@ export function extractErrorHeadersAndStatusIfTheyExist(error: unknown) {
   return {
     errorMessage: extractMessageFromError(error),
     headers: extractFromErrorResponse<Record<string, any>>(error, 'headers', {}),
-    status: extractFromErrorResponse(error, 'status', -1),
+    status: extractFromErrorResponse<number, '<NONE>'>(error, 'status', '<NONE>'),
   };
 }
 
@@ -22,7 +22,7 @@ function extractMessageFromError(error: any) {
   return undefined;
 }
 
-function extractFromErrorResponse<T>(error: any, fieldName: string, defaultValue: T) {
+function extractFromErrorResponse<T, D = T>(error: any, fieldName: string, defaultValue: D): T | D {
   if (
     error &&
     typeof error === 'object' &&

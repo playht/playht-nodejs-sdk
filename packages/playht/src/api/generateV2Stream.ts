@@ -4,10 +4,9 @@ import { type PlayDialogTurboEngineStreamOptions } from '../index';
 import { keepAliveHttpsAgent } from './internal/http';
 import { convertError } from './internal/convertError';
 import { mapPlayDialogTurboVoice } from './internal/tts/dialog-turbo/PlayDialogTurboVoice';
-import { extractErrorHeadersAndStatusIfTheyExist, getAxiosClient } from './internal/config/getAxiosClient';
+import { getAxiosClient } from './internal/config/getAxiosClient';
 import { PlayRequestConfigWithDefaults } from './internal/config/PlayRequestConfig';
-import { debugLog } from './internal/debug/debugLog';
-import { SDKSettings } from './APISettingsStore';
+import { logRequest } from './internal/debug/logRequest';
 
 export async function generateV2Stream(
   text: string,
@@ -58,22 +57,9 @@ export async function generateV2Stream(
   } as const satisfies AxiosRequestConfig;
 
   const response = await getAxiosClient(reqConfig.settings)(streamOptions).catch((error: unknown) => {
-    debugRequest(reqConfig.settings, data, extractErrorHeadersAndStatusIfTheyExist(error));
+    logRequest(reqConfig.settings, 'request-failed', 'v2-tts-stream', 'x-play-request-id', data, error);
     return convertError(error);
   });
-  debugRequest(reqConfig.settings, data, response);
+  logRequest(reqConfig.settings, 'request-successful', 'v2-tts-stream', 'x-play-request-id', data, response);
   return response.data;
-}
-
-function debugRequest(
-  sdkSettings: Partial<SDKSettings> | undefined,
-  payloadForEngine: any,
-  response: { headers: Record<string, any>; status: number; errorMessage?: string },
-) {
-  debugLog(
-    sdkSettings,
-    `Request - Inference Backend: v2-tts-stream - Params: ${JSON.stringify(payloadForEngine)} - Request-ID: ${
-      response.headers['x-play-request-id']
-    } - Status: ${response.status}${response.errorMessage ? ` - Error: ${response.errorMessage}` : ''}`,
-  );
 }
