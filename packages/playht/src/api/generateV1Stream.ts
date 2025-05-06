@@ -16,7 +16,7 @@ export async function generateV1Stream(
     responseType: 'stream',
     headers: {
       'x-play-sdk-version': PLAY_SDK_VERSION,
-    }
+    },
   }).catch((error: any) => {
     throw {
       message: error.response?.data?.error_message || error.message,
