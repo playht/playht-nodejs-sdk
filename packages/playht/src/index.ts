@@ -636,24 +636,20 @@ export type APISettingsInput = {
      */
     info?: (
       infoMessage: string,
-      logData: (
+      logData: {
+        inferenceBackend: string;
+        requestId: string;
+        backendPayload: Record<string, string | number>;
+        responseStatus: number | '<NONE>';
+      } & (
         | {
             event: 'request-successful';
-            inferenceBackend: string;
-            requestId: string;
-            backendPayload: Record<string, string | number>;
-            responseStatus: number | '<NONE>';
           }
         | {
             event: 'request-failed';
-            inferenceBackend: string;
-            requestId: string;
-            backendPayload: Record<string, string | number>;
-            responseStatus: number | '<NONE>';
             responseErrorMessage?: string;
           }
-      ) &
-        Record<string, any>,
+      ),
     ) => void;
     /**
      * A function to log warn debug messages. Defaults to console.warn.
