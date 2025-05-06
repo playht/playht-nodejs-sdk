@@ -10,7 +10,12 @@ import { resolveV3Settings } from './resolveV3Settings';
 
 type UserAndEngine = `${UserId}:${InternalAuthBasedEngine}`;
 
-const cachedCoordinates: Record<UserAndEngine, InferenceCoordinatesEntry> = {};
+type CachedCoordinatesValue = {
+  coordinates: InferenceCoordinatesEntry;
+  lastUsedAt: Date;
+  autoCleanupIfUnused: boolean;
+};
+const cachedCoordinates: Record<UserAndEngine, CachedCoordinatesValue> = {};
 const coordinatesCreationPromises: Record<UserAndEngine, Promise<InferenceCoordinatesEntry>> = {};
 const inFlightRefreshControllers: Record<UserAndEngine, AbortController> = {};
 const delayedRefreshTimers: Record<UserAndEngine, NodeJS.Timeout> = {};
@@ -26,9 +31,12 @@ export async function createOrGetInferenceAddress(
   const cachedCoordinatesEntry = cachedCoordinates[userAndEngine];
   const entryExistsAndIsNotExpired =
     cachedCoordinatesEntry &&
-    cachedCoordinatesEntry.expiresAtMs >= Date.now() - v3Settings.coordinatesUsableThresholdTimeMs;
+    cachedCoordinatesEntry.coordinates.expiresAtMs >= Date.now() - v3Settings.coordinatesUsableThresholdTimeMs;
 
-  if (entryExistsAndIsNotExpired) return cachedCoordinatesEntry.inferenceAddress;
+  if (entryExistsAndIsNotExpired) {
+    cachedCoordinatesEntry.lastUsedAt = new Date(); // Update last used time
+    return cachedCoordinatesEntry.coordinates.inferenceAddress;
+  }
 
   if (cachedCoordinatesEntry) delete cachedCoordinates[userAndEngine]; // clear expired entry
 
@@ -72,7 +80,16 @@ async function createInferenceCoordinates(
       scheduleAutoRefresh(voiceEngine, userId, v3Settings, reqConfigSettings, newInferenceCoordinatesEntry);
     }
 
-    cachedCoordinates[userAndEngine] = newInferenceCoordinatesEntry;
+    cachedCoordinates[userAndEngine] = {
+      coordinates: newInferenceCoordinatesEntry,
+      lastUsedAt: new Date(),
+      autoCleanupIfUnused: v3Settings.autoCleanupUnusedCoordinates,
+    };
+
+    if (v3Settings.autoCleanupUnusedCoordinates) {
+      ensureAutoCleanupUnusedCoordinatesWorkerIsRunning();
+    }
+
     return newInferenceCoordinatesEntry;
   } catch (error) {
     if (attemptNo >= v3Settings.coordinatesGetApiCallMaxRetries) throw error;
@@ -164,36 +181,74 @@ function logGivenUpRefreshingCredentials(
   );
 }
 
-export function clearInferenceCoordinatesStoreForUser(userToClear: UserId): void {
-  for (const [userAndEngine] of Object.entries(cachedCoordinates) as Array<
-    [UserAndEngine, InferenceCoordinatesEntry]
+function forEachCachedCoordinate(
+  callback: (opts: {
+    userId: UserId;
+    voiceEngine: InternalAuthBasedEngine;
+    userAndEngine: UserAndEngine;
+    coordinates: CachedCoordinatesValue;
+  }) => void,
+): void {
+  for (const [userAndEngine, coordinates] of Object.entries(cachedCoordinates) as Array<
+    [UserAndEngine, CachedCoordinatesValue]
   >) {
-    const [userId] = userAndEngine.split(':') as [UserId];
-    if (userId !== userToClear) continue;
-    delete coordinatesCreationPromises[userAndEngine];
-    delete cachedCoordinates[userAndEngine];
-
-    clearTimeout(delayedRefreshTimers[userAndEngine]);
-    delete delayedRefreshTimers[userAndEngine];
-
-    abortInFlightGeneration(userAndEngine);
+    const [userId, voiceEngine] = userAndEngine.split(':') as [UserId, InternalAuthBasedEngine];
+    callback({ userId, voiceEngine, userAndEngine, coordinates });
   }
+}
+
+export function clearInferenceCoordinatesStoreForUser(userToClear: UserId): void {
+  forEachCachedCoordinate(({ userId, userAndEngine }) => {
+    if (userId === userToClear) clearInferenceCoordinatesStoreForUserAndEngine(userAndEngine);
+  });
+}
+
+function clearInferenceCoordinatesStoreForUserAndEngine(userAndEngine: UserAndEngine) {
+  delete coordinatesCreationPromises[userAndEngine];
+  delete cachedCoordinates[userAndEngine];
+
+  clearTimeout(delayedRefreshTimers[userAndEngine]);
+  delete delayedRefreshTimers[userAndEngine];
+
+  abortInFlightGeneration(userAndEngine);
+}
+
+// constants are visible for tests
+export const AUTO_CLEANUP_UNUSED_COORDINATES_AFTER_MS = 2 * 60 * 60 * 1000; // 2 hours
+export const AUTO_CLEANUP_WORKER_INTERVAL_MS = 30 * 60 * 1000; // Check every 30 minutes
+let cleanupIntervalTimer: NodeJS.Timeout | null = null;
+function ensureAutoCleanupUnusedCoordinatesWorkerIsRunning() {
+  if (cleanupIntervalTimer) return;
+
+  cleanupIntervalTimer = setInterval(() => {
+    const now = Date.now();
+    forEachCachedCoordinate(({ userAndEngine, coordinates }) => {
+      if (!coordinates.autoCleanupIfUnused) return;
+
+      const unusedTimeLimit = coordinates.lastUsedAt.getTime() + AUTO_CLEANUP_UNUSED_COORDINATES_AFTER_MS;
+      if (now > unusedTimeLimit) {
+        clearInferenceCoordinatesStoreForUserAndEngine(userAndEngine);
+      }
+    });
+  }, AUTO_CLEANUP_WORKER_INTERVAL_MS).unref();
 }
 
 // visible for tests
 export function __inspectInferenceCoordinatesStoreForUser(selectedUserId: UserId) {
-  const result: Record<InternalAuthBasedEngine, InferenceCoordinatesEntry | null> = {} as any;
-  for (const icse of Object.entries(cachedCoordinates) as Array<[UserAndEngine, InferenceCoordinatesEntry]>) {
-    const [userId, typedEngine] = icse[0].split(':') as [UserId, InternalAuthBasedEngine];
-    if (userId == selectedUserId) result[typedEngine] = icse[1];
-  }
+  const result: Record<InternalAuthBasedEngine, CachedCoordinatesValue> = {} as any;
+  forEachCachedCoordinate(({ userId, voiceEngine, coordinates }) => {
+    if (userId == selectedUserId) result[voiceEngine] = coordinates;
+  });
   return result;
 }
 
 // visible for tests
 export function __clearInferenceCoordinatesStoreForAllUsers() {
-  for (const icse of Object.entries(cachedCoordinates) as Array<[UserAndEngine, InferenceCoordinatesEntry]>) {
-    const userId = icse[0].split(':')[0] as UserId;
+  forEachCachedCoordinate(({ userId }) => {
     clearInferenceCoordinatesStoreForUser(userId);
+  });
+  if (cleanupIntervalTimer) {
+    clearInterval(cleanupIntervalTimer);
+    cleanupIntervalTimer = null;
   }
 }
