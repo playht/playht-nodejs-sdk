@@ -631,8 +631,8 @@ export type APISettingsInput = {
      * A function to log info debug messages.
      * Defaults to console.log.
      *
-     * @param infoMessage - The info message to log.
-     * @param logData - Objects for structured logging.
+     * @param infoMessage - The info message, for simple logging.
+     * @param logData - Full rich log data, for structured logging.
      */
     info?: (
       infoMessage: string,
@@ -652,7 +652,11 @@ export type APISettingsInput = {
       ),
     ) => void;
     /**
-     * A function to log warn debug messages. Defaults to console.warn.
+     * A function to log warn debug messages.
+     * Defaults to `console.warn`.
+     *
+     * @param warnMessage - The warn message, for simple logging.
+     * @param logData - Full rich log data, for structured logging.
      */
     warn?: (
       warnMessage: string,
@@ -666,7 +670,11 @@ export type APISettingsInput = {
       },
     ) => void;
     /**
-     * A function to log error debug messages. Defaults to console.error.
+     * A function to log error debug messages.
+     * Defaults to `console.error`.
+     *
+     * @param errorMessage - The error message, for simple logging.
+     * @param logData - Full rich log data, for structured logging.
      */
     error?: (
       errorMessage: string,
