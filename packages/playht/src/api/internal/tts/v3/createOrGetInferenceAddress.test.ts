@@ -275,19 +275,19 @@ describe('createOrGetInferenceAddress', () => {
       const req = createOrGetInferenceAddress('Play3.0-mini', configSettings);
       await sleep(100);
 
-      const debugInfoCalls = (configSettings.debug!.info as jest.Mock).mock.calls;
-      const debugWarnCalls = (configSettings.debug!.warn as jest.Mock).mock.calls;
-      const debugErrorCalls = (configSettings.debug!.error as jest.Mock).mock.calls;
+      const logInfoCalls = (configSettings.debug!.info as jest.Mock).mock.calls;
+      const logWarnCalls = (configSettings.debug!.warn as jest.Mock).mock.calls;
+      const logErrorCalls = (configSettings.debug!.error as jest.Mock).mock.calls;
 
-      expect(debugInfoCalls).toHaveLength(0);
-      expect(debugWarnCalls).toHaveLength(2);
-      expect((debugWarnCalls[0]![1] as any).event).toBe('failed-obtaining-credentials');
-      expect((debugWarnCalls[0]![1] as any).error.message).toBe(`non-first call error #2`);
-      expect((debugWarnCalls[1]![1] as any).event).toBe('failed-obtaining-credentials');
-      expect((debugWarnCalls[1]![1] as any).error.message).toBe(`non-first call error #3`);
-      expect(debugErrorCalls).toHaveLength(1);
-      expect((debugErrorCalls[0]![1] as any).event).toBe('given-up-obtaining-credentials');
-      expect((debugErrorCalls[0]![1] as any).error.message).toBe(`non-first call error #4`);
+      expect(logInfoCalls).toHaveLength(0);
+      expect(logWarnCalls).toHaveLength(2);
+      expect((logWarnCalls[0]![1] as any).event).toBe('failed-obtaining-credentials');
+      expect((logWarnCalls[0]![1] as any).error.message).toBe(`non-first call error #2`);
+      expect((logWarnCalls[1]![1] as any).event).toBe('failed-obtaining-credentials');
+      expect((logWarnCalls[1]![1] as any).error.message).toBe(`non-first call error #3`);
+      expect(logErrorCalls).toHaveLength(1);
+      expect((logErrorCalls[0]![1] as any).event).toBe('given-up-obtaining-credentials');
+      expect((logErrorCalls[0]![1] as any).error.message).toBe(`non-first call error #4`);
 
       await expect(req).resolves.toBe('first-call successful');
     });

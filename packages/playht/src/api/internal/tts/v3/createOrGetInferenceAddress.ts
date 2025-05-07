@@ -1,6 +1,6 @@
 import { PlayRequestConfigWithDefaults } from '../../config/PlayRequestConfig';
 import { UserId } from '../../types';
-import { debugError, debugWarn } from '../../debug/debugLog';
+import { logError, logWarn } from '../../debug/debugLog';
 import {
   InferenceCoordinatesEntry,
   InternalAuthBasedEngine,
@@ -147,7 +147,7 @@ function logFailedObtainingCredentials(
   error: unknown,
   attemptNo: number,
 ) {
-  debugWarn(
+  logWarn(
     reqConfigSettings,
     `Error while trying to get credentials for ${voiceEngine} (attempt ${attemptNo} of ${v3Settings.coordinatesGetApiCallMaxRetries})`,
     {
@@ -168,7 +168,7 @@ function logGivenUpRefreshingCredentials(
   error: unknown,
   userId: UserId,
 ) {
-  debugError(
+  logError(
     reqConfigSettings,
     `Giving up after failing to refresh credentials for ${voiceEngine} after ${v3Settings.coordinatesGetApiCallMaxRetries} attempts`,
     {
