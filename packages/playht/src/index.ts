@@ -671,10 +671,9 @@ export type APISettingsInput = {
      */
     error?: (
       errorMessage: string,
-      logData:
+      logData: { error: unknown } & (
         | {
             event: 'given-up-obtaining-credentials';
-            error: unknown;
             userId: string;
             voiceEngine: string;
             maxRetries: number;
@@ -686,8 +685,8 @@ export type APISettingsInput = {
             backendPayload: Record<string, string | number>;
             responseStatus: number | '<NONE>';
             responseErrorMessage?: string;
-            error: unknown;
-          },
+          }
+      ),
     ) => void;
   };
 };
