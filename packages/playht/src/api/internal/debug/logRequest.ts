@@ -1,10 +1,10 @@
 import { SDKSettings } from '../../APISettingsStore';
 import { extractErrorHeadersAndStatusIfTheyExist } from '../config/getAxiosClient';
-import { debugInfo } from './debugLog';
+import { logError, logInfo } from './debugLog';
 
 export function logRequest(
   sdkSettings: Partial<SDKSettings> | undefined,
-  event: Parameters<typeof debugInfo>[2]['event'],
+  event: 'request-successful' | 'request-failed',
   inferenceAddress: string,
   requestIdHeaderName: string,
   payloadForEngine: any,
@@ -17,12 +17,21 @@ export function logRequest(
   const ps = JSON.stringify(payloadForEngine);
   const em = errorMessage ? ` - Error: ${errorMessage}` : '';
   const msg = `Request - Inference Backend: ${inferenceBackend} - Params: ${ps} - Request-ID: ${requestId} - Status: ${status}${em}`;
-  debugInfo(sdkSettings, msg, {
-    event,
+
+  const common = {
     inferenceBackend,
     requestId: requestId,
     backendPayload: payloadForEngine,
     responseStatus: status,
-    ...(event === 'request-failed' ? { responseErrorMessage: errorMessage } : {}),
-  });
+  };
+  if (event === 'request-successful') {
+    logInfo(sdkSettings, msg, { event, ...common });
+  } else {
+    logError(sdkSettings, msg, {
+      event,
+      ...common,
+      responseErrorMessage: errorMessage,
+      error: maybeHeadersStatusAndErrorMessage,
+    });
+  }
 }
