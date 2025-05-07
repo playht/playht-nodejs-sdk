@@ -637,19 +637,12 @@ export type APISettingsInput = {
     info?: (
       infoMessage: string,
       logData: {
+        event: 'request-successful';
         inferenceBackend: string;
         requestId: string;
         backendPayload: Record<string, string | number>;
         responseStatus: number | '<NONE>';
-      } & (
-        | {
-            event: 'request-successful';
-          }
-        | {
-            event: 'request-failed';
-            responseErrorMessage?: string;
-          }
-      ),
+      },
     ) => void;
     /**
      * A function to log warn debug messages.
@@ -678,13 +671,23 @@ export type APISettingsInput = {
      */
     error?: (
       errorMessage: string,
-      logData: {
-        event: 'given-up-obtaining-credentials';
-        error: unknown;
-        userId: string;
-        voiceEngine: string;
-        maxRetries: number;
-      },
+      logData:
+        | {
+            event: 'given-up-obtaining-credentials';
+            error: unknown;
+            userId: string;
+            voiceEngine: string;
+            maxRetries: number;
+          }
+        | {
+            event: 'request-failed';
+            inferenceBackend: string;
+            requestId: string;
+            backendPayload: Record<string, string | number>;
+            responseStatus: number | '<NONE>';
+            responseErrorMessage?: string;
+            error: unknown;
+          },
     ) => void;
   };
 };
