@@ -2,7 +2,7 @@ import type { PlayDialogTurboEngineStreamOptions } from '../../../../index';
 import type { SpeechOptionsWithVoiceID } from '../../../apiCommon';
 import { isPlayDialogTurboVoice } from './PlayDialogTurboVoice';
 
-const PLAYDIALOG_TURBO_SUPPORTED_OUTPUT_FORMATS = ['wav', 'mp3'];
+const PLAYDIALOG_TURBO_SUPPORTED_OUTPUT_FORMATS = ['wav', 'mp3', 'ogg', 'mulaw', 'flac'];
 
 export function isPlayDialogTurboSupportedCall(
   options: SpeechOptionsWithVoiceID,
