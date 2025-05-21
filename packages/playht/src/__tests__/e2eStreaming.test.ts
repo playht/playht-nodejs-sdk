@@ -235,6 +235,7 @@ describe('E2E', () => {
         voiceId: 'Celeste-PlayAI',
         quality: 'high',
         language: 'english',
+        outputFormat: 'wav',
       });
       const streamFromText = await p;
 
