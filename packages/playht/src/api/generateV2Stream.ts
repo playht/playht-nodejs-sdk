@@ -19,9 +19,7 @@ export async function generateV2Stream(
 
   const outputFormat = options?.outputFormat || 'mp3';
   const accept =
-    options?.voiceEngine === 'PlayDialog-turbo'
-      ? null
-      : outputFormat === 'mp3' ? 'audio/mpeg' : 'audio/basic';
+    options?.voiceEngine === 'PlayDialog-turbo' ? null : outputFormat === 'mp3' ? 'audio/mpeg' : 'audio/basic';
 
   const data = {
     text,
