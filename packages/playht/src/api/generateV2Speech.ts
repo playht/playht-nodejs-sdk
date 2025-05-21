@@ -1,6 +1,7 @@
 import type { V2ApiOptions } from './apiCommon';
 import https from 'https';
 import { APISettingsStore } from './APISettingsStore';
+import { PLAY_SDK_VERSION } from './internal/sdkVersion';
 
 const CONNECTION_TIMEOUT = 30 * 1000; // 30s
 const INNACTIVITY_TIMEOUT = 20 * 1000; // 20s
@@ -22,10 +23,11 @@ export function generateV2Speech(text: string, voice: string, options?: V2ApiOpt
     path: apiUrl.pathname,
     port: apiUrl.port,
     headers: {
-      AUTHORIZATION: `Bearer ${apiKey}`,
-      'X-USER-ID': userId,
-      'Content-Type': 'application/json',
       accept: 'text/event-stream',
+      'content-type': 'application/json',
+      authorization: `Bearer ${apiKey}`,
+      'x-user-id': userId,
+      'x-play-sdk-version': PLAY_SDK_VERSION,
     },
     timeout: CONNECTION_TIMEOUT,
   };
