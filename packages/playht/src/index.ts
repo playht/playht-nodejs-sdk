@@ -484,7 +484,7 @@ export type PlayDialogTurboEngineStreamOptions = Omit<
    */
   voiceEngine: 'PlayDialog-turbo';
 
-  outputFormat?: ['wav', 'mp3'];
+  outputFormat?: 'wav' | 'mp3' | 'ogg' | 'mulaw' | 'flac';
 } & (
     | {
         language: 'arabic';
