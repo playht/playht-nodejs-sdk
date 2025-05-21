@@ -24,6 +24,9 @@ export type DeepPartial<T> = {
  * @param overwrites - The object to merge with the defaults.
  * @returns The merged object.
  */
-export function deepMergeMaintainingDefaults<T>(defaults: T, ...overwrites: Array<DeepPartial<T> | undefined | null>): T {
+export function deepMergeMaintainingDefaults<T>(
+  defaults: T,
+  ...overwrites: Array<DeepPartial<T> | undefined | null>
+): T {
   return customizedDeepmerge(defaults, ...overwrites) as T;
 }

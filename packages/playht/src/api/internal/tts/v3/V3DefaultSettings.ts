@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { keepAliveHttpsAgent } from '../../http';
 import { convertError } from '../../convertError';
+import { PLAY_SDK_VERSION } from '../../sdkVersion';
 import {
   InferenceCoordinatesEntry,
   InternalAuthBasedEngine,
@@ -20,8 +21,9 @@ const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceC
       {},
       {
         headers: {
-          'x-user-id': userId,
           authorization: `Bearer ${apiKey}`,
+          'x-user-id': userId,
+          'x-play-sdk-version': PLAY_SDK_VERSION,
         },
         httpsAgent: keepAliveHttpsAgent,
       },
