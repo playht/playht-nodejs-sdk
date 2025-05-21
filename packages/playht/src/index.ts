@@ -628,9 +628,66 @@ export type APISettingsInput = {
      */
     enabled: boolean;
     /**
-     * A function to log debug messages. Defaults to console.log.
+     * A function to log info debug messages.
+     * Defaults to console.log.
+     *
+     * @param infoMessage - The info message, for simple logging.
+     * @param logData - Full rich log data, for structured logging.
      */
-    log?: (...data: Array<any>) => void;
+    info?: (
+      infoMessage: string,
+      logData: {
+        event: 'request-successful';
+        inferenceBackend: string;
+        requestId: string;
+        backendPayload: Record<string, string | number>;
+        responseStatus: number | '<NONE>';
+      },
+    ) => void;
+    /**
+     * A function to log warn debug messages.
+     * Defaults to `console.warn`.
+     *
+     * @param warnMessage - The warn message, for simple logging.
+     * @param logData - Full rich log data, for structured logging.
+     */
+    warn?: (
+      warnMessage: string,
+      logData: {
+        event: 'failed-obtaining-credentials';
+        error: unknown;
+        userId: string;
+        voiceEngine: string;
+        attemptNo: number;
+        maxRetries: number;
+      },
+    ) => void;
+    /**
+     * A function to log error debug messages.
+     * Defaults to `console.error`.
+     *
+     * @param errorMessage - The error message, for simple logging.
+     * @param logData - Full rich log data, for structured logging.
+     */
+    error?: (
+      errorMessage: string,
+      logData: { error: unknown } & (
+        | {
+            event: 'given-up-obtaining-credentials';
+            userId: string;
+            voiceEngine: string;
+            maxRetries: number;
+          }
+        | {
+            event: 'request-failed';
+            inferenceBackend: string;
+            requestId: string;
+            backendPayload: Record<string, string | number>;
+            responseStatus: number | '<NONE>';
+            responseErrorMessage?: string;
+          }
+      ),
+    ) => void;
   };
 };
 

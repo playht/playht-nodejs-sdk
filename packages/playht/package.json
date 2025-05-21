@@ -1,6 +1,6 @@
 {
   "name": "playht",
-  "version": "0.19.1",
+  "version": "0.20.0-alpha.0",
   "description": "NodeJS SDK for PlayHT generative AI text-to-speech APIs",
   "files": [
     "dist/**/*",
@@ -21,7 +21,7 @@
     "clean": "rm -rf ./dist && rm -f src/grpc-client/protos/*.js src/grpc-client/protos/*.d.ts",
     "build": "yarn clean && yarn build:protobufs && tsc -p tsconfig.json --emitDeclarationOnly --outdir dist && yarn build:cjs && yarn build:esm",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
-    "lint": "prettier --write . && eslint --ext .ts ./src --fix",
+    "lint": "prettier --write . && eslint --ext .ts ./src --fix && tsc --noEmit",
     "verify": "yarn check && yarn test",
     "check": "yarn build:protobufs && tsc -p tsconfig.json --noEmit && prettier --check . && eslint --ext .ts ./src",
     "release": "yarn && yarn verify && yarn build && cp ../../README.md . && npm publish || true && rm README.md",
@@ -53,9 +53,8 @@
     "@grpc/grpc-js": "^1.9.4",
     "axios": "^1.4.0",
     "cross-fetch": "^4.0.0",
-    "deepmerge": "^4.3.1",
+    "deepmerge-ts": "^7.1.5",
     "file-type": "^18.5.0",
-    "is-plain-object": "^5.0.0",
     "protobufjs": "^7.2.5",
     "tslib": "^2.1.0"
   }

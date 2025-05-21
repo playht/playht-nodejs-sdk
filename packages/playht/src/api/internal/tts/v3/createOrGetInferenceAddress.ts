@@ -1,160 +1,254 @@
-import axios from 'axios';
-import { convertError } from '../../convertError';
-import { keepAliveHttpsAgent } from '../../http';
 import { PlayRequestConfigWithDefaults } from '../../config/PlayRequestConfig';
-import { APISettingsStore } from '../../../APISettingsStore';
 import { UserId } from '../../types';
-import { getSetting } from '../../settings/getSetting';
-import { InferenceCoordinatesEntry, InternalAuthBasedEngine, V3InternalSettings } from './V3InternalSettings';
-import { V3_DEFAULT_SETTINGS } from './V3DefaultSettings';
+import { logError, logWarn } from '../../debug/debugLog';
+import {
+  InferenceCoordinatesEntry,
+  InternalAuthBasedEngine,
+  V3InternalSettingsWithDefaults,
+} from './V3InternalSettings';
+import { resolveV3Settings } from './resolveV3Settings';
 
-const inferenceCoordinatesStores: Record<InternalAuthBasedEngine, Record<UserId, InferenceCoordinatesEntry>> = {
-  'Play3.0-mini': {},
-  PlayDialog: {},
-  PlayDialogArabic: {},
-  PlayDialogHindi: {},
-  PlayDialogLora: {},
-  PlayDialogMultilingual: {},
-};
+type UserAndEngine = `${UserId}:${InternalAuthBasedEngine}`;
 
-export const clearInferenceCoordinatesStoreForUser = (userId: UserId): void => {
-  for (const engine in inferenceCoordinatesStores) {
-    delete inferenceCoordinatesStores[engine as keyof typeof inferenceCoordinatesStores][userId];
-  }
+type CachedCoordinatesValue = {
+  coordinates: InferenceCoordinatesEntry;
+  lastUsedAt: Date;
+  autoCleanupIfUnused: boolean;
 };
-export const _inspectInferenceCoordinatesStoreForUser = (userId: UserId) => {
-  const result: Record<InternalAuthBasedEngine, InferenceCoordinatesEntry | null> = {} as any;
-  for (const engine in inferenceCoordinatesStores) {
-    const typedEngine = engine as keyof typeof inferenceCoordinatesStores;
-    const value = inferenceCoordinatesStores[typedEngine][userId];
-    if (value) result[typedEngine] = value;
-  }
-  return result;
-};
+const cachedCoordinates: Record<UserAndEngine, CachedCoordinatesValue> = {};
+const coordinatesCreationPromises: Record<UserAndEngine, Promise<InferenceCoordinatesEntry>> = {};
+const inFlightRefreshControllers: Record<UserAndEngine, AbortController> = {};
+const delayedRefreshTimers: Record<UserAndEngine, NodeJS.Timeout> = {};
 
-// By default, the inference coordinates generator will call the Play API to get the inference coordinates.
-const defaultInferenceCoordinatesGenerator: V3InternalSettings['customInferenceCoordinatesGenerator'] = async (
-  engine,
-  userId,
-  apiKey,
-): Promise<InferenceCoordinatesEntry> => {
-  const data = await axios
-    .post(
-      'https://api.play.ht/api/v4/sdk-auth',
-      {},
-      {
-        headers: {
-          'x-user-id': userId,
-          authorization: `Bearer ${apiKey}`,
-        },
-        httpsAgent: keepAliveHttpsAgent,
-      },
-    )
-    .then(
-      (response) =>
-        response.data as Record<InternalAuthBasedEngine, { http_streaming_url: string; websocket_url: string }> & {
-          expires_at: string; // ISO Date string, e.g., "2025-02-08T02:09:53.499Z"
-        },
-    )
-    .catch((error: any) => convertError(error));
-  const httpStreamingUrl = data[engine]?.http_streaming_url;
-  if (!httpStreamingUrl) {
-    return convertError(new Error(`Engine ${engine} not found in AUTH response`));
-  }
-  return {
-    inferenceAddress: httpStreamingUrl,
-    expiresAtMs: new Date(data.expires_at).getTime(),
-  };
-};
-
-const createInferenceCoordinates = async (
+export async function createOrGetInferenceAddress(
   voiceEngine: InternalAuthBasedEngine,
-  reqConfigSettings?: PlayRequestConfigWithDefaults['settings'],
-  attemptNo = 0,
-): Promise<InferenceCoordinatesEntry> => {
-  const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
-  const apiKey = reqConfigSettings?.apiKey ?? APISettingsStore.getSettings().apiKey;
+  reqConfig: PlayRequestConfigWithDefaults['settings'],
+): Promise<string> {
+  const v3Settings = resolveV3Settings(reqConfig.experimental?.v3);
 
-  const coordinatesAheadOfTimeAutoRefresh = getSetting(
-    'coordinatesAheadOfTimeAutoRefresh',
-    reqConfigSettings?.experimental?.v3,
-    APISettingsStore.getSettings().experimental?.v3,
-    V3_DEFAULT_SETTINGS,
-  );
-  const inferenceCoordinatesGenerator =
-    reqConfigSettings?.experimental?.v3?.customInferenceCoordinatesGenerator ??
-    APISettingsStore.getSettings().experimental?.v3?.customInferenceCoordinatesGenerator ??
-    defaultInferenceCoordinatesGenerator;
-  const coordinatesExpirationMinimalFrequencyMs =
-    reqConfigSettings?.experimental?.v3?.coordinatesExpirationMinimalFrequencyMs ??
-    APISettingsStore.getSettings().experimental?.v3?.coordinatesExpirationMinimalFrequencyMs ??
-    V3_DEFAULT_SETTINGS.coordinatesExpirationMinimalFrequencyMs;
-  const coordinatesExpirationAdvanceRefreshTimeMs =
-    reqConfigSettings?.experimental?.v3?.coordinatesExpirationAdvanceRefreshTimeMs ??
-    APISettingsStore.getSettings().experimental?.v3?.coordinatesExpirationAdvanceRefreshTimeMs ??
-    V3_DEFAULT_SETTINGS.coordinatesExpirationAdvanceRefreshTimeMs;
-  const coordinatesGetApiCallMaxRetries =
-    reqConfigSettings?.experimental?.v3?.coordinatesGetApiCallMaxRetries ??
-    APISettingsStore.getSettings().experimental?.v3?.coordinatesGetApiCallMaxRetries ??
-    V3_DEFAULT_SETTINGS.coordinatesGetApiCallMaxRetries;
+  const userAndEngine = `${reqConfig.userId as UserId}:${voiceEngine}` as const;
+
+  const cachedCoordinatesEntry = cachedCoordinates[userAndEngine];
+  const entryExistsAndIsNotExpired =
+    cachedCoordinatesEntry &&
+    cachedCoordinatesEntry.coordinates.expiresAtMs >= Date.now() - v3Settings.coordinatesUsableThresholdTimeMs;
+
+  if (entryExistsAndIsNotExpired) {
+    cachedCoordinatesEntry.lastUsedAt = new Date(); // Update last used time
+    return cachedCoordinatesEntry.coordinates.inferenceAddress;
+  }
+
+  if (cachedCoordinatesEntry) delete cachedCoordinates[userAndEngine]; // clear expired entry
+
+  if (!coordinatesCreationPromises[userAndEngine]) {
+    // we don't have a previous in-flight to piggyback on, so we have to dispatch a new one
+    coordinatesCreationPromises[userAndEngine] = createInferenceCoordinates(voiceEngine, v3Settings, reqConfig);
+  }
 
   try {
-    const newInferenceCoordinatesEntry = await inferenceCoordinatesGenerator(voiceEngine, userId, apiKey);
-    if (coordinatesAheadOfTimeAutoRefresh) {
-      const automaticRefreshDelay = Math.max(
-        coordinatesExpirationMinimalFrequencyMs,
-        newInferenceCoordinatesEntry.expiresAtMs - Date.now() - coordinatesExpirationAdvanceRefreshTimeMs,
-      );
-      setTimeout(() => createInferenceCoordinates(voiceEngine, reqConfigSettings), automaticRefreshDelay).unref();
+    const newCoordinates = (await coordinatesCreationPromises[userAndEngine])!;
+    return newCoordinates.inferenceAddress;
+  } finally {
+    delete coordinatesCreationPromises[userAndEngine];
+  }
+}
+
+async function createInferenceCoordinates(
+  voiceEngine: InternalAuthBasedEngine,
+  v3Settings: V3InternalSettingsWithDefaults,
+  reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
+  attemptNo = 1,
+): Promise<InferenceCoordinatesEntry> {
+  const userId = reqConfigSettings.userId as UserId;
+  const apiKey = reqConfigSettings.apiKey;
+
+  const userAndEngine = `${userId}:${voiceEngine}` as const;
+  try {
+    // we abort previous generations, to make sure their results are not stored in the cache
+    abortInFlightGeneration(userAndEngine);
+    const currentGenerationController = new AbortController();
+    inFlightRefreshControllers[userAndEngine] = currentGenerationController;
+    const newInferenceCoordinatesEntry = await v3Settings.customInferenceCoordinatesGenerator(
+      voiceEngine,
+      userId,
+      apiKey,
+    );
+    // if generation was canceled, don't update cache or schedule refresh
+    if (currentGenerationController.signal.aborted) return newInferenceCoordinatesEntry;
+
+    if (v3Settings.coordinatesAheadOfTimeAutoRefresh) {
+      scheduleAutoRefresh(voiceEngine, userId, v3Settings, reqConfigSettings, newInferenceCoordinatesEntry);
     }
-    inferenceCoordinatesStores[voiceEngine][userId] = newInferenceCoordinatesEntry;
+
+    cachedCoordinates[userAndEngine] = {
+      coordinates: newInferenceCoordinatesEntry,
+      lastUsedAt: new Date(),
+      autoCleanupIfUnused: v3Settings.autoCleanupUnusedCoordinates,
+    };
+
+    if (v3Settings.autoCleanupUnusedCoordinates) {
+      ensureAutoCleanupUnusedCoordinatesWorkerIsRunning();
+    }
+
     return newInferenceCoordinatesEntry;
-  } catch (e) {
-    if (attemptNo >= coordinatesGetApiCallMaxRetries) {
-      throw e;
-    }
+  } catch (error) {
+    if (attemptNo >= v3Settings.coordinatesGetApiCallMaxRetries) throw error;
+
+    logFailedObtainingCredentials(voiceEngine, userId, v3Settings, reqConfigSettings, error, attemptNo);
     return new Promise((resolve) => {
-      setTimeout(
-        () => {
-          resolve(createInferenceCoordinates(voiceEngine, reqConfigSettings, attemptNo + 1));
-        },
-        500 * (attemptNo + 1),
-      ).unref();
+      clearTimeout(delayedRefreshTimers[userAndEngine]);
+      delayedRefreshTimers[userAndEngine] = setTimeout(() => {
+        resolve(createInferenceCoordinates(voiceEngine, v3Settings, reqConfigSettings, attemptNo + 1));
+      }, v3Settings.customRetryDelay(attemptNo)).unref();
     });
   }
-};
+}
 
-const inferenceCoordinatesCreationPromise: Record<UserId, Promise<InferenceCoordinatesEntry>> = {};
+function abortInFlightGeneration(userAndEngine: `${UserId}:${InternalAuthBasedEngine}`) {
+  inFlightRefreshControllers[userAndEngine]?.abort('abortInFlightGeneration');
+  delete inFlightRefreshControllers[userAndEngine];
+}
 
-export const createOrGetInferenceAddress = async (
+function scheduleAutoRefresh(
   voiceEngine: InternalAuthBasedEngine,
-  reqConfigSettings?: PlayRequestConfigWithDefaults['settings'],
-): Promise<string> => {
-  const userId = (reqConfigSettings?.userId ?? APISettingsStore.getSettings().userId) as UserId;
-  const inferenceCoordinatesEntry = inferenceCoordinatesStores[voiceEngine][userId];
+  userId: UserId,
+  v3Settings: V3InternalSettingsWithDefaults,
+  reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
+  newInferenceCoordinatesEntry: InferenceCoordinatesEntry,
+) {
+  clearTimeout(delayedRefreshTimers[`${userId}:${voiceEngine}`]);
+  delayedRefreshTimers[`${userId}:${voiceEngine}`] = setTimeout(
+    () => {
+      // notice in this case no one is waiting for the promise to resolve, so we catch eventual errors
+      // since if we just let the error bubble up it will be unhandled.
+      createInferenceCoordinates(voiceEngine, v3Settings, reqConfigSettings).catch((error) =>
+        logGivenUpRefreshingCredentials(voiceEngine, v3Settings, reqConfigSettings, error, userId),
+      );
+    },
+    calculateRefreshDelay(v3Settings, newInferenceCoordinatesEntry.expiresAtMs),
+  ).unref();
+}
 
-  const coordinatesUsableThresholdTimeMs = getSetting(
-    'coordinatesUsableThresholdTimeMs',
-    reqConfigSettings?.experimental?.v3,
-    APISettingsStore.getSettings().experimental?.v3,
-    V3_DEFAULT_SETTINGS,
+function calculateRefreshDelay(
+  v3Settings: V3InternalSettingsWithDefaults,
+  newInferenceCoordinatesEntryExpirationTimeMs: number,
+) {
+  return Math.max(
+    v3Settings.coordinatesExpirationMinimalFrequencyMs,
+    newInferenceCoordinatesEntryExpirationTimeMs - Date.now() - v3Settings.coordinatesExpirationAdvanceRefreshTimeMs,
   );
+}
 
-  if (
-    inferenceCoordinatesEntry &&
-    inferenceCoordinatesEntry.expiresAtMs >= Date.now() - coordinatesUsableThresholdTimeMs
-  ) {
-    return inferenceCoordinatesEntry.inferenceAddress;
-  } else {
-    // Clear expired entry
-    if (inferenceCoordinatesEntry) {
-      delete inferenceCoordinatesStores[voiceEngine][userId];
-    }
-    if (!(userId in inferenceCoordinatesCreationPromise)) {
-      inferenceCoordinatesCreationPromise[userId] = createInferenceCoordinates(voiceEngine, reqConfigSettings);
-    }
-    const newInferenceCoordinatesEntry = (await inferenceCoordinatesCreationPromise[userId])!;
-    delete inferenceCoordinatesCreationPromise[userId];
-    return newInferenceCoordinatesEntry.inferenceAddress;
+function logFailedObtainingCredentials(
+  voiceEngine: InternalAuthBasedEngine,
+  userId: UserId,
+  v3Settings: V3InternalSettingsWithDefaults,
+  reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
+  error: unknown,
+  attemptNo: number,
+) {
+  logWarn(
+    reqConfigSettings,
+    `Error while trying to get credentials for ${voiceEngine} (attempt ${attemptNo} of ${v3Settings.coordinatesGetApiCallMaxRetries})`,
+    {
+      event: 'failed-obtaining-credentials',
+      error,
+      userId,
+      voiceEngine,
+      attemptNo,
+      maxRetries: v3Settings.coordinatesGetApiCallMaxRetries,
+    },
+  );
+}
+
+function logGivenUpRefreshingCredentials(
+  voiceEngine: InternalAuthBasedEngine,
+  v3Settings: V3InternalSettingsWithDefaults,
+  reqConfigSettings: PlayRequestConfigWithDefaults['settings'],
+  error: unknown,
+  userId: UserId,
+) {
+  logError(
+    reqConfigSettings,
+    `Giving up after failing to refresh credentials for ${voiceEngine} after ${v3Settings.coordinatesGetApiCallMaxRetries} attempts`,
+    {
+      event: 'given-up-obtaining-credentials',
+      error,
+      userId,
+      voiceEngine,
+      maxRetries: v3Settings.coordinatesGetApiCallMaxRetries,
+    },
+  );
+}
+
+function forEachCachedCoordinate(
+  callback: (opts: {
+    userId: UserId;
+    voiceEngine: InternalAuthBasedEngine;
+    userAndEngine: UserAndEngine;
+    coordinates: CachedCoordinatesValue;
+  }) => void,
+): void {
+  for (const [userAndEngine, coordinates] of Object.entries(cachedCoordinates) as Array<
+    [UserAndEngine, CachedCoordinatesValue]
+  >) {
+    const [userId, voiceEngine] = userAndEngine.split(':') as [UserId, InternalAuthBasedEngine];
+    callback({ userId, voiceEngine, userAndEngine, coordinates });
   }
-};
+}
+
+export function clearInferenceCoordinatesStoreForUser(userToClear: UserId): void {
+  forEachCachedCoordinate(({ userId, userAndEngine }) => {
+    if (userId === userToClear) clearInferenceCoordinatesStoreForUserAndEngine(userAndEngine);
+  });
+}
+
+function clearInferenceCoordinatesStoreForUserAndEngine(userAndEngine: UserAndEngine) {
+  delete coordinatesCreationPromises[userAndEngine];
+  delete cachedCoordinates[userAndEngine];
+
+  clearTimeout(delayedRefreshTimers[userAndEngine]);
+  delete delayedRefreshTimers[userAndEngine];
+
+  abortInFlightGeneration(userAndEngine);
+}
+
+// constants are visible for tests
+export const AUTO_CLEANUP_UNUSED_COORDINATES_AFTER_MS = 2 * 60 * 60 * 1000; // 2 hours
+export const AUTO_CLEANUP_WORKER_INTERVAL_MS = 30 * 60 * 1000; // Check every 30 minutes
+let cleanupIntervalTimer: NodeJS.Timeout | null = null;
+function ensureAutoCleanupUnusedCoordinatesWorkerIsRunning() {
+  if (cleanupIntervalTimer) return;
+
+  cleanupIntervalTimer = setInterval(() => {
+    const now = Date.now();
+    forEachCachedCoordinate(({ userAndEngine, coordinates }) => {
+      if (!coordinates.autoCleanupIfUnused) return;
+
+      const unusedTimeLimit = coordinates.lastUsedAt.getTime() + AUTO_CLEANUP_UNUSED_COORDINATES_AFTER_MS;
+      if (now > unusedTimeLimit) {
+        clearInferenceCoordinatesStoreForUserAndEngine(userAndEngine);
+      }
+    });
+  }, AUTO_CLEANUP_WORKER_INTERVAL_MS).unref();
+}
+
+// visible for tests
+export function __inspectInferenceCoordinatesStoreForUser(selectedUserId: UserId) {
+  const result: Record<InternalAuthBasedEngine, CachedCoordinatesValue> = {} as any;
+  forEachCachedCoordinate(({ userId, voiceEngine, coordinates }) => {
+    if (userId == selectedUserId) result[voiceEngine] = coordinates;
+  });
+  return result;
+}
+
+// visible for tests
+export function __clearInferenceCoordinatesStoreForAllUsers() {
+  forEachCachedCoordinate(({ userId }) => {
+    clearInferenceCoordinatesStoreForUser(userId);
+  });
+  if (cleanupIntervalTimer) {
+    clearInterval(cleanupIntervalTimer);
+    cleanupIntervalTimer = null;
+  }
+}
