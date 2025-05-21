@@ -18,7 +18,10 @@ export async function generateV2Stream(
   const { apiKey, userId } = reqConfig.settings;
 
   const outputFormat = options?.outputFormat || 'mp3';
-  const accept = outputFormat === 'mp3' ? 'audio/mpeg' : 'audio/basic';
+  const accept =
+    options?.voiceEngine === 'PlayDialog-turbo'
+      ? null
+      : outputFormat === 'mp3' ? 'audio/mpeg' : 'audio/basic';
 
   const data = {
     text,
@@ -27,6 +30,7 @@ export async function generateV2Stream(
       ? {
           voice: mapPlayDialogTurboVoice(options?.voiceId),
           language: options?.language,
+          output_format: options?.outputFormat,
         }
       : {
           voice,
