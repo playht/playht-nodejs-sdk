@@ -1,6 +1,6 @@
 import { SDKSettings } from '../../APISettingsStore';
 
-export function debugInfo(
+export function logInfo(
   sdkSettings: Partial<SDKSettings> | undefined,
   infoMessage: string,
   logData: Parameters<NonNullable<NonNullable<SDKSettings['debug']>['info']>>[1],
@@ -15,7 +15,7 @@ export function debugInfo(
   }
 }
 
-export function debugWarn(
+export function logWarn(
   sdkSettings: Partial<SDKSettings> | undefined,
   warnMessage: string,
   logData: Parameters<NonNullable<NonNullable<SDKSettings['debug']>['warn']>>[1],
@@ -30,7 +30,7 @@ export function debugWarn(
   }
 }
 
-export function debugError(
+export function logError(
   sdkSettings: Partial<SDKSettings> | undefined,
   errorMessage: string,
   logData: Parameters<NonNullable<NonNullable<SDKSettings['debug']>['error']>>[1],
