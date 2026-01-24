@@ -14,7 +14,7 @@ import { defaultConfigWithOverrides } from './api/internal/settings/defaultConfi
  * For the lowest latency, use `Play3.0-mini`.
  * For the highest quality, use `PlayDialog`.
  */
-export type VoiceEngine = 'PlayDialog' | 'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
+export type VoiceEngine = 'PlayDialog' | 'PlayDialog-turbo' | 'Play3.0-mini' | 'PlayHT2.0-turbo' | 'PlayHT2.0' | 'PlayHT1.0' | 'Standard';
 
 /**
  * Type representing the different input types that can be used to define the format of the input text.
