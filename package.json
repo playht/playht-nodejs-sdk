@@ -14,7 +14,7 @@
     "packages/*"
   ],
   "devDependencies": {
-    "eslint": "^8.49.0",
+    "eslint": "^9.26.0",
     "typescript": "^5.2.2"
   },
   "packageManager": "yarn@3.6.3"
